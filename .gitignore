@@ -1,0 +1,51 @@
+# ==============================
+# SIGMA - Git Ignore
+# ==============================
+
+# ------------------------------
+# Variables de entorno / secretos
+# ------------------------------
+.env
+.env.*
+!.env.example
+
+# ------------------------------
+# Java / Spring Boot / Maven
+# ------------------------------
+**/target/
+**/*.class
+
+# Maven Wrapper - archivos generados
+**/.mvn/wrapper/maven-wrapper.jar
+
+# ------------------------------
+# Frontend - Node / React / Vite
+# ------------------------------
+**/node_modules/
+**/dist/
+**/.vite/
+
+# ------------------------------
+# IDEs / Editores
+# ------------------------------
+.vscode/
+.idea/
+*.iml
+
+# ------------------------------
+# Sistema operativo
+# ------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ------------------------------
+# Logs
+# ------------------------------
+*.log
+
+# ------------------------------
+# Archivos temporales
+# ------------------------------
+*.tmp
+*.tempgit -C .\backend rev-parse --show-toplevel

@@ -1,0 +1,35 @@
+SIGMA/
+│
+├── docs/
+│   ├── 00 - Normas del Proyecto
+│   ├── 01 - Visión del Proyecto
+│   ├── 02 - Levantamiento de Requisitos
+│   ├── 03 - Casos de Uso
+│   ├── 04 - Reglas de Negocio
+│   ├── 05 - Modelo de Datos
+│   ├── 06 - Arquitectura del Sistema
+│   ├── 07 - API REST
+│   ├── 08 - Manual Técnico
+│   ├── 09 - Manual de Usuario
+│   ├── 10 - Plan de Pruebas
+│   ├── 11 - Bitácora del Proyecto
+│   └── 12 - Bitácora de Versiones
+
+✅ 01 - Visión del Proyecto
+
+✅  02 - Levantamiento de Requisitos
+
+✅  03 - Casos de Uso
+
+✅ 04 - Modelo de Datos
+
+⬜ 05 - Arquitectura del Sistema
+
+
+| Estado | Idea                          | Prioridad   |
+| ------ | ----------------------------- | ----------- |
+| 🟡     | Agregar modelo a los recursos | Alta        |
+| 🟡     | Historial de movimientos      | Muy alta    |
+| 🟡     | Fotografías por herramienta   | Media       |
+| 🔵     | Código QR para inventario     | Baja (v2.0) |
+| 🔵     | Alertas por mantenimiento     | Media       |
