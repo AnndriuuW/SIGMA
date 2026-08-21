@@ -9,5 +9,5 @@ public class SigmaBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SigmaBackendApplication.class, args);
 	}
-
+	
 }
