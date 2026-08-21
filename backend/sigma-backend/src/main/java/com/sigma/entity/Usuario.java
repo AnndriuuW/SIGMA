@@ -23,12 +23,12 @@ public class Usuario {
     private String codigo;
 
     @Column(name = "nombres", nullable = false, length = 100)
-    private String nombre;
+    private String nombres;
 
     @Column(name = "apellidos", nullable = false, length = 100)
-    private String apellido;
+    private String apellidos;
 
-    @Column(name = "contraseña", nullable = false, length = 255)
+    @Column(name = "contrasena", nullable = false, length = 255)
     private String contrasena;
 
     @ManyToOne
