@@ -1,12 +1,15 @@
 package com.sigma.service;
 
 import com.sigma.dto.UsuarioCreateRequest;
+import com.sigma.dto.UsuarioResponse;
 import com.sigma.entity.Rol;
 import com.sigma.entity.Usuario;
 import com.sigma.repository.RolRepository;
 import com.sigma.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.sigma.exception.RecursoDuplicadoException;
+import com.sigma.exception.RecursoNoEncontradoException;
 
 import java.util.Optional;
 
@@ -27,10 +30,18 @@ public class UsuarioService {
         return usuarioRepository.findById(codigo);
     }
 
-    public Usuario guardar(UsuarioCreateRequest request) {
+    public UsuarioResponse guardar(UsuarioCreateRequest request) {
+
+        if (usuarioRepository.existsById(request.getCodigo())) {
+            throw new RecursoDuplicadoException(
+                    "El código de usuario ya existe"
+            );
+        }
 
         Rol rol = rolRepository.findById(request.getRolId())
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        .orElseThrow(() -> new RecursoNoEncontradoException(
+                "El rol no existe"
+        ));
 
         Usuario usuario = new Usuario();
 
@@ -44,6 +55,14 @@ public class UsuarioService {
         usuario.setRol(rol);
         usuario.setActivo(true);
 
-        return usuarioRepository.save(usuario);
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        UsuarioResponse response = new UsuarioResponse();
+
+        response.setCodigo(usuarioGuardado.getCodigo());
+        response.setNombres(usuarioGuardado.getNombres());
+        response.setApellidos(usuarioGuardado.getApellidos());
+        response.setRol(usuarioGuardado.getRol().getNombre());
+        response.setActivo(usuarioGuardado.getActivo());
+        return response;
     }
 }
