@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -25,8 +23,20 @@ public class UsuarioController {
     }
 
     @GetMapping("/{codigo}")
-    public Optional<Usuario> buscarPorCodigo(@PathVariable String codigo) {
-        return usuarioService.buscarPorCodigo(codigo);
+    public UsuarioResponse buscarPorCodigo(@PathVariable String codigo) {
+
+        Usuario usuario = usuarioService.buscarPorCodigo(codigo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        UsuarioResponse response = new UsuarioResponse();
+
+        response.setCodigo(usuario.getCodigo());
+        response.setNombres(usuario.getNombres());
+        response.setApellidos(usuario.getApellidos());
+        response.setRol(usuario.getRol().getNombre());
+        response.setActivo(usuario.getActivo());
+
+        return response;
     }
 
     @PostMapping
