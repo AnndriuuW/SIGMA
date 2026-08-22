@@ -59,8 +59,30 @@ public class SecurityConfig {
                 )
             )
             .authorizeHttpRequests(auth -> auth
+
                 .requestMatchers("/auth/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/usuarios").hasRole("ADMINISTRADOR")
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/usuarios",
+                    "/usuarios/**"
+                ).hasRole("ADMINISTRADOR")
+
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/usuarios"
+                ).hasRole("ADMINISTRADOR")
+
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/usuarios/**"
+                ).hasRole("ADMINISTRADOR")
+
+                .requestMatchers(
+                    HttpMethod.DELETE,
+                    "/usuarios/**"
+                ).hasRole("ADMINISTRADOR")
+
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

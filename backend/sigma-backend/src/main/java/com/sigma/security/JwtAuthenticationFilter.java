@@ -74,8 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 } catch (Exception e) {
                         // Token inválido: continúa sin autenticar
                 }
-
-                filterChain.doFilter(request, response);
+                
                 filterChain.doFilter(request, response);
         }
 }

@@ -2,15 +2,19 @@ package com.sigma.controller;
 
 import com.sigma.dto.UsuarioCreateRequest;
 import com.sigma.dto.UsuarioResponse;
+import com.sigma.dto.UsuarioUpdateRequest;
 import com.sigma.entity.Usuario;
 import com.sigma.service.UsuarioService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -42,5 +46,23 @@ public class UsuarioController {
     @PostMapping
     public UsuarioResponse crearUsuario(@Valid @RequestBody UsuarioCreateRequest request) {
         return usuarioService.guardar(request);
+    }
+
+    @GetMapping
+    public List<UsuarioResponse> listarUsuarios() {
+        return usuarioService.listarUsuarios();
+    }
+
+    @PutMapping("/{codigo}")
+    public UsuarioResponse actualizar(
+            @PathVariable String codigo,
+            @Valid @RequestBody UsuarioUpdateRequest request) {
+
+        return usuarioService.actualizar(codigo, request);
+    }
+
+    @DeleteMapping("/{codigo}")
+    public void eliminar(@PathVariable String codigo) {
+        usuarioService.eliminar(codigo);
     }
 }
