@@ -62,6 +62,7 @@ public class SecurityConfig {
 
                 .requestMatchers("/auth/login").permitAll()
 
+                // USUARIOS
                 .requestMatchers(
                     HttpMethod.GET,
                     "/usuarios",
@@ -82,6 +83,28 @@ public class SecurityConfig {
                     HttpMethod.DELETE,
                     "/usuarios/**"
                 ).hasRole("ADMINISTRADOR")
+                
+                // UNIDADES
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/unidades",
+                        "/unidades/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/unidades"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/unidades/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/unidades/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
 
                 .anyRequest().authenticated()
             )
