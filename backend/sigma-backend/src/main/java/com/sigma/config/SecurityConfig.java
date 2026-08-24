@@ -106,6 +106,28 @@ public class SecurityConfig {
                         "/unidades/**"
                 ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
 
+                // UBICACIONES
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/ubicaciones",
+                        "/ubicaciones/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/ubicaciones"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/ubicaciones/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/ubicaciones/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

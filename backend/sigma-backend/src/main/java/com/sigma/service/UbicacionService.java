@@ -6,169 +6,170 @@ import com.sigma.dto.UbicacionUpdateRequest;
 import com.sigma.entity.TipoUbicacion;
 import com.sigma.entity.Ubicacion;
 import com.sigma.entity.Unidad;
+import com.sigma.exception.RecursoNoEncontradoException;
+import com.sigma.exception.ReglaNegocioException;
 import com.sigma.repository.UbicacionRepository;
 import com.sigma.repository.UnidadRepository;
 import org.springframework.stereotype.Service;
+import com.sigma.exception.RecursoDuplicadoException;
 
 import java.util.List;
 
 @Service
 public class UbicacionService {
 
-    private final UbicacionRepository ubicacionRepository;
-    private final UnidadRepository unidadRepository;
+        private final UbicacionRepository ubicacionRepository;
+        private final UnidadRepository unidadRepository;
 
-    public UbicacionService(
-            UbicacionRepository ubicacionRepository,
-            UnidadRepository unidadRepository) {
+        public UbicacionService(
+                        UbicacionRepository ubicacionRepository,
+                        UnidadRepository unidadRepository) {
 
-        this.ubicacionRepository = ubicacionRepository;
-        this.unidadRepository = unidadRepository;
-    }
-
-    public UbicacionResponse crear(UbicacionCreateRequest request) {
-
-        Unidad unidad = obtenerUnidad(request.getTipo(), request.getIdUnidad());
-
-        if (request.getIdUnidad() != null
-                && ubicacionRepository.existsByNombreAndUnidadId(
-                        request.getNombre(),
-                        request.getIdUnidad())) {
-
-            throw new RuntimeException(
-                    "Ya existe una ubicación con ese nombre en la unidad");
+                this.ubicacionRepository = ubicacionRepository;
+                this.unidadRepository = unidadRepository;
         }
 
-        Ubicacion ubicacion = new Ubicacion();
+        public UbicacionResponse crear(UbicacionCreateRequest request) {
 
-        ubicacion.setNombre(request.getNombre());
-        ubicacion.setTipo(request.getTipo());
-        ubicacion.setUnidad(unidad);
-        ubicacion.setActivo(true);
+                Unidad unidad = obtenerUnidad(request.getTipo(), request.getIdUnidad());
 
-        Ubicacion guardada = ubicacionRepository.save(ubicacion);
+                if (request.getIdUnidad() != null
+                        && ubicacionRepository.findByNombreAndUnidadIdAndActivoTrue(
+                                request.getNombre(),
+                                request.getIdUnidad()).isPresent()) {
 
-        return convertirAResponse(guardada);
-    }
+                throw new RecursoDuplicadoException(
+                        "Ya existe una ubicación con ese nombre en la unidad");
+                }
 
-    public List<UbicacionResponse> listar() {
+                Ubicacion ubicacion = new Ubicacion();
 
-        return ubicacionRepository.findAll()
-                .stream()
-                .filter(Ubicacion::getActivo)
-                .map(this::convertirAResponse)
-                .toList();
-    }
+                ubicacion.setNombre(request.getNombre());
+                ubicacion.setTipo(request.getTipo());
+                ubicacion.setUnidad(unidad);
+                ubicacion.setActivo(true);
 
-    public UbicacionResponse buscarPorId(Long id) {
+                Ubicacion guardada = ubicacionRepository.save(ubicacion);
 
-        Ubicacion ubicacion = ubicacionRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Ubicación no encontrada"));
-
-        if (!ubicacion.getActivo()) {
-            throw new RuntimeException("Ubicación no encontrada");
+                return convertirAResponse(guardada);
         }
 
-        return convertirAResponse(ubicacion);
-    }
+        public List<UbicacionResponse> listar() {
 
-    public UbicacionResponse actualizar(
-            Long id,
-            UbicacionUpdateRequest request) {
-
-        Ubicacion ubicacion = ubicacionRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Ubicación no encontrada"));
-
-        if (!ubicacion.getActivo()) {
-            throw new RuntimeException("Ubicación no encontrada");
+                return ubicacionRepository.findAll()
+                                .stream()
+                                .filter(Ubicacion::getActivo)
+                                .map(this::convertirAResponse)
+                                .toList();
         }
 
-        Unidad unidad = obtenerUnidad(
-                request.getTipo(),
-                request.getIdUnidad());
+        public UbicacionResponse buscarPorId(Long id) {
 
-        Long unidadIdActual = ubicacion.getUnidad() != null
-                ? ubicacion.getUnidad().getId()
-                : null;
+                Ubicacion ubicacion = ubicacionRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException("Ubicación no encontrada"));
 
-        if (request.getIdUnidad() != null
-                && ubicacionRepository.existsByNombreAndUnidadId(
-                        request.getNombre(),
-                        request.getIdUnidad())
-                && !request.getIdUnidad().equals(unidadIdActual)) {
+                if (!ubicacion.getActivo()) {
+                        throw new RecursoNoEncontradoException("Ubicación no encontrada");
+                }
 
-            throw new RuntimeException(
-                    "Ya existe una ubicación con ese nombre en la unidad");
+                return convertirAResponse(ubicacion);
         }
 
-        ubicacion.setNombre(request.getNombre());
-        ubicacion.setTipo(request.getTipo());
-        ubicacion.setUnidad(unidad);
+        public UbicacionResponse actualizar(
+                        Long id,
+                        UbicacionUpdateRequest request) {
 
-        Ubicacion actualizada = ubicacionRepository.save(ubicacion);
+                Ubicacion ubicacion = ubicacionRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException("Ubicación no encontrada"));
 
-        return convertirAResponse(actualizada);
-    }
+                                if (!ubicacion.getActivo()) {
+                                throw new RecursoNoEncontradoException(
+                                        "Ubicación no encontrada");
+                                }
+                                
+                                Unidad unidad = obtenerUnidad(
+                                request.getTipo(),
+                                request.getIdUnidad());
 
-    public void desactivar(Long id) {
+                if (request.getIdUnidad() != null) {
 
-        Ubicacion ubicacion = ubicacionRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Ubicación no encontrada"));
+                        var ubicacionExistente =
+                                ubicacionRepository.findByNombreAndUnidadIdAndActivoTrue(
+                                        request.getNombre(),
+                                        request.getIdUnidad());
 
-        if (!ubicacion.getActivo()) {
-            throw new RuntimeException(
-                    "La ubicación ya está desactivada");
+                        if (ubicacionExistente.isPresent()
+                                && !ubicacionExistente.get().getId().equals(id)) {
+
+                                throw new RecursoDuplicadoException(
+                                        "Ya existe una ubicación con ese nombre en la unidad");
+                        }
+                }
+
+                ubicacion.setNombre(request.getNombre());
+                ubicacion.setTipo(request.getTipo());
+                ubicacion.setUnidad(unidad);
+
+                Ubicacion actualizada = ubicacionRepository.save(ubicacion);
+
+                return convertirAResponse(actualizada);
         }
 
-        ubicacion.setActivo(false);
+        public void desactivar(Long id) {
 
-        ubicacionRepository.save(ubicacion);
-    }
+                Ubicacion ubicacion = ubicacionRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException("Ubicación no encontrada"));
 
-    private Unidad obtenerUnidad(
-            TipoUbicacion tipo,
-            Long idUnidad) {
+                if (!ubicacion.getActivo()) {
+                        throw new ReglaNegocioException(
+                                        "La ubicación ya está desactivada");
+                }
 
-        if (tipo == TipoUbicacion.SALA_DE_OPERACIONES) {
+                ubicacion.setActivo(false);
 
-            if (idUnidad != null) {
-                throw new RuntimeException(
-                        "La Sala de Operaciones no puede pertenecer a una unidad");
-            }
-
-            return null;
+                ubicacionRepository.save(ubicacion);
         }
 
-        if (idUnidad == null) {
-            throw new RuntimeException(
-                    "La ubicación debe pertenecer a una unidad");
+        private Unidad obtenerUnidad(
+                        TipoUbicacion tipo,
+                        Long idUnidad) {
+
+                if (tipo == TipoUbicacion.SALA_DE_OPERACIONES) {
+
+                        if (idUnidad != null) {
+                                throw new ReglaNegocioException(
+                                                "La Sala de Operaciones no puede pertenecer a una unidad");
+                        }
+
+                        return null;
+                }
+
+                if (idUnidad == null) {
+                        throw new ReglaNegocioException(
+                                        "La ubicación debe pertenecer a una unidad");
+                }
+
+                return unidadRepository.findById(idUnidad)
+                                .filter(Unidad::getActivo)
+                                .orElseThrow(() -> new RecursoNoEncontradoException("Unidad no encontrada"));
         }
 
-        return unidadRepository.findById(idUnidad)
-                .filter(Unidad::getActivo)
-                .orElseThrow(() ->
-                        new RuntimeException("Unidad no encontrada"));
-    }
+        private UbicacionResponse convertirAResponse(
+                        Ubicacion ubicacion) {
 
-    private UbicacionResponse convertirAResponse(
-            Ubicacion ubicacion) {
+                UbicacionResponse response = new UbicacionResponse();
 
-        UbicacionResponse response = new UbicacionResponse();
+                response.setId(ubicacion.getId());
+                response.setNombre(ubicacion.getNombre());
+                response.setTipo(ubicacion.getTipo());
+                response.setActivo(ubicacion.getActivo());
 
-        response.setId(ubicacion.getId());
-        response.setNombre(ubicacion.getNombre());
-        response.setTipo(ubicacion.getTipo());
-        response.setActivo(ubicacion.getActivo());
+                if (ubicacion.getUnidad() != null) {
+                        response.setIdUnidad(ubicacion.getUnidad().getId());
+                        response.setNombreUnidad(
+                                        ubicacion.getUnidad().getNombre());
+                }
 
-        if (ubicacion.getUnidad() != null) {
-            response.setIdUnidad(ubicacion.getUnidad().getId());
-            response.setNombreUnidad(
-                    ubicacion.getUnidad().getNombre());
+                return response;
         }
-
-        return response;
-    }
 }
