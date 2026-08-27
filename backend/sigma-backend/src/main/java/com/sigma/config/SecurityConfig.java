@@ -128,6 +128,23 @@ public class SecurityConfig {
                         "/ubicaciones/**"
                 ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
 
+                // TIPOS DE RECURSO
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/tipos-recurso",
+                        "/tipos-recurso/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/tipos-recurso"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/tipos-recurso/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception
