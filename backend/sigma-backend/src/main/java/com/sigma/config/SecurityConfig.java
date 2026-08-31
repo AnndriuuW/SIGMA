@@ -167,6 +167,18 @@ public class SecurityConfig {
                         "/recursos/**"
                 ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
 
+                // OCURRENCIAS
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/ocurrencias",
+                        "/ocurrencias/**"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/ocurrencias"
+                ).hasAnyRole("ADMINISTRADOR", "PERSONAL_ADJUNTO")
+
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

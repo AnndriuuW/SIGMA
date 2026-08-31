@@ -3,6 +3,10 @@ package com.sigma.repository;
 import com.sigma.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UsuarioRepository extends JpaRepository<Usuario, String> {
-}
+import java.util.Optional;
 
+public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+
+    Optional<Usuario> findByCodigo(String codigo);
+    
+}
