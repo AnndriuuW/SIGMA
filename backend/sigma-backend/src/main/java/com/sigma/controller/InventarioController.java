@@ -4,6 +4,9 @@ import com.sigma.dto.InventarioCreateRequest;
 import com.sigma.dto.InventarioResponse;
 import com.sigma.dto.InventarioUpdateRequest;
 import com.sigma.service.InventarioService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +25,7 @@ public class InventarioController {
 
     @PostMapping
     public ResponseEntity<InventarioResponse> crear(
-            @RequestBody InventarioCreateRequest request) {
+            @Valid @RequestBody InventarioCreateRequest request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

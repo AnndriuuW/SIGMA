@@ -13,6 +13,8 @@ import com.sigma.repository.InventarioRepository;
 import com.sigma.repository.UnidadRepository;
 import com.sigma.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,15 +49,20 @@ public class InventarioService {
                     "No se puede realizar un inventario sobre una unidad inactiva");
         }
 
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String codigoUsuario = authentication.getName();
+
         Usuario responsable = usuarioRepository.findByCodigo(
-                request.getCodigoResponsable()
+                codigoUsuario
         ).orElseThrow(() ->
                 new RecursoNoEncontradoException(
-                        "Responsable no encontrado"));
+                        "Usuario autenticado no encontrado"));
 
         if (!responsable.getActivo()) {
-            throw new ReglaNegocioException(
-                    "El responsable seleccionado está inactivo");
+                throw new ReglaNegocioException(
+                "El usuario autenticado está inactivo");
         }
 
         Inventario inventario = new Inventario();

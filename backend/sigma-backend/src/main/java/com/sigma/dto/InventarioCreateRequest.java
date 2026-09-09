@@ -1,9 +1,11 @@
 package com.sigma.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public class InventarioCreateRequest {
 
+    @NotNull
     private Long idUnidad;
-    private String codigoResponsable;
 
     public Long getIdUnidad() {
         return idUnidad;
@@ -11,13 +13,5 @@ public class InventarioCreateRequest {
 
     public void setIdUnidad(Long idUnidad) {
         this.idUnidad = idUnidad;
-    }
-
-    public String getCodigoResponsable() {
-        return codigoResponsable;
-    }
-
-    public void setCodigoResponsable(String codigoResponsable) {
-        this.codigoResponsable = codigoResponsable;
     }
 }
