@@ -14,7 +14,7 @@ public class OcurrenciaCreateRequest {
     @Size(max = 2000, message = "La descripción no puede superar los 2000 caracteres")
     private String descripcion;
 
-    @NotNull(message = "El destinatario es obligatorio")
+    @NotBlank(message = "El destinatario es obligatorio")
     private String codigoDestinatario;
 
     private Long idUnidad;

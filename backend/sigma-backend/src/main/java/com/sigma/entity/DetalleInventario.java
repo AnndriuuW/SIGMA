@@ -34,7 +34,7 @@ public class DetalleInventario {
     @Column(name = "fecha_verificacion", nullable = false)
     private LocalDateTime fechaVerificacion;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String observacion;
 
     public DetalleInventario() {

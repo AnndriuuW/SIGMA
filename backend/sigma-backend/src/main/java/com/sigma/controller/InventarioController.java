@@ -52,7 +52,7 @@ public class InventarioController {
     @PutMapping("/{id}")
     public ResponseEntity<InventarioResponse> actualizar(
             @PathVariable Long id,
-            @RequestBody InventarioUpdateRequest request) {
+            @Valid @RequestBody InventarioUpdateRequest request) {
 
         return ResponseEntity.ok(
                 inventarioService.actualizar(id, request)

@@ -1,10 +1,10 @@
 package com.sigma.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,49 +12,74 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<Map<String, String>> manejarErroresValidacion(
-                        MethodArgumentNotValidException ex) {
+    // =========================================================
+    // ERRORES DE VALIDACIÓN
+    // =========================================================
 
-                Map<String, String> errores = new HashMap<>();
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> manejarErroresValidacion(
+            MethodArgumentNotValidException ex) {
 
-                ex.getBindingResult().getFieldErrors()
-                                .forEach(error -> errores.put(error.getField(), error.getDefaultMessage()));
+        Map<String, String> errores = new HashMap<>();
 
-                return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(errores);
-        }
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error ->
+                        errores.put(
+                                error.getField(),
+                                error.getDefaultMessage()
+                        )
+                );
 
-        @ExceptionHandler(RecursoDuplicadoException.class)
-        public ResponseEntity<Map<String, String>> manejarRecursoDuplicado(
-                        RecursoDuplicadoException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errores);
+    }
 
-                Map<String, String> respuesta = new HashMap<>();
 
-                respuesta.put("mensaje", ex.getMessage());
+    // =========================================================
+    // RECURSO DUPLICADO
+    // =========================================================
 
-                return ResponseEntity
-                                .status(HttpStatus.CONFLICT)
-                                .body(respuesta);
-        }
+    @ExceptionHandler(RecursoDuplicadoException.class)
+    public ResponseEntity<Map<String, String>> manejarRecursoDuplicado(
+            RecursoDuplicadoException ex) {
 
-        @ExceptionHandler(RecursoNoEncontradoException.class)
-        public ResponseEntity<Map<String, String>> manejarRecursoNoEncontrado(
-                        RecursoNoEncontradoException ex) {
+        Map<String, String> respuesta = new HashMap<>();
 
-                Map<String, String> respuesta = new HashMap<>();
+        respuesta.put("mensaje", ex.getMessage());
 
-                respuesta.put("mensaje", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(respuesta);
+    }
 
-                return ResponseEntity
-                                .status(HttpStatus.NOT_FOUND)
-                                .body(respuesta);
-        }
 
-        @ExceptionHandler(ReglaNegocioException.class)
-        public ResponseEntity<Map<String, String>> manejarReglaNegocio(
-                ReglaNegocioException ex) {
+    // =========================================================
+    // RECURSO NO ENCONTRADO
+    // =========================================================
+
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<Map<String, String>> manejarRecursoNoEncontrado(
+            RecursoNoEncontradoException ex) {
+
+        Map<String, String> respuesta = new HashMap<>();
+
+        respuesta.put("mensaje", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(respuesta);
+    }
+
+
+    // =========================================================
+    // REGLA DE NEGOCIO
+    // =========================================================
+
+    @ExceptionHandler(ReglaNegocioException.class)
+    public ResponseEntity<Map<String, String>> manejarReglaNegocio(
+            ReglaNegocioException ex) {
 
         Map<String, String> respuesta = new HashMap<>();
 
@@ -63,5 +88,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(respuesta);
-        }
+    }
+
+
+    // =========================================================
+    // ERROR NO CONTROLADO
+    // =========================================================
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> manejarErrorGeneral(
+            Exception ex) {
+
+        Map<String, String> respuesta = new HashMap<>();
+
+        respuesta.put(
+                "mensaje",
+                "Ocurrió un error interno en el servidor"
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(respuesta);
+    }
 }

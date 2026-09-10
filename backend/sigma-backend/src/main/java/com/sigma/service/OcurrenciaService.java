@@ -51,10 +51,12 @@ public class OcurrenciaService {
 
                 Usuario informante = obtenerUsuarioAutenticado();
 
-                Usuario destinatario = usuarioRepository.findById(
-                                request.getCodigoDestinatario()).orElseThrow(
-                                                () -> new RecursoNoEncontradoException(
-                                                                "Destinatario no encontrado"));
+                Usuario destinatario = usuarioRepository
+                        .findById(request.getCodigoDestinatario())
+                        .filter(Usuario::getActivo)
+                        .orElseThrow(() ->
+                                new RecursoNoEncontradoException(
+                                        "Destinatario no encontrado"));
 
                 Unidad unidad = null;
                 Recurso recurso = null;

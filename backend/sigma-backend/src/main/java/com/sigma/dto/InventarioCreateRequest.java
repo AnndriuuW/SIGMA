@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class InventarioCreateRequest {
 
-    @NotNull
+    @NotNull(message = "La unidad es obligatoria")
     private Long idUnidad;
 
     public Long getIdUnidad() {

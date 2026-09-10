@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import jakarta.validation.Valid;
 import java.util.List;
+import com.sigma.exception.RecursoNoEncontradoException;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -30,7 +31,7 @@ public class UsuarioController {
     public UsuarioResponse buscarPorCodigo(@PathVariable String codigo) {
 
         Usuario usuario = usuarioService.buscarPorCodigo(codigo)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         UsuarioResponse response = new UsuarioResponse();
 

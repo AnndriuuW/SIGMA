@@ -96,8 +96,8 @@ public class InventarioService {
     }
 
     public InventarioResponse actualizar(
-            Long id,
-            InventarioUpdateRequest request) {
+                Long id,
+                InventarioUpdateRequest request) {
 
         Inventario inventario = inventarioRepository.findById(id)
                 .orElseThrow(() ->
@@ -105,38 +105,44 @@ public class InventarioService {
                                 "Inventario no encontrado"));
 
         if (request.getEstado() == null) {
-            throw new ReglaNegocioException(
-                    "El estado del inventario es obligatorio");
+                throw new ReglaNegocioException(
+                        "El estado del inventario es obligatorio");
         }
 
+        // Un inventario finalizado no puede modificarse
+        if (inventario.getEstado() == EstadoInventario.FINALIZADO) {
+                throw new ReglaNegocioException(
+                        "El inventario ya está finalizado y no puede modificarse");
+        }
+
+        // El resultado general solo puede registrarse al finalizar
         if (request.getResultadoGeneral() != null
                 && request.getEstado() != EstadoInventario.FINALIZADO) {
 
-            throw new ReglaNegocioException(
-                    "El resultado general solo puede registrarse cuando el inventario está finalizado");
+                throw new ReglaNegocioException(
+                        "El resultado general solo puede registrarse cuando el inventario está finalizado");
         }
 
         inventario.setEstado(request.getEstado());
 
         if (request.getResultadoGeneral() != null) {
-            inventario.setResultadoGeneral(
-                    request.getResultadoGeneral()
-            );
+                inventario.setResultadoGeneral(
+                        request.getResultadoGeneral()
+                );
         }
 
+        // Registrar fecha de finalización únicamente al finalizar
         if (request.getEstado() == EstadoInventario.FINALIZADO) {
 
-            if (inventario.getFechaFin() == null) {
+                if (inventario.getFechaFin() == null) {
                 inventario.setFechaFin(LocalDateTime.now());
-            }
-        } else {
-            inventario.setFechaFin(null);
+                }
         }
 
         Inventario actualizado = inventarioRepository.save(inventario);
 
         return convertirAResponse(actualizado);
-    }
+     }
 
     private InventarioResponse convertirAResponse(
             Inventario inventario) {

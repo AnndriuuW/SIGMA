@@ -92,7 +92,7 @@ public class UsuarioService {
 
         Usuario usuario = usuarioRepository.findById(codigo)
                 .orElseThrow(() ->
-                        new RuntimeException("Usuario no encontrado"));
+                        new RecursoNoEncontradoException("Usuario no encontrado"));
 
         usuario.setNombres(request.getNombres());
         usuario.setApellidos(request.getApellidos());
@@ -109,7 +109,7 @@ public class UsuarioService {
 
             Rol rol = rolRepository.findById(request.getRolId())
                     .orElseThrow(() ->
-                            new RuntimeException("Rol no encontrado"));
+                            new RecursoNoEncontradoException("Rol no encontrado"));
 
             usuario.setRol(rol);
         }
@@ -130,8 +130,11 @@ public class UsuarioService {
     public void eliminar(String codigo) {
 
         Usuario usuario = usuarioRepository.findById(codigo)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException("Usuario no encontrado"));
 
-        usuarioRepository.delete(usuario);
+        usuario.setActivo(false);
+
+        usuarioRepository.save(usuario);
     }
 }

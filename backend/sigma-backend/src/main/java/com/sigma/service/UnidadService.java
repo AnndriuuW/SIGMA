@@ -4,6 +4,7 @@ import com.sigma.dto.UnidadCreateRequest;
 import com.sigma.dto.UnidadResponse;
 import com.sigma.dto.UnidadUpdateRequest;
 import com.sigma.entity.Unidad;
+import com.sigma.exception.RecursoNoEncontradoException;
 import com.sigma.repository.UnidadRepository;
 import org.springframework.stereotype.Service;
 
@@ -101,10 +102,10 @@ public class UnidadService {
 
         Unidad unidad = unidadRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Unidad no encontrada"));
+                        new RecursoNoEncontradoException("Unidad no encontrada"));
 
         if (!unidad.getActivo()) {
-            throw new RuntimeException("La unidad ya está desactivada");
+            throw new RecursoNoEncontradoException("La unidad ya está desactivada");
         }
 
         unidad.setActivo(false);
