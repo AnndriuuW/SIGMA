@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "../pages/Dashboard";
 import Vehiculos from "../pages/Vehiculos";
 import VehiculoDetalle from "../pages/VehiculoDetalle";
+import Recursos from "../pages/Recursos";
 
 export default function AppRoutes() {
   return (
@@ -20,15 +21,7 @@ export default function AppRoutes() {
 
           <Route path="/vehiculos/:id" element={<VehiculoDetalle />} />
 
-          <Route
-            path="/recursos"
-            element={
-              <div>
-                <h1>Recursos</h1>
-                <p>Gestión de recursos y equipamiento.</p>
-              </div>
-            }
-          />
+          <Route path="/recursos" element={<Recursos />} />
 
           <Route
             path="/inventario"
