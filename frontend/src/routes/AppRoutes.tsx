@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import App from "../App";
 import AppLayout from "../layouts/AppLayout";
 import ProtectedRoute from "./ProtectedRoute";
+import Dashboard from "../pages/Dashboard";
 
 export default function AppRoutes() {
   return (
@@ -11,15 +12,7 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route
-            path="/dashboard"
-            element={
-              <div>
-                <h1>Dashboard</h1>
-                <p>Panel principal de SIGMA</p>
-              </div>
-            }
-          />
+          <Route path="/dashboard" element={<Dashboard />} />
 
           <Route
             path="/vehiculos"

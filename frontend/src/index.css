@@ -36,3 +36,164 @@ button,
 input {
   font: inherit;
 }
+
+/* =========================
+   DASHBOARD
+   ========================= */
+
+.dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-eyebrow {
+  margin: 0 0 6px;
+  color: #b90c1b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #0b1c30;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.page-header p:last-child {
+  margin-top: 7px;
+  color: #667085;
+  font-size: 14px;
+}
+
+/* Resumen */
+
+.dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.summary-card {
+  padding: 20px;
+  border: 1px solid #e1e5eb;
+  border-radius: 8px;
+  background: white;
+}
+
+.summary-card span {
+  display: block;
+  color: #667085;
+  font-size: 13px;
+}
+
+.summary-card strong {
+  display: block;
+  margin-top: 8px;
+  color: #0b1c30;
+  font-size: 30px;
+  line-height: 1;
+}
+
+/* Unidades */
+
+.dashboard-section {
+  margin-top: 10px;
+}
+
+.section-header {
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: #0b1c30;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.section-header p {
+  margin-top: 5px;
+  color: #667085;
+  font-size: 13px;
+}
+
+.units-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.unit-card {
+  padding: 20px;
+  border: 1px solid #e1e5eb;
+  border-radius: 8px;
+  background: white;
+}
+
+.unit-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.unit-indicativo {
+  color: #98a2b3;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.unit-card h3 {
+  margin: 5px 0 0;
+  color: #0b1c30;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.unit-status {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.unit-status-operativa {
+  background: #e8f5ec;
+  color: #237a3b;
+}
+
+.unit-status-fuera_de_servicio {
+  background: #fff0f1;
+  color: #b90c1b;
+}
+
+.unit-status-mantenimiento {
+  background: #fff5df;
+  color: #9a6700;
+}
+
+@media (max-width: 900px) {
+  .dashboard-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .units-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .dashboard-summary {
+    grid-template-columns: 1fr;
+  }
+}
