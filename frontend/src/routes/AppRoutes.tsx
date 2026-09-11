@@ -5,6 +5,7 @@ import AppLayout from "../layouts/AppLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "../pages/Dashboard";
 import Vehiculos from "../pages/Vehiculos";
+import VehiculoDetalle from "../pages/VehiculoDetalle";
 
 export default function AppRoutes() {
   return (
@@ -16,6 +17,8 @@ export default function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
 
           <Route path="/vehiculos" element={<Vehiculos />} />
+
+          <Route path="/vehiculos/:id" element={<VehiculoDetalle />} />
 
           <Route
             path="/recursos"

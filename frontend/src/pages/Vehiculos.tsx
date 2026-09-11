@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { listarUnidades } from "../services/unidadService";
 import type { Unidad } from "../types/unidad";
+import { Link } from "react-router-dom";
 
 function Vehiculos() {
   const [unidades, setUnidades] = useState<Unidad[]>([]);
@@ -43,7 +44,10 @@ function Vehiculos() {
       {!cargando && !error && (
         <section className="vehiculos-grid">
           {unidades.map((unidad) => (
-            <article className="vehiculo-card" key={unidad.id}>
+            <Link to={`/vehiculos/${unidad.id}`}
+            className="vehiculo-card"
+            key={unidad.id}
+            >
               <div className="vehiculo-card-top">
                 <span className="vehiculo-indicativo">
                   {unidad.indicativo}
@@ -67,7 +71,7 @@ function Vehiculos() {
                 <span>Estado</span>
                 <strong>{unidad.estado.replaceAll("_", " ")}</strong>
               </div>
-            </article>
+            </Link>
           ))}
         </section>
       )}
