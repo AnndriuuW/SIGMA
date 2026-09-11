@@ -197,3 +197,70 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================
+   VEHÍCULOS
+   ========================= */
+
+.vehiculos-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.vehiculos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.vehiculo-card {
+  padding: 22px;
+  border: 1px solid #e1e5eb;
+  border-radius: 8px;
+  background: white;
+}
+
+.vehiculo-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vehiculo-indicativo {
+  color: #98a2b3;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.vehiculo-card h2 {
+  margin: 14px 0 20px;
+  color: #0b1c30;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.vehiculo-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-top: 1px solid #eef0f3;
+}
+
+.vehiculo-info span {
+  color: #667085;
+  font-size: 13px;
+}
+
+.vehiculo-info strong {
+  color: #0b1c30;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .vehiculos-grid {
+    grid-template-columns: 1fr;
+  }
+}

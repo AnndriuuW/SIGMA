@@ -4,6 +4,7 @@ import App from "../App";
 import AppLayout from "../layouts/AppLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "../pages/Dashboard";
+import Vehiculos from "../pages/Vehiculos";
 
 export default function AppRoutes() {
   return (
@@ -14,15 +15,7 @@ export default function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
 
-          <Route
-            path="/vehiculos"
-            element={
-              <div>
-                <h1>Vehículos</h1>
-                <p>Gestión de unidades de la Compañía 120.</p>
-              </div>
-            }
-          />
+          <Route path="/vehiculos" element={<Vehiculos />} />
 
           <Route
             path="/recursos"
