@@ -7,6 +7,10 @@ import Dashboard from "../pages/Dashboard";
 import Vehiculos from "../pages/Vehiculos";
 import VehiculoDetalle from "../pages/VehiculoDetalle";
 import Recursos from "../pages/Recursos";
+import Inventario from "../pages/Inventario";
+import InventarioDetalle from "../pages/InventarioDetalle";
+import Ocurrencias from "../pages/Ocurrencias";
+import OcurrenciaDetalle from "../pages/OcurrenciaDetalle";
 
 export default function AppRoutes() {
   return (
@@ -23,25 +27,13 @@ export default function AppRoutes() {
 
           <Route path="/recursos" element={<Recursos />} />
 
-          <Route
-            path="/inventario"
-            element={
-              <div>
-                <h1>Inventario</h1>
-                <p>Control y verificación del inventario.</p>
-              </div>
-            }
-          />
+          <Route path="/inventario" element={<Inventario />} />
 
-          <Route
-            path="/ocurrencias"
-            element={
-              <div>
-                <h1>Ocurrencias</h1>
-                <p>Registro de ocurrencias.</p>
-              </div>
-            }
-          />
+          <Route path="/inventario/:id" element={<InventarioDetalle />} />
+
+          <Route path="/ocurrencias" element={<Ocurrencias />} />
+
+          <Route path="/ocurrencias/:id" element={<OcurrenciaDetalle />} />
 
           <Route
             path="/usuarios"
