@@ -114,6 +114,10 @@ public class UsuarioService {
             usuario.setRol(rol);
         }
 
+        if (request.getActivo() != null) {
+            usuario.setActivo(request.getActivo());
+        }
+
         Usuario actualizado = usuarioRepository.save(usuario);
 
         UsuarioResponse response = new UsuarioResponse();

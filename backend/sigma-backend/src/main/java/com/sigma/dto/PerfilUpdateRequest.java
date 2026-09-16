@@ -3,12 +3,14 @@ package com.sigma.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class UsuarioUpdateRequest {
+public class PerfilUpdateRequest {
 
     @NotBlank(message = "Los nombres son obligatorios")
+    @Size(max = 100, message = "Los nombres no pueden superar los 100 caracteres")
     private String nombres;
 
     @NotBlank(message = "Los apellidos son obligatorios")
+    @Size(max = 100, message = "Los apellidos no pueden superar los 100 caracteres")
     private String apellidos;
 
     @Size(
@@ -17,10 +19,6 @@ public class UsuarioUpdateRequest {
         message = "La contraseña debe tener entre 8 y 255 caracteres"
     )
     private String contrasena;
-
-    private Long rolId;
-
-    private Boolean activo;
 
     public String getNombres() {
         return nombres;
@@ -44,21 +42,5 @@ public class UsuarioUpdateRequest {
 
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
-    }
-
-    public Long getRolId() {
-        return rolId;
-    }
-
-    public void setRolId(Long rolId) {
-        this.rolId = rolId;
-    }
-
-    public Boolean getActivo() {
-        return activo;
-    }
-
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
     }
 }

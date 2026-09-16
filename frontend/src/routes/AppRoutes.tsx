@@ -11,6 +11,8 @@ import Inventario from "../pages/Inventario";
 import InventarioDetalle from "../pages/InventarioDetalle";
 import Ocurrencias from "../pages/Ocurrencias";
 import OcurrenciaDetalle from "../pages/OcurrenciaDetalle";
+import Usuarios from "../pages/Usuarios";
+import Perfil from "../pages/Perfil";
 
 export default function AppRoutes() {
   return (
@@ -35,25 +37,9 @@ export default function AppRoutes() {
 
           <Route path="/ocurrencias/:id" element={<OcurrenciaDetalle />} />
 
-          <Route
-            path="/usuarios"
-            element={
-              <div>
-                <h1>Usuarios</h1>
-                <p>Gestión de usuarios del sistema.</p>
-              </div>
-            }
-          />
+          <Route path="/usuarios" element={<Usuarios />} />
 
-          <Route
-            path="/perfil"
-            element={
-              <div>
-                <h1>Mi perfil</h1>
-                <p>Información de tu cuenta.</p>
-              </div>
-            }
-          />
+          <Route path="/perfil" element={<Perfil />} />
         </Route>
       </Route>
 

@@ -1048,3 +1048,51 @@ input {
     grid-template-columns: 1fr;
   }
 }
+/* =========================
+   USUARIOS
+   ========================= */
+
+.modal-body input,
+.modal-body select {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.modal-body input:focus,
+.modal-body select:focus {
+  outline: none;
+  border-color: #b90c1b;
+  box-shadow: 0 0 0 3px rgba(185, 12, 27, 0.1);
+}
+
+.user-table-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.table-action-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.table-action-button:hover {
+  color: #b90c1b;
+}
+
+.table-action-button.danger {
+  color: #991b1b;
+}

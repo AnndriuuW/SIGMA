@@ -402,6 +402,16 @@ public class SecurityConfig {
                     "PERSONAL_ADJUNTO"
                 )
 
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/perfil"
+                ).authenticated()
+
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/perfil"
+                ).authenticated()
+
 
                 // =====================================================
                 // CUALQUIER OTRA RUTA
