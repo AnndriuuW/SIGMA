@@ -192,6 +192,10 @@ public class SecurityConfig {
 
                 // =====================================================
                 // UBICACIONES
+                // Consulta: todos
+                // Actualización directa: Administrador, Jefe, Adjunto
+                // Bombero actualizará ubicación de recursos mediante
+                // un endpoint específico.
                 // =====================================================
 
                 .requestMatchers(
@@ -282,6 +286,18 @@ public class SecurityConfig {
                     "BOMBERO"
                 )
 
+                // Cambiar únicamente la ubicación de un recurso
+                // Permitido también para Bombero.
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/recursos/*/ubicacion"
+                ).hasAnyRole(
+                    "ADMINISTRADOR",
+                    "JEFE_MAQUINAS",
+                    "PERSONAL_ADJUNTO",
+                    "BOMBERO"
+                )
+
                 .requestMatchers(
                     HttpMethod.POST,
                     "/recursos"
@@ -291,6 +307,7 @@ public class SecurityConfig {
                     "PERSONAL_ADJUNTO"
                 )
 
+                // Actualización completa del recurso
                 .requestMatchers(
                     HttpMethod.PUT,
                     "/recursos/**"
@@ -312,6 +329,8 @@ public class SecurityConfig {
 
                 // =====================================================
                 // OCURRENCIAS
+                // Consulta: todos
+                // Registro: todos
                 // =====================================================
 
                 .requestMatchers(
@@ -331,12 +350,16 @@ public class SecurityConfig {
                 ).hasAnyRole(
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
-                    "PERSONAL_ADJUNTO"
+                    "PERSONAL_ADJUNTO",
+                    "BOMBERO"
                 )
 
 
                 // =====================================================
                 // INVENTARIOS
+                // Consulta:
+                // - Admin/Jefe/Adjunto: todos
+                // - Bombero: solo activos, controlado en Controller
                 // =====================================================
 
                 .requestMatchers(
@@ -371,6 +394,9 @@ public class SecurityConfig {
 
                 // =====================================================
                 // DETALLES DE INVENTARIO
+                // Consulta:
+                // - Admin/Jefe/Adjunto: todos
+                // - Bombero: solo activos, controlado en Controller
                 // =====================================================
 
                 .requestMatchers(
@@ -402,14 +428,20 @@ public class SecurityConfig {
                     "PERSONAL_ADJUNTO"
                 )
 
+
+                // =====================================================
+                // PERFIL
+                // Todos los usuarios autenticados
+                // =====================================================
+
                 .requestMatchers(
-                        HttpMethod.GET,
-                        "/perfil"
+                    HttpMethod.GET,
+                    "/perfil"
                 ).authenticated()
 
                 .requestMatchers(
-                        HttpMethod.PUT,
-                        "/perfil"
+                    HttpMethod.PUT,
+                    "/perfil"
                 ).authenticated()
 
 

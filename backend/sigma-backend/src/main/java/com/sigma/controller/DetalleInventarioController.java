@@ -3,11 +3,14 @@ package com.sigma.controller;
 import com.sigma.dto.DetalleInventarioCreateRequest;
 import com.sigma.dto.DetalleInventarioResponse;
 import com.sigma.dto.DetalleInventarioUpdateRequest;
+import com.sigma.entity.EstadoInventario;
 import com.sigma.service.DetalleInventarioService;
-import jakarta.validation.Valid;
+import com.sigma.service.InventarioService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -16,15 +19,19 @@ import java.util.List;
 public class DetalleInventarioController {
 
     private final DetalleInventarioService detalleInventarioService;
+    private final InventarioService inventarioService;
 
     public DetalleInventarioController(
-            DetalleInventarioService detalleInventarioService) {
+            DetalleInventarioService detalleInventarioService,
+            InventarioService inventarioService) {
+
         this.detalleInventarioService = detalleInventarioService;
+        this.inventarioService = inventarioService;
     }
 
     @PostMapping
     public ResponseEntity<DetalleInventarioResponse> crear(
-            @Valid @RequestBody DetalleInventarioCreateRequest request) {
+            @RequestBody DetalleInventarioCreateRequest request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -32,7 +39,19 @@ public class DetalleInventarioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DetalleInventarioResponse>> listar() {
+    public ResponseEntity<List<DetalleInventarioResponse>> listar(
+            Authentication authentication) {
+
+        boolean esBombero = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_BOMBERO"));
+
+        if (esBombero) {
+            return ResponseEntity.ok(
+                    detalleInventarioService.listarActuales()
+            );
+        }
 
         return ResponseEntity.ok(
                 detalleInventarioService.listar()
@@ -40,18 +59,41 @@ public class DetalleInventarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DetalleInventarioResponse> buscarPorId(
-            @PathVariable Long id) {
+    public ResponseEntity<?> buscarPorId(
+            @PathVariable Long id,
+            Authentication authentication) {
 
-        return ResponseEntity.ok(
-                detalleInventarioService.buscarPorId(id)
-        );
+        DetalleInventarioResponse detalle =
+                detalleInventarioService.buscarPorId(id);
+
+        boolean esBombero = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_BOMBERO"));
+
+        if (esBombero) {
+
+            var inventario =
+                    inventarioService.buscarPorId(
+                            detalle.getIdInventario()
+                    );
+
+            if (inventario.getEstado()
+                    == EstadoInventario.FINALIZADO) {
+
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .build();
+            }
+        }
+
+        return ResponseEntity.ok(detalle);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DetalleInventarioResponse> actualizar(
             @PathVariable Long id,
-            @Valid @RequestBody DetalleInventarioUpdateRequest request) {
+            @RequestBody DetalleInventarioUpdateRequest request) {
 
         return ResponseEntity.ok(
                 detalleInventarioService.actualizar(id, request)

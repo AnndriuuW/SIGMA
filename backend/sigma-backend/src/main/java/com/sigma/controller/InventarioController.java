@@ -3,12 +3,14 @@ package com.sigma.controller;
 import com.sigma.dto.InventarioCreateRequest;
 import com.sigma.dto.InventarioResponse;
 import com.sigma.dto.InventarioUpdateRequest;
+import com.sigma.entity.EstadoInventario;
 import com.sigma.service.InventarioService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,7 +35,19 @@ public class InventarioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<InventarioResponse>> listar() {
+    public ResponseEntity<List<InventarioResponse>> listar(
+            Authentication authentication) {
+
+        boolean esBombero = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_BOMBERO"));
+
+        if (esBombero) {
+            return ResponseEntity.ok(
+                    inventarioService.listarActuales()
+            );
+        }
 
         return ResponseEntity.ok(
                 inventarioService.listar()
@@ -41,12 +55,27 @@ public class InventarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<InventarioResponse> buscarPorId(
-            @PathVariable Long id) {
+    public ResponseEntity<?> buscarPorId(
+            @PathVariable Long id,
+            Authentication authentication) {
 
-        return ResponseEntity.ok(
-                inventarioService.buscarPorId(id)
-        );
+        InventarioResponse inventario =
+                inventarioService.buscarPorId(id);
+
+        boolean esBombero = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_BOMBERO"));
+
+        if (esBombero
+                && inventario.getEstado() == EstadoInventario.FINALIZADO) {
+
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
+
+        return ResponseEntity.ok(inventario);
     }
 
     @PutMapping("/{id}")

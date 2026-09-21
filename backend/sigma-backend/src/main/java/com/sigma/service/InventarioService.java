@@ -16,171 +16,175 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class InventarioService {
 
-    private final InventarioRepository inventarioRepository;
-    private final UnidadRepository unidadRepository;
-    private final UsuarioRepository usuarioRepository;
+        private final InventarioRepository inventarioRepository;
+        private final UnidadRepository unidadRepository;
+        private final UsuarioRepository usuarioRepository;
 
-    public InventarioService(
-            InventarioRepository inventarioRepository,
-            UnidadRepository unidadRepository,
-            UsuarioRepository usuarioRepository) {
+        public InventarioService(
+                        InventarioRepository inventarioRepository,
+                        UnidadRepository unidadRepository,
+                        UsuarioRepository usuarioRepository) {
 
-        this.inventarioRepository = inventarioRepository;
-        this.unidadRepository = unidadRepository;
-        this.usuarioRepository = usuarioRepository;
-    }
-
-    public InventarioResponse crear(InventarioCreateRequest request) {
-
-        Unidad unidad = unidadRepository.findById(
-                request.getIdUnidad()
-        ).orElseThrow(() ->
-                new RecursoNoEncontradoException(
-                        "Unidad no encontrada"));
-
-        if (!unidad.getActivo()) {
-            throw new ReglaNegocioException(
-                    "No se puede realizar un inventario sobre una unidad inactiva");
+                this.inventarioRepository = inventarioRepository;
+                this.unidadRepository = unidadRepository;
+                this.usuarioRepository = usuarioRepository;
         }
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        public InventarioResponse crear(InventarioCreateRequest request) {
 
-        String codigoUsuario = authentication.getName();
+                Unidad unidad = unidadRepository.findById(
+                                request.getIdUnidad()).orElseThrow(
+                                                () -> new RecursoNoEncontradoException(
+                                                                "Unidad no encontrada"));
 
-        Usuario responsable = usuarioRepository.findByCodigo(
-                codigoUsuario
-        ).orElseThrow(() ->
-                new RecursoNoEncontradoException(
-                        "Usuario autenticado no encontrado"));
-
-        if (!responsable.getActivo()) {
-                throw new ReglaNegocioException(
-                "El usuario autenticado está inactivo");
-        }
-
-        Inventario inventario = new Inventario();
-
-        inventario.setUnidad(unidad);
-        inventario.setResponsable(responsable);
-        inventario.setFechaInicio(LocalDateTime.now());
-        inventario.setEstado(EstadoInventario.EN_PROCESO);
-
-        Inventario guardado = inventarioRepository.save(inventario);
-
-        return convertirAResponse(guardado);
-    }
-
-    public List<InventarioResponse> listar() {
-
-        return inventarioRepository.findAll()
-                .stream()
-                .map(this::convertirAResponse)
-                .toList();
-    }
-
-    public InventarioResponse buscarPorId(Long id) {
-
-        Inventario inventario = inventarioRepository.findById(id)
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "Inventario no encontrado"));
-
-        return convertirAResponse(inventario);
-    }
-
-    public InventarioResponse actualizar(
-                Long id,
-                InventarioUpdateRequest request) {
-
-        Inventario inventario = inventarioRepository.findById(id)
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "Inventario no encontrado"));
-
-        if (request.getEstado() == null) {
-                throw new ReglaNegocioException(
-                        "El estado del inventario es obligatorio");
-        }
-
-        // Un inventario finalizado no puede modificarse
-        if (inventario.getEstado() == EstadoInventario.FINALIZADO) {
-                throw new ReglaNegocioException(
-                        "El inventario ya está finalizado y no puede modificarse");
-        }
-
-        // El resultado general solo puede registrarse al finalizar
-        if (request.getResultadoGeneral() != null
-                && request.getEstado() != EstadoInventario.FINALIZADO) {
-
-                throw new ReglaNegocioException(
-                        "El resultado general solo puede registrarse cuando el inventario está finalizado");
-        }
-
-        inventario.setEstado(request.getEstado());
-
-        if (request.getResultadoGeneral() != null) {
-                inventario.setResultadoGeneral(
-                        request.getResultadoGeneral()
-                );
-        }
-
-        // Registrar fecha de finalización únicamente al finalizar
-        if (request.getEstado() == EstadoInventario.FINALIZADO) {
-
-                if (inventario.getFechaFin() == null) {
-                inventario.setFechaFin(LocalDateTime.now());
+                if (!unidad.getActivo()) {
+                        throw new ReglaNegocioException(
+                                        "No se puede realizar un inventario sobre una unidad inactiva");
                 }
+
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+                String codigoUsuario = authentication.getName();
+
+                Usuario responsable = usuarioRepository.findByCodigo(
+                                codigoUsuario).orElseThrow(
+                                                () -> new RecursoNoEncontradoException(
+                                                                "Usuario autenticado no encontrado"));
+
+                if (!responsable.getActivo()) {
+                        throw new ReglaNegocioException(
+                                        "El usuario autenticado está inactivo");
+                }
+
+                Inventario inventario = new Inventario();
+
+                inventario.setUnidad(unidad);
+                inventario.setResponsable(responsable);
+                inventario.setFechaInicio(LocalDateTime.now());
+                inventario.setEstado(EstadoInventario.EN_PROCESO);
+
+                Inventario guardado = inventarioRepository.save(inventario);
+
+                return convertirAResponse(guardado);
         }
 
-        Inventario actualizado = inventarioRepository.save(inventario);
+        public List<InventarioResponse> listar() {
 
-        return convertirAResponse(actualizado);
-     }
-
-    private InventarioResponse convertirAResponse(
-            Inventario inventario) {
-
-        InventarioResponse response = new InventarioResponse();
-
-        response.setId(inventario.getId());
-
-        if (inventario.getUnidad() != null) {
-            response.setIdUnidad(
-                    inventario.getUnidad().getId());
-
-            response.setNombreUnidad(
-                    inventario.getUnidad().getNombre());
+                return inventarioRepository.findAll()
+                                .stream()
+                                .map(this::convertirAResponse)
+                                .toList();
         }
 
-        if (inventario.getResponsable() != null) {
-            response.setCodigoResponsable(
-                    inventario.getResponsable().getCodigo());
+        public List<InventarioResponse> listarActuales() {
 
-            response.setNombreResponsable(
-                    inventario.getResponsable().getNombres()
-                            + " "
-                            + inventario.getResponsable().getApellidos());
+                return inventarioRepository.findAll()
+                                .stream()
+                                .filter(inventario -> inventario.getEstado() != EstadoInventario.FINALIZADO)
+                                .map(this::convertirAResponse)
+                                .toList();
         }
 
-        response.setFechaInicio(
-                inventario.getFechaInicio());
+        public InventarioResponse buscarPorId(Long id) {
 
-        response.setFechaFin(
-                inventario.getFechaFin());
+                Inventario inventario = inventarioRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Inventario no encontrado"));
 
-        response.setEstado(
-                inventario.getEstado());
+                return convertirAResponse(inventario);
+        }
 
-        response.setResultadoGeneral(
-                inventario.getResultadoGeneral());
+        public InventarioResponse actualizar(
+                        Long id,
+                        InventarioUpdateRequest request) {
 
-        return response;
-    }
+                Inventario inventario = inventarioRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Inventario no encontrado"));
+
+                if (request.getEstado() == null) {
+                        throw new ReglaNegocioException(
+                                        "El estado del inventario es obligatorio");
+                }
+
+                // Un inventario finalizado no puede modificarse
+                if (inventario.getEstado() == EstadoInventario.FINALIZADO) {
+                        throw new ReglaNegocioException(
+                                        "El inventario ya está finalizado y no puede modificarse");
+                }
+
+                // El resultado general solo puede registrarse al finalizar
+                if (request.getResultadoGeneral() != null
+                                && request.getEstado() != EstadoInventario.FINALIZADO) {
+
+                        throw new ReglaNegocioException(
+                                        "El resultado general solo puede registrarse cuando el inventario está finalizado");
+                }
+
+                inventario.setEstado(request.getEstado());
+
+                if (request.getResultadoGeneral() != null) {
+                        inventario.setResultadoGeneral(
+                                        request.getResultadoGeneral());
+                }
+
+                // Registrar fecha de finalización únicamente al finalizar
+                if (request.getEstado() == EstadoInventario.FINALIZADO) {
+
+                        if (inventario.getFechaFin() == null) {
+                                inventario.setFechaFin(LocalDateTime.now());
+                        }
+                }
+
+                Inventario actualizado = inventarioRepository.save(inventario);
+
+                return convertirAResponse(actualizado);
+        }
+
+        private InventarioResponse convertirAResponse(
+                        Inventario inventario) {
+
+                InventarioResponse response = new InventarioResponse();
+
+                response.setId(inventario.getId());
+
+                if (inventario.getUnidad() != null) {
+                        response.setIdUnidad(
+                                        inventario.getUnidad().getId());
+
+                        response.setNombreUnidad(
+                                        inventario.getUnidad().getNombre());
+                }
+
+                if (inventario.getResponsable() != null) {
+                        response.setCodigoResponsable(
+                                        inventario.getResponsable().getCodigo());
+
+                        response.setNombreResponsable(
+                                        inventario.getResponsable().getNombres()
+                                                        + " "
+                                                        + inventario.getResponsable().getApellidos());
+                }
+
+                response.setFechaInicio(
+                                inventario.getFechaInicio());
+
+                response.setFechaFin(
+                                inventario.getFechaFin());
+
+                response.setEstado(
+                                inventario.getEstado());
+
+                response.setResultadoGeneral(
+                                inventario.getResultadoGeneral());
+
+                return response;
+        }
 }

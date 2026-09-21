@@ -1,13 +1,17 @@
 package com.sigma.controller;
 
+import com.sigma.dto.CambiarUbicacionRequest;
 import com.sigma.dto.RecursoCreateRequest;
 import com.sigma.dto.RecursoResponse;
 import com.sigma.dto.RecursoUpdateRequest;
 import com.sigma.service.RecursoService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.sigma.dto.MovimientoRecursoResponse;
 
 import java.util.List;
 
@@ -44,6 +48,28 @@ public class RecursoController {
 
         return ResponseEntity.ok(
                 recursoService.buscarPorId(id)
+        );
+    }
+
+    @GetMapping("/{id}/historial")
+    public ResponseEntity<List<MovimientoRecursoResponse>> listarHistorial(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                recursoService.listarHistorial(id)
+        );
+    }
+
+    @PutMapping("/{id}/ubicacion")
+    public ResponseEntity<RecursoResponse> cambiarUbicacion(
+            @PathVariable Long id,
+            @Valid @RequestBody CambiarUbicacionRequest request) {
+
+        return ResponseEntity.ok(
+                recursoService.cambiarUbicacion(
+                        id,
+                        request.getIdUbicacion()
+                )
         );
     }
 

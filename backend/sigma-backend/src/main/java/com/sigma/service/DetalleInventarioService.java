@@ -26,246 +26,238 @@ import java.util.List;
 @Service
 public class DetalleInventarioService {
 
-    private final DetalleInventarioRepository detalleInventarioRepository;
-    private final InventarioRepository inventarioRepository;
-    private final RecursoRepository recursoRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final OcurrenciaService ocurrenciaService;
+        private final DetalleInventarioRepository detalleInventarioRepository;
+        private final InventarioRepository inventarioRepository;
+        private final RecursoRepository recursoRepository;
+        private final UsuarioRepository usuarioRepository;
+        private final OcurrenciaService ocurrenciaService;
 
-    public DetalleInventarioService(
-            DetalleInventarioRepository detalleInventarioRepository,
-            InventarioRepository inventarioRepository,
-            RecursoRepository recursoRepository,
-            UsuarioRepository usuarioRepository,
-            OcurrenciaService ocurrenciaService) {
+        public DetalleInventarioService(
+                        DetalleInventarioRepository detalleInventarioRepository,
+                        InventarioRepository inventarioRepository,
+                        RecursoRepository recursoRepository,
+                        UsuarioRepository usuarioRepository,
+                        OcurrenciaService ocurrenciaService) {
 
-        this.detalleInventarioRepository = detalleInventarioRepository;
-        this.inventarioRepository = inventarioRepository;
-        this.recursoRepository = recursoRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.ocurrenciaService = ocurrenciaService;
-    }
-
-    public DetalleInventarioResponse crear(
-            DetalleInventarioCreateRequest request) {
-
-        Inventario inventario = inventarioRepository
-                .findById(request.getIdInventario())
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "Inventario no encontrado"));
-
-        if (inventario.getEstado() == EstadoInventario.FINALIZADO) {
-            throw new ReglaNegocioException(
-                    "No se pueden registrar detalles en un inventario finalizado");
+                this.detalleInventarioRepository = detalleInventarioRepository;
+                this.inventarioRepository = inventarioRepository;
+                this.recursoRepository = recursoRepository;
+                this.usuarioRepository = usuarioRepository;
+                this.ocurrenciaService = ocurrenciaService;
         }
 
-        Recurso recurso = recursoRepository
-                .findById(request.getIdRecurso())
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "Recurso no encontrado"));
+        public DetalleInventarioResponse crear(
+                        DetalleInventarioCreateRequest request) {
 
-        if (recurso.getUbicacion() == null
-                || recurso.getUbicacion().getUnidad() == null
-                || !recurso.getUbicacion().getUnidad().getId()
-                        .equals(inventario.getUnidad().getId())) {
+                Inventario inventario = inventarioRepository
+                                .findById(request.getIdInventario())
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Inventario no encontrado"));
 
-            throw new ReglaNegocioException(
-                    "El recurso no pertenece a la unidad del inventario");
+                if (inventario.getEstado() == EstadoInventario.FINALIZADO) {
+                        throw new ReglaNegocioException(
+                                        "No se pueden registrar detalles en un inventario finalizado");
+                }
+
+                Recurso recurso = recursoRepository
+                                .findById(request.getIdRecurso())
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Recurso no encontrado"));
+
+                if (recurso.getUbicacion() == null
+                                || recurso.getUbicacion().getUnidad() == null
+                                || !recurso.getUbicacion().getUnidad().getId()
+                                                .equals(inventario.getUnidad().getId())) {
+
+                        throw new ReglaNegocioException(
+                                        "El recurso no pertenece a la unidad del inventario");
+                }
+
+                if (detalleInventarioRepository
+                                .existsByInventarioIdAndRecursoId(
+                                                inventario.getId(),
+                                                recurso.getId())) {
+
+                        throw new ReglaNegocioException(
+                                        "El recurso ya fue registrado en este inventario");
+                }
+
+                Usuario usuarioVerificador = obtenerUsuarioAutenticado();
+
+                DetalleInventario detalle = new DetalleInventario();
+
+                detalle.setInventario(inventario);
+                detalle.setRecurso(recurso);
+                detalle.setVerificado(request.getVerificado());
+                detalle.setVerificadoPor(usuarioVerificador);
+                detalle.setFechaVerificacion(LocalDateTime.now());
+                detalle.setObservacion(request.getObservacion());
+
+                DetalleInventario guardado = detalleInventarioRepository.save(detalle);
+
+                if (!request.getVerificado()) {
+                        generarNovedad(recurso);
+                }
+
+                return convertirRespuesta(guardado);
         }
 
-        if (detalleInventarioRepository
-                .existsByInventarioIdAndRecursoId(
-                        inventario.getId(),
-                        recurso.getId())) {
+        public List<DetalleInventarioResponse> listar() {
 
-            throw new ReglaNegocioException(
-                    "El recurso ya fue registrado en este inventario");
+                return detalleInventarioRepository.findAll()
+                                .stream()
+                                .map(this::convertirRespuesta)
+                                .toList();
         }
 
-        Usuario usuarioVerificador = obtenerUsuarioAutenticado();
+        public List<DetalleInventarioResponse> listarActuales() {
 
-        DetalleInventario detalle = new DetalleInventario();
-
-        detalle.setInventario(inventario);
-        detalle.setRecurso(recurso);
-        detalle.setVerificado(request.getVerificado());
-        detalle.setVerificadoPor(usuarioVerificador);
-        detalle.setFechaVerificacion(LocalDateTime.now());
-        detalle.setObservacion(request.getObservacion());
-
-        DetalleInventario guardado =
-                detalleInventarioRepository.save(detalle);
-
-        if (!request.getVerificado()) {
-            generarNovedad(recurso);
+                return detalleInventarioRepository.findAll()
+                                .stream()
+                                .filter(detalle -> detalle.getInventario().getEstado() != EstadoInventario.FINALIZADO)
+                                .map(this::convertirRespuesta)
+                                .toList();
         }
 
-        return convertirRespuesta(guardado);
-    }
+        public DetalleInventarioResponse buscarPorId(Long id) {
 
-    public List<DetalleInventarioResponse> listar() {
+                DetalleInventario detalle = detalleInventarioRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Detalle de inventario no encontrado"));
 
-        return detalleInventarioRepository.findAll()
-                .stream()
-                .map(this::convertirRespuesta)
-                .toList();
-    }
-
-    public DetalleInventarioResponse buscarPorId(Long id) {
-
-        DetalleInventario detalle =
-                detalleInventarioRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RecursoNoEncontradoException(
-                                        "Detalle de inventario no encontrado"));
-
-        return convertirRespuesta(detalle);
-    }
-
-    public DetalleInventarioResponse actualizar(
-            Long id,
-            DetalleInventarioUpdateRequest request) {
-
-        DetalleInventario detalle =
-                detalleInventarioRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RecursoNoEncontradoException(
-                                        "Detalle de inventario no encontrado"));
-
-        if (detalle.getInventario().getEstado()
-                == EstadoInventario.FINALIZADO) {
-
-            throw new ReglaNegocioException(
-                    "No se puede modificar un detalle de un inventario finalizado");
+                return convertirRespuesta(detalle);
         }
 
-        Usuario usuarioVerificador = obtenerUsuarioAutenticado();
+        public DetalleInventarioResponse actualizar(
+                        Long id,
+                        DetalleInventarioUpdateRequest request) {
 
-        Boolean verificadoAnterior = detalle.getVerificado();
+                DetalleInventario detalle = detalleInventarioRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Detalle de inventario no encontrado"));
 
-        detalle.setVerificado(request.getVerificado());
-        detalle.setVerificadoPor(usuarioVerificador);
-        detalle.setFechaVerificacion(LocalDateTime.now());
-        detalle.setObservacion(request.getObservacion());
+                if (detalle.getInventario().getEstado() == EstadoInventario.FINALIZADO) {
 
-        DetalleInventario actualizado =
-                detalleInventarioRepository.save(detalle);
+                        throw new ReglaNegocioException(
+                                        "No se puede modificar un detalle de un inventario finalizado");
+                }
 
-        /*
-         * Generar novedad únicamente cuando el recurso
-         * cambia de verificado a no verificado.
-         */
-        if (Boolean.TRUE.equals(verificadoAnterior)
-                && Boolean.FALSE.equals(request.getVerificado())) {
+                Usuario usuarioVerificador = obtenerUsuarioAutenticado();
 
-            generarNovedad(actualizado.getRecurso());
+                Boolean verificadoAnterior = detalle.getVerificado();
+
+                detalle.setVerificado(request.getVerificado());
+                detalle.setVerificadoPor(usuarioVerificador);
+                detalle.setFechaVerificacion(LocalDateTime.now());
+                detalle.setObservacion(request.getObservacion());
+
+                DetalleInventario actualizado = detalleInventarioRepository.save(detalle);
+
+                /*
+                 * Generar novedad únicamente cuando el recurso
+                 * cambia de verificado a no verificado.
+                 */
+                if (Boolean.TRUE.equals(verificadoAnterior)
+                                && Boolean.FALSE.equals(request.getVerificado())) {
+
+                        generarNovedad(actualizado.getRecurso());
+                }
+
+                return convertirRespuesta(actualizado);
         }
 
-        return convertirRespuesta(actualizado);
-    }
+        private Usuario obtenerUsuarioAutenticado() {
 
-    private Usuario obtenerUsuarioAutenticado() {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+                if (authentication == null
+                                || !authentication.isAuthenticated()) {
 
-        if (authentication == null
-                || !authentication.isAuthenticated()) {
+                        throw new RecursoNoEncontradoException(
+                                        "Usuario no autenticado");
+                }
 
-            throw new RecursoNoEncontradoException(
-                    "Usuario no autenticado");
+                String codigo = authentication.getName();
+
+                Usuario usuario = usuarioRepository
+                                .findByCodigo(codigo)
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Usuario autenticado no encontrado"));
+
+                if (!usuario.getActivo()) {
+                        throw new ReglaNegocioException(
+                                        "El usuario autenticado está inactivo");
+                }
+
+                return usuario;
         }
 
-        String codigo = authentication.getName();
+        private void generarNovedad(Recurso recurso) {
 
-        Usuario usuario = usuarioRepository
-                .findByCodigo(codigo)
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "Usuario autenticado no encontrado"));
+                Usuario jefeMaquinas = usuarioRepository
+                                .findFirstByRolNombreAndActivoTrue("JEFE_MAQUINAS")
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "No existe un Jefe de Máquinas activo"));
 
-        if (!usuario.getActivo()) {
-            throw new ReglaNegocioException(
-                    "El usuario autenticado está inactivo");
+                OcurrenciaCreateRequest ocurrenciaRequest = new OcurrenciaCreateRequest();
+
+                ocurrenciaRequest.setTipo(TipoOcurrencia.RECURSO);
+
+                ocurrenciaRequest.setDescripcion(
+                                "Novedad detectada durante inventario: el recurso "
+                                                + recurso.getCodigo()
+                                                + " - "
+                                                + recurso.getNombre()
+                                                + " no fue verificado.");
+
+                ocurrenciaRequest.setCodigoDestinatario(
+                                jefeMaquinas.getCodigo());
+
+                ocurrenciaRequest.setIdRecurso(
+                                recurso.getId());
+
+                ocurrenciaService.crear(ocurrenciaRequest);
         }
 
-        return usuario;
-    }
+        private DetalleInventarioResponse convertirRespuesta(
+                        DetalleInventario detalle) {
 
-    private void generarNovedad(Recurso recurso) {
+                DetalleInventarioResponse response = new DetalleInventarioResponse();
 
-        Usuario jefeMaquinas = usuarioRepository
-                .findFirstByRolNombreAndActivoTrue("JEFE_MAQUINAS")
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "No existe un Jefe de Máquinas activo"));
+                response.setId(detalle.getId());
 
-        OcurrenciaCreateRequest ocurrenciaRequest =
-                new OcurrenciaCreateRequest();
+                response.setIdInventario(
+                                detalle.getInventario().getId());
 
-        ocurrenciaRequest.setTipo(TipoOcurrencia.RECURSO);
+                response.setIdRecurso(
+                                detalle.getRecurso().getId());
 
-        ocurrenciaRequest.setDescripcion(
-                "Novedad detectada durante inventario: el recurso "
-                        + recurso.getCodigo()
-                        + " - "
-                        + recurso.getNombre()
-                        + " no fue verificado."
-        );
+                response.setCodigoRecurso(
+                                detalle.getRecurso().getCodigo());
 
-        ocurrenciaRequest.setCodigoDestinatario(
-                jefeMaquinas.getCodigo()
-        );
+                response.setNombreRecurso(
+                                detalle.getRecurso().getNombre());
 
-        ocurrenciaRequest.setIdRecurso(
-                recurso.getId()
-        );
+                if (detalle.getVerificadoPor() != null) {
 
-        ocurrenciaService.crear(ocurrenciaRequest);
-    }
+                        response.setCodigoVerificadoPor(
+                                        detalle.getVerificadoPor().getCodigo());
 
-    private DetalleInventarioResponse convertirRespuesta(
-            DetalleInventario detalle) {
+                        response.setNombreVerificadoPor(
+                                        detalle.getVerificadoPor().getNombres()
+                                                        + " "
+                                                        + detalle.getVerificadoPor().getApellidos());
+                }
 
-        DetalleInventarioResponse response =
-                new DetalleInventarioResponse();
+                response.setVerificado(
+                                detalle.getVerificado());
 
-        response.setId(detalle.getId());
+                response.setFechaVerificacion(
+                                detalle.getFechaVerificacion());
 
-        response.setIdInventario(
-                detalle.getInventario().getId());
+                response.setObservacion(
+                                detalle.getObservacion());
 
-        response.setIdRecurso(
-                detalle.getRecurso().getId());
-
-        response.setCodigoRecurso(
-                detalle.getRecurso().getCodigo());
-
-        response.setNombreRecurso(
-                detalle.getRecurso().getNombre());
-
-        if (detalle.getVerificadoPor() != null) {
-
-            response.setCodigoVerificadoPor(
-                    detalle.getVerificadoPor().getCodigo());
-
-            response.setNombreVerificadoPor(
-                    detalle.getVerificadoPor().getNombres()
-                            + " "
-                            + detalle.getVerificadoPor().getApellidos());
+                return response;
         }
-
-        response.setVerificado(
-                detalle.getVerificado());
-
-        response.setFechaVerificacion(
-                detalle.getFechaVerificacion());
-
-        response.setObservacion(
-                detalle.getObservacion());
-
-        return response;
-    }
 }
