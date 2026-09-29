@@ -1,0 +1,106 @@
+/* =========================================================
+   SIGMA · CALIBRACIÓN VISUAL GLOBAL
+   ========================================================= */
+
+/* Texto general */
+body {
+  color: var(--sigma-text);
+  background: var(--sigma-bg);
+}
+
+/* Encabezados */
+h1,
+h2,
+h3,
+h4 {
+  color: var(--sigma-text);
+}
+
+/* Texto secundario */
+p {
+  color: var(--sigma-text-secondary);
+}
+
+/* Etiquetas técnicas */
+.page-eyebrow,
+.inventario-section-label,
+.usuarios-kicker,
+.usuarios-section-label,
+.perfil-kicker,
+.perfil-section-label {
+  color: var(--sigma-navy-2);
+}
+
+/* Campos */
+input,
+select,
+textarea {
+  color: var(--sigma-text);
+  background: var(--sigma-surface);
+}
+
+/* Placeholder */
+input::placeholder,
+textarea::placeholder {
+  color: #7f8998;
+}
+
+/* Bordes */
+input,
+select,
+textarea {
+  border-color: var(--sigma-border);
+}
+
+/* Estados de foco */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #8290a3;
+}
+
+/* Texto de tablas */
+.resources-table td,
+.inventario-table td,
+.ocurrencias-table td,
+.usuarios-table td {
+  color: var(--sigma-text-secondary);
+}
+
+/* Encabezados de tablas */
+.resources-table th,
+.inventario-table th,
+.ocurrencias-table th,
+.usuarios-table th {
+  color: #5f6d80;
+}
+
+/* Datos importantes de tablas */
+.resources-table strong,
+.inventario-table strong,
+.ocurrencias-table strong,
+.usuarios-table strong {
+  color: var(--sigma-text);
+}
+
+/* Texto auxiliar: sigue siendo secundario,
+   pero no tan lavado */
+.resource-name span,
+.inventario-unit-cell span,
+.inventario-result-count span,
+.ocurrencia-related-cell span,
+.ocurrencia-date-cell span,
+.usuarios-code-cell span,
+.usuarios-person-cell span {
+  color: #778396;
+}
+
+/* Links */
+a {
+  color: var(--sigma-navy-2);
+}
+
+a:hover {
+  color: var(--sigma-red);
+}
+

@@ -1,0 +1,27 @@
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  background: var(--sigma-bg);
+  color: var(--sigma-text);
+  font-family: var(--sigma-font);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+

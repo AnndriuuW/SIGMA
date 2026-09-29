@@ -67,18 +67,29 @@ function VehiculoDetalle() {
   }, [id]);
 
   if (cargando) {
-    return <p>Cargando información de la unidad...</p>;
+    return (
+      <div className="vehiculo-detalle-page">
+        <div className="vehiculo-detalle-state">
+          <div className="vehiculo-detalle-state-line" />
+          <strong>Cargando unidad</strong>
+          <span>Obteniendo información operativa...</span>
+        </div>
+      </div>
+    );
   }
 
   if (error || !unidad) {
     return (
-      <div className="vehiculo-detalle">
-        <Link to="/vehiculos" className="back-link">
-          ← Volver a vehículos
+      <div className="vehiculo-detalle-page">
+        <Link to="/vehiculos" className="vehiculo-detalle-back">
+          <span>←</span>
+          Volver a vehículos
         </Link>
 
-        <div className="error-message">
-          {error || "La unidad no fue encontrada."}
+        <div className="vehiculo-detalle-error">
+          <strong>
+            {error || "La unidad no fue encontrada."}
+          </strong>
         </div>
       </div>
     );
@@ -87,86 +98,158 @@ function VehiculoDetalle() {
   const recursosPorUbicacion = (ubicacionId: number) =>
     recursos.filter((recurso) => recurso.idUbicacion === ubicacionId);
 
+  const recursosOperativos = recursos.filter(
+    (recurso) => recurso.estado === "OPERATIVO",
+  ).length;
+
   return (
-    <div className="vehiculo-detalle">
-      <Link to="/vehiculos" className="back-link">
-        ← Volver a vehículos
+    <div className="vehiculo-detalle-page">
+      <Link to="/vehiculos" className="vehiculo-detalle-back">
+        <span>←</span>
+        Volver a vehículos
       </Link>
 
-      <header className="detalle-header">
-        <div>
-          <p className="page-eyebrow">UNIDAD</p>
+      <header className="vehiculo-detalle-header">
+        <div className="vehiculo-detalle-title">
+          <span className="vehiculo-detalle-kicker">
+            SIGMA · UNIDAD OPERATIVA
+          </span>
 
-          <h1>{unidad.nombre}</h1>
+          <div className="vehiculo-detalle-title-row">
+            <div>
+              <h1>{unidad.nombre}</h1>
 
-          <p className="detalle-indicativo">
-            Indicativo: {unidad.indicativo}
-          </p>
+              <p>
+                Información operativa y recursos asociados a la unidad.
+              </p>
+            </div>
+
+            <span
+              className={`vehiculo-detalle-status vehiculo-detalle-status-${unidad.estado.toLowerCase()}`}
+            >
+              <span className="vehiculo-detalle-status-dot" />
+              {unidad.estado.replaceAll("_", " ")}
+            </span>
+          </div>
         </div>
 
-        <span
-          className={`unit-status unit-status-${unidad.estado.toLowerCase()}`}
-        >
-          {unidad.estado.replaceAll("_", " ")}
-        </span>
+        <div className="vehiculo-detalle-identity">
+          <span>INDICATIVO</span>
+          <strong>{unidad.indicativo}</strong>
+        </div>
       </header>
 
-      <section className="detalle-section">
-        <div className="section-header">
+      <section className="vehiculo-detalle-overview">
+        <div className="vehiculo-detalle-overview-item">
+          <span>Ubicaciones</span>
+          <strong>{ubicaciones.length}</strong>
+          <small>Espacios activos</small>
+        </div>
+
+        <div className="vehiculo-detalle-overview-item">
+          <span>Recursos asignados</span>
+          <strong>{recursos.length}</strong>
+          <small>Equipamiento asociado</small>
+        </div>
+
+        <div className="vehiculo-detalle-overview-item">
+          <span>Recursos operativos</span>
+          <strong>{recursosOperativos}</strong>
+          <small>En condición operativa</small>
+        </div>
+
+        <div className="vehiculo-detalle-overview-item detalle-overview-highlight">
+          <span>Estado de unidad</span>
+          <strong>
+            {unidad.estado.replaceAll("_", " ")}
+          </strong>
+          <small>Condición actual registrada</small>
+        </div>
+      </section>
+
+      <section className="vehiculo-detalle-section">
+        <div className="vehiculo-detalle-section-header">
           <div>
-            <h2>Ubicaciones</h2>
-            <p>Espacios registrados para esta unidad.</p>
+            <span className="vehiculo-detalle-section-label">
+              DISTRIBUCIÓN DEL EQUIPAMIENTO
+            </span>
+
+            <h2>Ubicaciones y recursos</h2>
+
+            <p>
+              Espacios registrados y equipamiento asociado a esta unidad.
+            </p>
           </div>
+
+          <span className="vehiculo-detalle-section-count">
+            {ubicaciones.length}{" "}
+            {ubicaciones.length === 1 ? "ubicación" : "ubicaciones"}
+          </span>
         </div>
 
         {ubicaciones.length === 0 ? (
-          <div className="empty-state">
-            No hay ubicaciones registradas para esta unidad.
+          <div className="vehiculo-detalle-empty">
+            <strong>No hay ubicaciones registradas</strong>
+            <span>
+              Esta unidad no tiene espacios activos asociados.
+            </span>
           </div>
         ) : (
-          <div className="ubicaciones-list">
+          <div className="vehiculo-detalle-ubicaciones">
             {ubicaciones.map((ubicacion) => {
               const recursosUbicacion = recursosPorUbicacion(ubicacion.id);
 
               return (
-                <article className="ubicacion-card" key={ubicacion.id}>
-                  <div className="ubicacion-header">
+                <article
+                  className="vehiculo-detalle-ubicacion"
+                  key={ubicacion.id}
+                >
+                  <div className="vehiculo-detalle-ubicacion-header">
                     <div>
-                      <span className="ubicacion-tipo">
+                      <span className="vehiculo-detalle-ubicacion-type">
                         {ubicacion.tipo.replaceAll("_", " ")}
                       </span>
 
                       <h3>{ubicacion.nombre}</h3>
                     </div>
 
-                    <span className="ubicacion-count">
-                      {recursosUbicacion.length}{" "}
-                      {recursosUbicacion.length === 1
-                        ? "recurso"
-                        : "recursos"}
+                    <span className="vehiculo-detalle-ubicacion-count">
+                      {recursosUbicacion.length}
+                      <small>
+                        {recursosUbicacion.length === 1
+                          ? "recurso"
+                          : "recursos"}
+                      </small>
                     </span>
                   </div>
 
                   {recursosUbicacion.length === 0 ? (
-                    <p className="ubicacion-empty">
+                    <div className="vehiculo-detalle-ubicacion-empty">
                       No hay recursos registrados en esta ubicación.
-                    </p>
+                    </div>
                   ) : (
-                    <div className="recursos-list">
+                    <div className="vehiculo-detalle-recursos">
                       {recursosUbicacion.map((recurso) => (
-                        <div className="recurso-row" key={recurso.id}>
-                          <div>
+                        <div
+                          className="vehiculo-detalle-recurso"
+                          key={recurso.id}
+                        >
+                          <div className="vehiculo-detalle-recurso-info">
                             <strong>{recurso.nombre}</strong>
 
                             <span>
                               {recurso.codigo} ·{" "}
                               {recurso.nombreTipoRecurso}
+                              {recurso.marca
+                                ? ` · ${recurso.marca}`
+                                : ""}
                             </span>
                           </div>
 
                           <span
-                            className={`recurso-status recurso-status-${recurso.estado.toLowerCase()}`}
+                            className={`vehiculo-detalle-recurso-status vehiculo-detalle-recurso-${recurso.estado.toLowerCase()}`}
                           >
+                            <span />
                             {recurso.estado.replaceAll("_", " ")}
                           </span>
                         </div>

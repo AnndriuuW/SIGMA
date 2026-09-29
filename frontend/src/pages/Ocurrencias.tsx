@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+
 import { listarOcurrencias } from "../services/ocurrenciaService";
 import type { Ocurrencia } from "../types/ocurrencia";
-import { Link } from "react-router-dom";
 
 export default function Ocurrencias() {
   const [ocurrencias, setOcurrencias] = useState<Ocurrencia[]>([]);
@@ -15,7 +16,11 @@ export default function Ocurrencias() {
   useEffect(() => {
     const cargarOcurrencias = async () => {
       try {
+        setCargando(true);
+        setError("");
+
         const data = await listarOcurrencias();
+
         setOcurrencias(data);
       } catch {
         setError("No se pudieron cargar las ocurrencias.");
@@ -68,13 +73,6 @@ export default function Ocurrencias() {
     });
   }, [ocurrencias, busqueda, filtroTipo, filtroLectura]);
 
-  const formatearFecha = (fecha: string) => {
-    return new Date(fecha).toLocaleString("es-PE", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
-  };
-
   const obtenerTipoTexto = (tipo: string) => {
     switch (tipo) {
       case "GENERAL":
@@ -100,156 +98,312 @@ export default function Ocurrencias() {
     return "General";
   };
 
+  const limpiarFiltros = () => {
+    setBusqueda("");
+    setFiltroTipo("TODOS");
+    setFiltroLectura("TODAS");
+  };
+
+  const hayFiltrosActivos =
+    busqueda.trim() !== "" ||
+    filtroTipo !== "TODOS" ||
+    filtroLectura !== "TODAS";
+
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <div>
-          <p className="page-eyebrow">GESTIÓN DE INCIDENCIAS</p>
+    <div className="ocurrencias-page">
+      <header className="ocurrencias-header">
+        <div className="ocurrencias-heading">
+          <span className="ocurrencias-kicker">
+            SIGMA · BITÁCORA OPERATIVA
+          </span>
 
           <h1>Ocurrencias</h1>
 
-          <p className="page-description">
-            Registro y seguimiento de novedades del sistema.
+          <p>
+            Registro y consulta de novedades comunicadas dentro del
+            sistema.
           </p>
         </div>
-      </div>
 
-      <div className="summary-grid">
-        <div className="summary-card">
-          <span>Total</span>
+        <div className="ocurrencias-header-meta">
+          <span>REGISTROS DISPONIBLES</span>
           <strong>{ocurrencias.length}</strong>
+          <small>
+            {noLeidas}{" "}
+            {noLeidas === 1 ? "sin leer" : "sin leer"}
+          </small>
+        </div>
+      </header>
+
+      <section className="ocurrencias-overview">
+        <div className="ocurrencias-overview-item ocurrencias-overview-total">
+          <span>Total de ocurrencias</span>
+          <strong>{ocurrencias.length}</strong>
+          <small>Registros disponibles</small>
         </div>
 
-        <div className="summary-card">
+        <div className="ocurrencias-overview-item ocurrencias-overview-unread">
           <span>No leídas</span>
           <strong>{noLeidas}</strong>
+          <small>Requieren revisión</small>
         </div>
 
-        <div className="summary-card">
+        <div className="ocurrencias-overview-item">
           <span>De unidad</span>
           <strong>{deUnidad}</strong>
+          <small>Novedades asociadas a unidades</small>
         </div>
 
-        <div className="summary-card">
+        <div className="ocurrencias-overview-item">
           <span>De recurso</span>
           <strong>{deRecurso}</strong>
+          <small>Novedades asociadas a recursos</small>
         </div>
-      </div>
+      </section>
 
-      <div className="content-card">
-        <div className="content-card-header">
+      <section className="ocurrencias-panel">
+        <div className="ocurrencias-panel-header">
           <div>
-            <h2>Registro de ocurrencias</h2>
+            <span className="ocurrencias-section-label">
+              REGISTRO DE NOVEDADES
+            </span>
+
+            <h2>Bitácora de ocurrencias</h2>
 
             <p>
               Consulta las novedades registradas y su estado de lectura.
             </p>
           </div>
+
+          <div className="ocurrencias-result-count">
+            <strong>{ocurrenciasFiltradas.length}</strong>
+            <span>
+              {ocurrenciasFiltradas.length === 1
+                ? "resultado"
+                : "resultados"}
+            </span>
+          </div>
         </div>
 
-        <div className="table-filters">
-          <input
-            type="text"
-            placeholder="Buscar por descripción, responsable o recurso..."
-            value={busqueda}
-            onChange={(event) => setBusqueda(event.target.value)}
-            className="table-search"
-          />
+        <div className="ocurrencias-toolbar">
+          <div className="ocurrencias-search-wrapper">
+            <span className="ocurrencias-search-icon">⌕</span>
 
-          <select
-            value={filtroTipo}
-            onChange={(event) => setFiltroTipo(event.target.value)}
-            className="table-filter-select"
-          >
-            <option value="TODOS">Todos los tipos</option>
-            <option value="GENERAL">General</option>
-            <option value="UNIDAD">Unidad</option>
-            <option value="RECURSO">Recurso</option>
-          </select>
+            <input
+              type="text"
+              placeholder="Buscar por descripción, informante, destinatario o recurso..."
+              value={busqueda}
+              onChange={(event) =>
+                setBusqueda(event.target.value)
+              }
+              className="ocurrencias-search"
+            />
 
-          <select
-            value={filtroLectura}
-            onChange={(event) =>
-              setFiltroLectura(event.target.value)
-            }
-            className="table-filter-select"
-          >
-            <option value="TODAS">Todas</option>
-            <option value="NO_LEIDAS">No leídas</option>
-            <option value="LEIDAS">Leídas</option>
-          </select>
+            {busqueda && (
+              <button
+                type="button"
+                className="ocurrencias-search-clear"
+                onClick={() => setBusqueda("")}
+                aria-label="Limpiar búsqueda"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          <div className="ocurrencias-filter-group">
+            <select
+              value={filtroTipo}
+              onChange={(event) =>
+                setFiltroTipo(event.target.value)
+              }
+              className="ocurrencias-filter"
+              aria-label="Filtrar por tipo"
+            >
+              <option value="TODOS">Todos los tipos</option>
+              <option value="GENERAL">General</option>
+              <option value="UNIDAD">Unidad</option>
+              <option value="RECURSO">Recurso</option>
+            </select>
+
+            <select
+              value={filtroLectura}
+              onChange={(event) =>
+                setFiltroLectura(event.target.value)
+              }
+              className="ocurrencias-filter"
+              aria-label="Filtrar por lectura"
+            >
+              <option value="TODAS">Todas</option>
+              <option value="NO_LEIDAS">No leídas</option>
+              <option value="LEIDAS">Leídas</option>
+            </select>
+
+            {hayFiltrosActivos && (
+              <button
+                type="button"
+                className="ocurrencias-clear-filters"
+                onClick={limpiarFiltros}
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
         </div>
 
         {cargando && (
-          <div className="empty-state">
-            <p>Cargando ocurrencias...</p>
+          <div className="ocurrencias-state">
+            <div className="ocurrencias-state-line" />
+
+            <strong>Cargando ocurrencias</strong>
+
+            <span>
+              Obteniendo información de la bitácora...
+            </span>
           </div>
         )}
 
         {!cargando && error && (
-          <div className="empty-state">
-            <p>{error}</p>
+          <div className="ocurrencias-state ocurrencias-state-error">
+            <strong>No se pudo cargar la información</strong>
+            <span>{error}</span>
           </div>
         )}
 
         {!cargando &&
           !error &&
           ocurrenciasFiltradas.length === 0 && (
-            <div className="empty-state">
-              <p>No se encontraron ocurrencias.</p>
+            <div className="ocurrencias-state ocurrencias-empty">
+              <strong>
+                {hayFiltrosActivos
+                  ? "No se encontraron coincidencias"
+                  : "No hay ocurrencias registradas"}
+              </strong>
+
+              <span>
+                {hayFiltrosActivos
+                  ? "Prueba con otros términos o filtros."
+                  : "No existen novedades disponibles para mostrar."}
+              </span>
+
+              {hayFiltrosActivos && (
+                <button
+                  type="button"
+                  className="ocurrencias-empty-button"
+                  onClick={limpiarFiltros}
+                >
+                  Limpiar filtros
+                </button>
+              )}
             </div>
           )}
 
         {!cargando &&
           !error &&
           ocurrenciasFiltradas.length > 0 && (
-            <div className="table-wrapper">
-              <table className="data-table">
+            <div className="ocurrencias-table-wrapper">
+              <table className="ocurrencias-table">
                 <thead>
                   <tr>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
-                    <th>Relacionado</th>
-                    <th>Descripción</th>
-                    <th>Informante</th>
-                    <th>Destinatario</th>
-                    <th>Lectura</th>
-                    <th></th>
+                    <th>FECHA</th>
+                    <th>TIPO</th>
+                    <th>RELACIONADO</th>
+                    <th>DESCRIPCIÓN</th>
+                    <th>INFORMANTE</th>
+                    <th>DESTINATARIO</th>
+                    <th>LECTURA</th>
+                    <th />
                   </tr>
                 </thead>
 
                 <tbody>
                   {ocurrenciasFiltradas.map((ocurrencia) => (
-                    <tr key={ocurrencia.id}>
-                      <td>{formatearFecha(ocurrencia.fechaHora)}</td>
+                    <tr
+                      key={ocurrencia.id}
+                      className={
+                        ocurrencia.leida
+                          ? ""
+                          : "ocurrencia-row-unread"
+                      }
+                    >
+                      <td>
+                        <div className="ocurrencia-date-cell">
+                          <strong>
+                            {new Date(
+                              ocurrencia.fechaHora,
+                            ).toLocaleDateString("es-PE")}
+                          </strong>
 
-                      <td>{obtenerTipoTexto(ocurrencia.tipo)}</td>
+                          <span>
+                            {new Date(
+                              ocurrencia.fechaHora,
+                            ).toLocaleTimeString("es-PE", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                      </td>
 
                       <td>
-                        <strong>
-                          {obtenerRelacionado(ocurrencia)}
-                        </strong>
+                        <span
+                          className={`ocurrencia-type ocurrencia-type-${ocurrencia.tipo.toLowerCase()}`}
+                        >
+                          <span className="ocurrencia-type-dot" />
+                          {obtenerTipoTexto(ocurrencia.tipo)}
+                        </span>
                       </td>
-
-                      <td className="occurrence-description">
-                        {ocurrencia.descripcion}
-                      </td>
-
-                      <td>{ocurrencia.nombreInformante}</td>
-
-                      <td>{ocurrencia.nombreDestinatario}</td>
 
                       <td>
-                        {ocurrencia.leida
-                          ? "Leída"
-                          : "No leída"}
+                        <div className="ocurrencia-related-cell">
+                          <strong>
+                            {obtenerRelacionado(ocurrencia)}
+                          </strong>
+                        </div>
                       </td>
+
+                      <td>
+                        <div className="ocurrencia-description-cell">
+                          <span>
+                            {ocurrencia.descripcion}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className="ocurrencia-person">
+                          {ocurrencia.nombreInformante}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span className="ocurrencia-person">
+                          {ocurrencia.nombreDestinatario}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`ocurrencia-reading ${
+                            ocurrencia.leida
+                              ? "ocurrencia-reading-read"
+                              : "ocurrencia-reading-unread"
+                          }`}
+                        >
+                          <span />
+                          {ocurrencia.leida
+                            ? "Leída"
+                            : "No leída"}
+                        </span>
+                      </td>
+
                       <td>
                         <Link
                           to={`/ocurrencias/${ocurrencia.id}`}
-                          className="table-action"
+                          className="ocurrencia-view-link"
                         >
-                          Ver detalle →
+                          Ver
+                          <span>→</span>
                         </Link>
                       </td>
                     </tr>
@@ -258,7 +412,7 @@ export default function Ocurrencias() {
               </table>
             </div>
           )}
-      </div>
+      </section>
     </div>
   );
 }

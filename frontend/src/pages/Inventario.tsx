@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { listarInventarios, crearInventario } from "../services/inventarioService";
+
+import {
+  listarInventarios,
+  crearInventario,
+} from "../services/inventarioService";
 import { listarUnidades } from "../services/unidadService";
+
 import type { Inventario as InventarioType } from "../types/inventario";
 import type { Unidad } from "../types/unidad";
 
@@ -23,6 +28,9 @@ export default function Inventario() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+        setCargando(true);
+        setError("");
+
         const [inventariosData, unidadesData] = await Promise.all([
           listarInventarios(),
           listarUnidades(),
@@ -75,7 +83,7 @@ export default function Inventario() {
   };
 
   const obtenerTextoResultado = (resultado: string | null) => {
-    if (!resultado) return "—";
+    if (!resultado) return "Pendiente";
 
     return resultado.replaceAll("_", " ");
   };
@@ -121,84 +129,121 @@ export default function Inventario() {
   };
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <div>
-          <p className="page-eyebrow">CONTROL DE RECURSOS</p>
+    <div className="inventario-page">
+      <header className="inventario-header">
+        <div className="inventario-heading">
+          <span className="inventario-kicker">
+            SIGMA · CONTROL DE INVENTARIO
+          </span>
+
           <h1>Inventario</h1>
-          <p className="page-description">
-            Registro y seguimiento de inventarios realizados por unidad.
+
+          <p>
+            Registro y seguimiento de los inventarios realizados por
+            unidad.
           </p>
         </div>
 
         <button
-          className="primary-button"
+          type="button"
+          className="inventario-new-button"
           onClick={abrirNuevoInventario}
         >
-          + Nuevo inventario
+          <span>+</span>
+          Nuevo inventario
         </button>
-      </div>
+      </header>
 
-      <div className="summary-grid">
-        <div className="summary-card">
-          <span>Total</span>
+      <section className="inventario-overview">
+        <div className="inventario-overview-item inventario-overview-total">
+          <span>Total de registros</span>
           <strong>{inventarios.length}</strong>
+          <small>Inventarios registrados</small>
         </div>
 
-        <div className="summary-card">
+        <div className="inventario-overview-item">
           <span>En proceso</span>
           <strong>{enProceso}</strong>
+          <small>Inventarios activos</small>
         </div>
 
-        <div className="summary-card">
+        <div className="inventario-overview-item">
           <span>Pausados</span>
           <strong>{pausados}</strong>
+          <small>Pendientes de reanudación</small>
         </div>
 
-        <div className="summary-card">
+        <div className="inventario-overview-item">
           <span>Finalizados</span>
           <strong>{finalizados}</strong>
+          <small>Registros cerrados</small>
         </div>
-      </div>
+      </section>
 
-      <div className="content-card">
-        <div className="content-card-header">
+      <section className="inventario-panel">
+        <div className="inventario-panel-header">
           <div>
-            <h2>Historial de inventarios</h2>
-            <p>Consulta los inventarios registrados por la sección.</p>
+            <span className="inventario-section-label">
+              REGISTRO DE INVENTARIOS
+            </span>
+
+            <h2>Inventarios registrados</h2>
+
+            <p>
+              Consulta el estado y resultado de cada inventario.
+            </p>
+          </div>
+
+          <div className="inventario-result-count">
+            <strong>{inventarios.length}</strong>
+            <span>
+              {inventarios.length === 1 ? "registro" : "registros"}
+            </span>
           </div>
         </div>
 
         {cargando && (
-          <div className="empty-state">
-            <p>Cargando inventarios...</p>
+          <div className="inventario-state">
+            <div className="inventario-state-line" />
+
+            <strong>Cargando inventarios</strong>
+
+            <span>
+              Obteniendo información de los registros...
+            </span>
           </div>
         )}
 
         {!cargando && error && (
-          <div className="empty-state">
-            <p>{error}</p>
+          <div className="inventario-state inventario-state-error">
+            <strong>No se pudo cargar la información</strong>
+            <span>{error}</span>
           </div>
         )}
 
         {!cargando && !error && inventarios.length === 0 && (
-          <div className="empty-state">
-            <p>No hay inventarios registrados.</p>
+          <div className="inventario-state">
+            <strong>No hay inventarios registrados</strong>
+
+            <span>
+              Puedes iniciar un nuevo inventario utilizando el botón
+              superior.
+            </span>
           </div>
         )}
 
         {!cargando && !error && inventarios.length > 0 && (
-          <div className="table-wrapper">
-            <table className="data-table">
+          <div className="inventario-table-wrapper">
+            <table className="inventario-table">
               <thead>
                 <tr>
-                  <th>Unidad</th>
-                  <th>Responsable</th>
-                  <th>Inicio</th>
-                  <th>Fin</th>
-                  <th>Estado</th>
-                  <th>Resultado</th>
-                  <th></th>
+                  <th>UNIDAD</th>
+                  <th>RESPONSABLE</th>
+                  <th>INICIO</th>
+                  <th>FIN</th>
+                  <th>ESTADO</th>
+                  <th>RESULTADO</th>
+                  <th />
                 </tr>
               </thead>
 
@@ -206,35 +251,61 @@ export default function Inventario() {
                 {inventarios.map((inventario) => (
                   <tr key={inventario.id}>
                     <td>
-                      <strong>{inventario.nombreUnidad}</strong>
+                      <div className="inventario-unit-cell">
+                        <strong>
+                          {inventario.nombreUnidad}
+                        </strong>
+
+                        <span>
+                          Inventario #{inventario.id}
+                        </span>
+                      </div>
                     </td>
 
-                    <td>{inventario.nombreResponsable}</td>
+                    <td>
+                      <span className="inventario-responsable">
+                        {inventario.nombreResponsable}
+                      </span>
+                    </td>
 
-                    <td>{formatearFecha(inventario.fechaInicio)}</td>
+                    <td>
+                      <span className="inventario-date">
+                        {formatearFecha(inventario.fechaInicio)}
+                      </span>
+                    </td>
 
-                    <td>{formatearFecha(inventario.fechaFin)}</td>
+                    <td>
+                      <span className="inventario-date">
+                        {formatearFecha(inventario.fechaFin)}
+                      </span>
+                    </td>
 
                     <td>
                       <span
-                        className={`status-badge status-${inventario.estado.toLowerCase()}`}
+                        className={`inventario-status inventario-status-${inventario.estado.toLowerCase()}`}
                       >
+                        <span className="inventario-status-dot" />
                         {obtenerTextoEstado(inventario.estado)}
                       </span>
                     </td>
 
                     <td>
-                      {obtenerTextoResultado(
-                        inventario.resultadoGeneral,
-                      )}
+                      <span
+                        className={`inventario-result inventario-result-${inventario.resultadoGeneral ? "completed" : "pending"}`}
+                      >
+                        {obtenerTextoResultado(
+                          inventario.resultadoGeneral,
+                        )}
+                      </span>
                     </td>
 
                     <td>
                       <Link
                         to={`/inventario/${inventario.id}`}
-                        className="table-action"
+                        className="inventario-view-link"
                       >
-                        Ver inventario →
+                        Ver detalle
+                        <span>→</span>
                       </Link>
                     </td>
                   </tr>
@@ -243,27 +314,44 @@ export default function Inventario() {
             </table>
           </div>
         )}
-      </div>
+      </section>
 
       {mostrarNuevo && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-header">
+        <div className="inventario-modal-overlay">
+          <div
+            className="inventario-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="nuevo-inventario-title"
+          >
+            <div className="inventario-modal-header">
               <div>
-                <p className="page-eyebrow">NUEVO REGISTRO</p>
-                <h2>Iniciar inventario</h2>
+                <span className="inventario-modal-kicker">
+                  NUEVO REGISTRO
+                </span>
+
+                <h2 id="nuevo-inventario-title">
+                  Iniciar inventario
+                </h2>
+
+                <p>
+                  Selecciona la unidad sobre la que se realizará el
+                  inventario.
+                </p>
               </div>
 
               <button
-                className="modal-close"
+                type="button"
+                className="inventario-modal-close"
                 onClick={cerrarNuevoInventario}
                 disabled={creando}
+                aria-label="Cerrar"
               >
                 ×
               </button>
             </div>
 
-            <div className="modal-body">
+            <div className="inventario-modal-body">
               <label htmlFor="unidad-inventario">
                 Unidad
               </label>
@@ -290,13 +378,16 @@ export default function Inventario() {
               </select>
 
               {errorCrear && (
-                <p className="form-error">{errorCrear}</p>
+                <p className="inventario-form-error">
+                  {errorCrear}
+                </p>
               )}
             </div>
 
-            <div className="modal-footer">
+            <div className="inventario-modal-footer">
               <button
-                className="secondary-button"
+                type="button"
+                className="inventario-secondary-button"
                 onClick={cerrarNuevoInventario}
                 disabled={creando}
               >
@@ -304,11 +395,14 @@ export default function Inventario() {
               </button>
 
               <button
-                className="primary-button"
+                type="button"
+                className="inventario-primary-button"
                 onClick={handleCrearInventario}
                 disabled={creando}
               >
-                {creando ? "Iniciando..." : "Iniciar inventario"}
+                {creando
+                  ? "Iniciando..."
+                  : "Iniciar inventario"}
               </button>
             </div>
           </div>

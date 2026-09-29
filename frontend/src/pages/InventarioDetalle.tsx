@@ -59,10 +59,6 @@ export default function InventarioDetalle() {
 
   const [error, setError] = useState("");
 
-  // =========================================================
-  // CARGAR DATOS
-  // =========================================================
-
   useEffect(() => {
     if (!inventarioId || Number.isNaN(inventarioId)) {
       setError("El inventario indicado no es válido.");
@@ -72,6 +68,9 @@ export default function InventarioDetalle() {
 
     const cargarDatos = async () => {
       try {
+        setCargando(true);
+        setError("");
+
         const [inventarioData, detallesData] = await Promise.all([
           obtenerInventario(inventarioId),
           listarDetallesInventario(),
@@ -106,10 +105,6 @@ export default function InventarioDetalle() {
     cargarDatos();
   }, [inventarioId]);
 
-  // =========================================================
-  // UBICACIONES DE LA UNIDAD
-  // =========================================================
-
   const ubicacionesDeLaUnidad = useMemo(() => {
     if (!inventario) return [];
 
@@ -119,10 +114,6 @@ export default function InventarioDetalle() {
         ubicacion.idUnidad === inventario.idUnidad,
     );
   }, [ubicaciones, inventario]);
-
-  // =========================================================
-  // RECURSOS DE LA UNIDAD
-  // =========================================================
 
   const recursosDeLaUnidad = useMemo(() => {
     const idsUbicaciones = new Set(
@@ -136,10 +127,6 @@ export default function InventarioDetalle() {
     );
   }, [recursos, ubicacionesDeLaUnidad]);
 
-  // =========================================================
-  // DETALLES POR RECURSO
-  // =========================================================
-
   const detallePorRecurso = useMemo(() => {
     const mapa = new Map<number, DetalleInventario>();
 
@@ -150,24 +137,56 @@ export default function InventarioDetalle() {
     return mapa;
   }, [detalles]);
 
-  // =========================================================
-  // PROGRESO
-  // =========================================================
-
   const totalRecursos = recursosDeLaUnidad.length;
 
   const recursosVerificados = recursosDeLaUnidad.filter((recurso) =>
     detallePorRecurso.has(recurso.id),
   ).length;
 
+  const recursosNoEncontrados = recursosDeLaUnidad.filter((recurso) => {
+    const detalle = detallePorRecurso.get(recurso.id);
+    return detalle?.verificado === false;
+  }).length;
+
+  const pendientes = Math.max(
+    totalRecursos - recursosVerificados,
+    0,
+  );
+
   const porcentaje =
     totalRecursos === 0
       ? 0
       : Math.round((recursosVerificados / totalRecursos) * 100);
 
-  // =========================================================
-  // VERIFICACIONES
-  // =========================================================
+  const formatearFecha = (fecha: string | null) => {
+    if (!fecha) return "—";
+
+    return new Date(fecha).toLocaleString("es-PE", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  };
+
+  const obtenerTextoEstado = (estado: string) => {
+    switch (estado) {
+      case "EN_PROCESO":
+        return "En proceso";
+      case "PAUSADO":
+        return "Pausado";
+      case "FINALIZADO":
+        return "Finalizado";
+      default:
+        return estado;
+    }
+  };
+
+  const obtenerTextoResultado = (
+    resultado: string | null,
+  ) => {
+    if (!resultado) return "—";
+
+    return resultado.replaceAll("_", " ");
+  };
 
   const actualizarVerificacion = (
     idRecurso: number,
@@ -202,10 +221,6 @@ export default function InventarioDetalle() {
       observacion: detalle?.observacion ?? "",
     };
   };
-
-  // =========================================================
-  // GUARDAR VERIFICACIÓN
-  // =========================================================
 
   const guardarVerificacion = async (recurso: Recurso) => {
     if (!inventario) return;
@@ -260,10 +275,6 @@ export default function InventarioDetalle() {
     }
   };
 
-  // =========================================================
-  // PAUSAR / REANUDAR
-  // =========================================================
-
   const cambiarEstadoInventario = async (
     nuevoEstado: "EN_PROCESO" | "PAUSADO",
   ) => {
@@ -289,10 +300,6 @@ export default function InventarioDetalle() {
       setProcesandoInventario(false);
     }
   };
-
-  // =========================================================
-  // FINALIZAR
-  // =========================================================
 
   const abrirFinalizarInventario = () => {
     setResultadoFinal("");
@@ -332,7 +339,6 @@ export default function InventarioDetalle() {
       setResultadoFinal("");
 
       navigate("/inventario");
-      
     } catch (error: any) {
       const mensaje =
         error?.response?.data?.message ||
@@ -344,36 +350,33 @@ export default function InventarioDetalle() {
     }
   };
 
-  // =========================================================
-  // CARGANDO
-  // =========================================================
-
   if (cargando) {
     return (
-      <div className="page-container">
-        <div className="empty-state">
-          <p>Cargando inventario...</p>
+      <div className="inventario-detalle-page">
+        <div className="inventario-detalle-state">
+          <div className="inventario-detalle-loading-line" />
+          <strong>Cargando inventario</strong>
+          <span>
+            Obteniendo información y recursos de la unidad...
+          </span>
         </div>
       </div>
     );
   }
 
-  // =========================================================
-  // ERROR
-  // =========================================================
-
   if (error && !inventario) {
     return (
-      <div className="page-container">
-        <div className="empty-state">
-          <p>{error}</p>
+      <div className="inventario-detalle-page">
+        <Link
+          to="/inventario"
+          className="inventario-detalle-back"
+        >
+          <span>←</span>
+          Volver a inventarios
+        </Link>
 
-          <button
-            className="secondary-button"
-            onClick={() => navigate("/inventario")}
-          >
-            Volver a inventarios
-          </button>
+        <div className="inventario-detalle-error">
+          <strong>{error}</strong>
         </div>
       </div>
     );
@@ -383,44 +386,60 @@ export default function InventarioDetalle() {
     return null;
   }
 
-  // =========================================================
-  // INTERFAZ
-  // =========================================================
-
   return (
-    <div className="page-container">
-      <div className="detail-back">
-        <Link to="/inventario">
-          ← Volver a inventarios
-        </Link>
-      </div>
+    <div className="inventario-detalle-page">
+      <Link
+        to="/inventario"
+        className="inventario-detalle-back"
+      >
+        <span>←</span>
+        Volver a inventarios
+      </Link>
 
-      {/* ENCABEZADO */}
-
-      <div className="page-header">
+      <header className="inventario-detalle-header">
         <div>
-          <p className="page-eyebrow">
-            CONTROL DE RECURSOS
-          </p>
-
-          <h1>Inventario #{inventario.id}</h1>
-
-          <p className="page-description">
-            Verificación de recursos de la unidad.
-          </p>
-        </div>
-
-        <div className="inventory-header-actions">
-          <span
-            className={`status-badge status-${inventario.estado.toLowerCase()}`}
-          >
-            {inventario.estado.replaceAll("_", " ")}
+          <span className="inventario-detalle-kicker">
+            SIGMA · EJECUCIÓN DE INVENTARIO
           </span>
 
+          <div className="inventario-detalle-title-row">
+            <div>
+              <h1>
+                Inventario #{inventario.id}
+              </h1>
+
+              <p>
+                Verificación de recursos de la unidad.
+              </p>
+            </div>
+
+            <span
+              className={`inventario-detalle-status inventario-detalle-status-${inventario.estado.toLowerCase()}`}
+            >
+              <span />
+              {obtenerTextoEstado(inventario.estado)}
+            </span>
+          </div>
+        </div>
+
+        <div className="inventario-detalle-unit">
+          <span>UNIDAD</span>
+          <strong>{inventario.nombreUnidad}</strong>
+        </div>
+      </header>
+
+      <div className="inventario-detalle-actions">
+        <div className="inventario-detalle-responsable">
+          <span>RESPONSABLE</span>
+          <strong>{inventario.nombreResponsable}</strong>
+        </div>
+
+        <div className="inventario-detalle-action-group">
           {inventario.estado === "EN_PROCESO" && (
             <>
               <button
-                className="secondary-button"
+                type="button"
+                className="inventario-detail-secondary-button"
                 onClick={() =>
                   cambiarEstadoInventario("PAUSADO")
                 }
@@ -428,11 +447,12 @@ export default function InventarioDetalle() {
               >
                 {procesandoInventario
                   ? "Procesando..."
-                  : "Pausar"}
+                  : "Pausar inventario"}
               </button>
 
               <button
-                className="primary-button"
+                type="button"
+                className="inventario-detail-primary-button"
                 onClick={abrirFinalizarInventario}
                 disabled={procesandoInventario}
               >
@@ -444,7 +464,8 @@ export default function InventarioDetalle() {
           {inventario.estado === "PAUSADO" && (
             <>
               <button
-                className="primary-button"
+                type="button"
+                className="inventario-detail-primary-button"
                 onClick={() =>
                   cambiarEstadoInventario("EN_PROCESO")
                 }
@@ -452,11 +473,12 @@ export default function InventarioDetalle() {
               >
                 {procesandoInventario
                   ? "Procesando..."
-                  : "Reanudar"}
+                  : "Reanudar inventario"}
               </button>
 
               <button
-                className="primary-button"
+                type="button"
+                className="inventario-detail-primary-button"
                 onClick={abrirFinalizarInventario}
                 disabled={procesandoInventario}
               >
@@ -464,104 +486,125 @@ export default function InventarioDetalle() {
               </button>
             </>
           )}
+
+          {inventario.estado === "FINALIZADO" && (
+            <span className="inventario-finalizado-label">
+              Inventario cerrado
+            </span>
+          )}
         </div>
       </div>
 
-      {/* INFORMACIÓN */}
-
-      <div className="inventory-info-grid">
-        <div className="inventory-info-card">
-          <span>Unidad</span>
-          <strong>{inventario.nombreUnidad}</strong>
+      <section className="inventario-detalle-summary">
+        <div className="inventario-detalle-summary-item">
+          <span>RECURSOS</span>
+          <strong>{totalRecursos}</strong>
+          <small>Registrados en la unidad</small>
         </div>
 
-        <div className="inventory-info-card">
-          <span>Responsable</span>
-          <strong>{inventario.nombreResponsable}</strong>
+        <div className="inventario-detalle-summary-item">
+          <span>VERIFICADOS</span>
+          <strong>{recursosVerificados}</strong>
+          <small>Revisados durante el inventario</small>
         </div>
 
-        <div className="inventory-info-card">
-          <span>Inicio</span>
-          <strong>
-            {new Date(
-              inventario.fechaInicio,
-            ).toLocaleString("es-PE", {
-              dateStyle: "short",
-              timeStyle: "short",
-            })}
-          </strong>
+        <div className="inventario-detalle-summary-item">
+          <span>PENDIENTES</span>
+          <strong>{pendientes}</strong>
+          <small>Recursos aún sin registrar</small>
         </div>
 
-        <div className="inventory-info-card">
-          <span>Fin</span>
-          <strong>
-            {inventario.fechaFin
-              ? new Date(
-                  inventario.fechaFin,
-                ).toLocaleString("es-PE", {
-                  dateStyle: "short",
-                  timeStyle: "short",
-                })
-              : "En proceso"}
-          </strong>
+        <div className="inventario-detalle-summary-item">
+          <span>NO ENCONTRADOS</span>
+          <strong>{recursosNoEncontrados}</strong>
+          <small>Marcados durante la revisión</small>
         </div>
-      </div>
+      </section>
 
-      {/* PROGRESO */}
-
-      <div className="inventory-progress-card">
-        <div className="inventory-progress-header">
+      <section className="inventario-detalle-progress">
+        <div className="inventario-detalle-progress-head">
           <div>
-            <h2>Progreso</h2>
+            <span className="inventario-detalle-section-label">
+              AVANCE DEL INVENTARIO
+            </span>
+
+            <h2>Progreso de verificación</h2>
 
             <p>
-              {recursosVerificados} de {totalRecursos}{" "}
-              recursos verificados
+              {recursosVerificados} de {totalRecursos} recursos
+              registrados.
             </p>
           </div>
 
           <strong>{porcentaje}%</strong>
         </div>
 
-        <div className="inventory-progress-track">
+        <div className="inventario-detalle-progress-track">
           <div
-            className="inventory-progress-fill"
+            className="inventario-detalle-progress-fill"
             style={{ width: `${porcentaje}%` }}
           />
         </div>
-      </div>
 
-      {/* ERROR */}
+        <div className="inventario-detalle-progress-meta">
+          <span>
+            Inicio: {formatearFecha(inventario.fechaInicio)}
+          </span>
+
+          <span>
+            Fin: {formatearFecha(inventario.fechaFin)}
+          </span>
+
+          {inventario.resultadoGeneral && (
+            <span>
+              Resultado:{" "}
+              {obtenerTextoResultado(
+                inventario.resultadoGeneral,
+              )}
+            </span>
+          )}
+        </div>
+      </section>
 
       {error && (
-        <div className="form-error inventory-error">
+        <div className="inventario-detalle-inline-error">
           {error}
         </div>
       )}
 
-      {/* RECURSOS */}
-
-      <div className="content-card">
-        <div className="content-card-header">
+      <section className="inventario-detalle-workspace">
+        <div className="inventario-detalle-workspace-header">
           <div>
+            <span className="inventario-detalle-section-label">
+              VERIFICACIÓN DE EQUIPAMIENTO
+            </span>
+
             <h2>Recursos de la unidad</h2>
 
             <p>
-              Marca cada recurso según su presencia durante
-              la verificación.
+              Registra la presencia de cada recurso y añade una
+              observación cuando sea necesario.
             </p>
           </div>
+
+          <span className="inventario-detalle-resource-count">
+            {totalRecursos}{" "}
+            {totalRecursos === 1
+              ? "recurso"
+              : "recursos"}
+          </span>
         </div>
 
         {recursosDeLaUnidad.length === 0 ? (
-          <div className="empty-state">
-            <p>
-              Esta unidad no tiene recursos registrados.
-            </p>
+          <div className="inventario-detalle-empty">
+            <strong>Esta unidad no tiene recursos registrados</strong>
+            <span>
+              No existen recursos activos disponibles para verificar.
+            </span>
           </div>
         ) : (
-          <div className="inventory-resource-list">
-            {recursosDeLaUnidad.map((recurso) => {
+          <div className="inventario-detalle-resource-list">
+            {recursosDeLaUnidad.map((recurso, index) => {
               const detalle = detallePorRecurso.get(
                 recurso.id,
               );
@@ -574,155 +617,204 @@ export default function InventarioDetalle() {
               );
 
               return (
-                <div
-                  className="inventory-resource-item"
+                <article
+                  className="inventario-detalle-resource"
                   key={recurso.id}
                 >
-                  <div className="inventory-resource-main">
-                    <div>
-                      <span className="resource-code">
-                        {recurso.codigo}
-                      </span>
+                  <div className="inventario-detalle-resource-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
 
-                      <h3>{recurso.nombre}</h3>
+                  <div className="inventario-detalle-resource-main">
+                    <div className="inventario-detalle-resource-heading">
+                      <div>
+                        <span className="inventario-detalle-resource-code">
+                          {recurso.codigo}
+                        </span>
 
-                      <p>
-                        {recurso.marca}
-                        {recurso.modelo
-                          ? ` · ${recurso.modelo}`
-                          : ""}
-                      </p>
+                        <h3>{recurso.nombre}</h3>
+
+                        <p>
+                          {recurso.nombreTipoRecurso}
+                          {recurso.marca
+                            ? ` · ${recurso.marca}`
+                            : ""}
+                          {recurso.modelo
+                            ? ` · ${recurso.modelo}`
+                            : ""}
+                        </p>
+                      </div>
+
+                      {detalle && !tieneCambios && (
+                        <span
+                          className={`inventario-verification-state ${
+                            detalle.verificado
+                              ? "inventario-verification-found"
+                              : "inventario-verification-missing"
+                          }`}
+                        >
+                          <span />
+                          {detalle.verificado
+                            ? "Encontrado"
+                            : "No encontrado"}
+                        </span>
+                      )}
                     </div>
 
-                    {detalle && !tieneCambios && (
-                      <span
-                        className={`verification-badge ${
-                          detalle.verificado
-                            ? "verification-ok"
-                            : "verification-missing"
-                        }`}
+                    <div className="inventario-detalle-controls">
+                      <div className="inventario-radio-group">
+                        <label
+                          className={`inventario-radio-option ${
+                            estado.verificado
+                              ? "selected"
+                              : ""
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`verificacion-${recurso.id}`}
+                            checked={estado.verificado}
+                            onChange={() =>
+                              actualizarVerificacion(
+                                recurso.id,
+                                "verificado",
+                                true,
+                              )
+                            }
+                            disabled={
+                              inventario.estado ===
+                                "FINALIZADO" ||
+                              guardandoRecurso === recurso.id
+                            }
+                          />
+
+                          <span className="inventario-radio-mark" />
+
+                          Encontrado
+                        </label>
+
+                        <label
+                          className={`inventario-radio-option ${
+                            !estado.verificado
+                              ? "selected missing"
+                              : ""
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`verificacion-${recurso.id}`}
+                            checked={!estado.verificado}
+                            onChange={() =>
+                              actualizarVerificacion(
+                                recurso.id,
+                                "verificado",
+                                false,
+                              )
+                            }
+                            disabled={
+                              inventario.estado ===
+                                "FINALIZADO" ||
+                              guardandoRecurso === recurso.id
+                            }
+                          />
+
+                          <span className="inventario-radio-mark" />
+
+                          No encontrado
+                        </label>
+                      </div>
+
+                      <div className="inventario-observation-wrapper">
+                        <input
+                          type="text"
+                          className="inventario-observation"
+                          placeholder="Observación opcional..."
+                          value={estado.observacion}
+                          onChange={(event) =>
+                            actualizarVerificacion(
+                              recurso.id,
+                              "observacion",
+                              event.target.value,
+                            )
+                          }
+                          disabled={
+                            inventario.estado ===
+                              "FINALIZADO" ||
+                            guardandoRecurso === recurso.id
+                          }
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        className="inventario-save-button"
+                        onClick={() =>
+                          guardarVerificacion(recurso)
+                        }
+                        disabled={
+                          inventario.estado ===
+                            "FINALIZADO" ||
+                          guardandoRecurso === recurso.id ||
+                          (!detalle && !tieneCambios)
+                        }
                       >
-                        {detalle.verificado
-                          ? "Encontrado"
-                          : "No encontrado"}
-                      </span>
-                    )}
+                        {guardandoRecurso === recurso.id
+                          ? "Guardando..."
+                          : detalle
+                            ? "Actualizar"
+                            : "Guardar"}
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="inventory-resource-controls">
-                    <label className="verification-option">
-                      <input
-                        type="radio"
-                        name={`verificacion-${recurso.id}`}
-                        checked={estado.verificado}
-                        onChange={() =>
-                          actualizarVerificacion(
-                            recurso.id,
-                            "verificado",
-                            true,
-                          )
-                        }
-                        disabled={
-                          inventario.estado === "FINALIZADO" ||
-                          guardandoRecurso === recurso.id
-                        }
-                      />
-
-                      Encontrado
-                    </label>
-
-                    <label className="verification-option">
-                      <input
-                        type="radio"
-                        name={`verificacion-${recurso.id}`}
-                        checked={!estado.verificado}
-                        onChange={() =>
-                          actualizarVerificacion(
-                            recurso.id,
-                            "verificado",
-                            false,
-                          )
-                        }
-                        disabled={
-                          inventario.estado === "FINALIZADO" ||
-                          guardandoRecurso === recurso.id
-                        }
-                      />
-
-                      No encontrado
-                    </label>
-
-                    <input
-                      type="text"
-                      className="verification-observation"
-                      placeholder="Observación (opcional)"
-                      value={estado.observacion}
-                      onChange={(event) =>
-                        actualizarVerificacion(
-                          recurso.id,
-                          "observacion",
-                          event.target.value,
-                        )
-                      }
-                      disabled={
-                        inventario.estado === "FINALIZADO" ||
-                        guardandoRecurso === recurso.id
-                      }
-                    />
-
-                    <button
-                      className="secondary-button"
-                      onClick={() =>
-                        guardarVerificacion(recurso)
-                      }
-                      disabled={
-                        inventario.estado === "FINALIZADO" ||
-                        guardandoRecurso === recurso.id ||
-                        (!detalle && !tieneCambios)
-                      }
-                    >
-                      {guardandoRecurso === recurso.id
-                        ? "Guardando..."
-                        : detalle
-                          ? "Actualizar"
-                          : "Guardar"}
-                    </button>
-                  </div>
-                </div>
+                </article>
               );
             })}
           </div>
         )}
-      </div>
-
-      {/* MODAL FINALIZAR */}
+      </section>
 
       {mostrarFinalizar && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-header">
+        <div className="inventario-finalizar-overlay">
+          <div
+            className="inventario-finalizar-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="finalizar-inventario-title"
+          >
+            <div className="inventario-finalizar-header">
               <div>
-                <p className="page-eyebrow">
-                  CIERRE DE INVENTARIO
-                </p>
+                <span>CIERRE DE INVENTARIO</span>
 
-                <h2>Finalizar inventario</h2>
+                <h2 id="finalizar-inventario-title">
+                  Finalizar inventario
+                </h2>
+
+                <p>
+                  El inventario pasará a estado FINALIZADO y ya no
+                  podrá modificarse.
+                </p>
               </div>
 
               <button
-                className="modal-close"
+                type="button"
+                className="inventario-finalizar-close"
                 onClick={cerrarFinalizarInventario}
                 disabled={procesandoInventario}
+                aria-label="Cerrar"
               >
                 ×
               </button>
             </div>
 
-            <div className="modal-body">
-              <p>
-                El inventario pasará a estado FINALIZADO y
-                ya no podrá modificarse.
-              </p>
+            <div className="inventario-finalizar-body">
+              <div className="inventario-finalizar-warning">
+                <strong>Antes de cerrar el registro</strong>
+
+                <span>
+                  Verificados: {recursosVerificados} de{" "}
+                  {totalRecursos} recursos.
+                </span>
+              </div>
 
               <label htmlFor="resultado-inventario">
                 Resultado general
@@ -756,11 +848,18 @@ export default function InventarioDetalle() {
                   No conforme
                 </option>
               </select>
+
+              {error && (
+                <p className="inventario-finalizar-error">
+                  {error}
+                </p>
+              )}
             </div>
 
-            <div className="modal-footer">
+            <div className="inventario-finalizar-footer">
               <button
-                className="secondary-button"
+                type="button"
+                className="inventario-finalizar-secondary"
                 onClick={cerrarFinalizarInventario}
                 disabled={procesandoInventario}
               >
@@ -768,7 +867,8 @@ export default function InventarioDetalle() {
               </button>
 
               <button
-                className="primary-button"
+                type="button"
+                className="inventario-finalizar-primary"
                 onClick={finalizarInventario}
                 disabled={procesandoInventario}
               >

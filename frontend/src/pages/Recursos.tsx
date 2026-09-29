@@ -65,55 +65,136 @@ function Recursos() {
     (recurso) => recurso.estado === "EN_MANTENIMIENTO",
   ).length;
 
+  const porcentajeOperativo =
+    recursos.length > 0
+      ? Math.round((operativos / recursos.length) * 100)
+      : 0;
+
   return (
     <div className="recursos-page">
-      <div className="page-header recursos-header">
-        <div>
-          <p className="page-eyebrow">EQUIPAMIENTO</p>
+      <header className="recursos-header">
+        <div className="recursos-heading">
+          <span className="recursos-kicker">
+            SIGMA · CONTROL DE EQUIPAMIENTO
+          </span>
+
           <h1>Recursos</h1>
+
           <p>
-            Recursos registrados y asignados a las ubicaciones de la
-            compañía.
+            Consulta y seguimiento del equipamiento registrado en las
+            ubicaciones de la compañía.
           </p>
         </div>
-      </div>
 
-      <section className="recursos-summary">
-        <div className="resource-summary-card">
-          <span>Total</span>
+        <div className="recursos-status-box">
+          <span className="recursos-status-label">
+            REGISTRO ACTUAL
+          </span>
+
           <strong>{recursos.length}</strong>
+
+          <span>
+            {recursos.length === 1 ? "recurso registrado" : "recursos registrados"}
+          </span>
+        </div>
+      </header>
+
+      <section className="recursos-overview">
+        <div className="recursos-overview-item recursos-overview-total">
+          <div>
+            <span>Total de recursos</span>
+            <strong>{recursos.length}</strong>
+          </div>
+
+          <small>Equipamiento registrado</small>
         </div>
 
-        <div className="resource-summary-card">
-          <span>Operativos</span>
-          <strong>{operativos}</strong>
+        <div className="recursos-overview-item">
+          <div>
+            <span>Operativos</span>
+            <strong>{operativos}</strong>
+          </div>
+
+          <small>
+            {porcentajeOperativo}% del total
+          </small>
         </div>
 
-        <div className="resource-summary-card">
-          <span>Dañados</span>
-          <strong>{danados}</strong>
+        <div className="recursos-overview-item">
+          <div>
+            <span>En mantenimiento</span>
+            <strong>{mantenimiento}</strong>
+          </div>
+
+          <small>Requieren seguimiento</small>
         </div>
 
-        <div className="resource-summary-card">
-          <span>Mantenimiento</span>
-          <strong>{mantenimiento}</strong>
+        <div className="recursos-overview-item">
+          <div>
+            <span>Dañados</span>
+            <strong>{danados}</strong>
+          </div>
+
+          <small>Fuera de condición operativa</small>
         </div>
       </section>
 
       <section className="recursos-panel">
+        <div className="recursos-panel-header">
+          <div>
+            <span className="recursos-section-label">
+              INVENTARIO DE RECURSOS
+            </span>
+
+            <h2>Equipamiento registrado</h2>
+
+            <p>
+              Consulta por código, nombre, tipo o ubicación.
+            </p>
+          </div>
+
+          <div className="recursos-result-count">
+            <strong>{recursosFiltrados.length}</strong>
+            <span>
+              {recursosFiltrados.length === 1
+                ? "resultado"
+                : "resultados"}
+            </span>
+          </div>
+        </div>
+
         <div className="recursos-toolbar">
-          <input
-            type="text"
-            value={busqueda}
-            onChange={(event) => setBusqueda(event.target.value)}
-            placeholder="Buscar por código, nombre, tipo o ubicación..."
-            className="recursos-search"
-          />
+          <div className="recursos-search-wrapper">
+            <span className="recursos-search-icon">⌕</span>
+
+            <input
+              type="text"
+              value={busqueda}
+              onChange={(event) => setBusqueda(event.target.value)}
+              placeholder="Buscar recurso, código, tipo o ubicación..."
+              className="recursos-search"
+            />
+
+            {busqueda && (
+              <button
+                type="button"
+                className="recursos-search-clear"
+                onClick={() => setBusqueda("")}
+                aria-label="Limpiar búsqueda"
+              >
+                ×
+              </button>
+            )}
+          </div>
 
           <div className="recursos-filters">
             <button
               type="button"
-              className={filtroEstado === "TODOS" ? "active" : ""}
+              className={
+                filtroEstado === "TODOS"
+                  ? "recursos-filter active"
+                  : "recursos-filter"
+              }
               onClick={() => setFiltroEstado("TODOS")}
             >
               Todos
@@ -122,7 +203,9 @@ function Recursos() {
             <button
               type="button"
               className={
-                filtroEstado === "OPERATIVO" ? "active" : ""
+                filtroEstado === "OPERATIVO"
+                  ? "recursos-filter active"
+                  : "recursos-filter"
               }
               onClick={() => setFiltroEstado("OPERATIVO")}
             >
@@ -131,7 +214,11 @@ function Recursos() {
 
             <button
               type="button"
-              className={filtroEstado === "DANADO" ? "active" : ""}
+              className={
+                filtroEstado === "DANADO"
+                  ? "recursos-filter active"
+                  : "recursos-filter"
+              }
               onClick={() => setFiltroEstado("DANADO")}
             >
               Dañados
@@ -140,7 +227,9 @@ function Recursos() {
             <button
               type="button"
               className={
-                filtroEstado === "EN_MANTENIMIENTO" ? "active" : ""
+                filtroEstado === "EN_MANTENIMIENTO"
+                  ? "recursos-filter active"
+                  : "recursos-filter"
               }
               onClick={() =>
                 setFiltroEstado("EN_MANTENIMIENTO")
@@ -152,78 +241,96 @@ function Recursos() {
         </div>
 
         {cargando && (
-          <div className="resource-message">
-            Cargando recursos...
+          <div className="recursos-state">
+            <div className="recursos-state-line" />
+            <strong>Cargando recursos</strong>
+            <span>Obteniendo información del sistema...</span>
           </div>
         )}
 
         {error && (
-          <div className="resource-message resource-error">
-            {error}
+          <div className="recursos-state recursos-state-error">
+            <strong>No se pudo cargar la información</strong>
+            <span>{error}</span>
           </div>
         )}
 
         {!cargando && !error && (
-          <div className="resources-table-wrapper">
-            <table className="resources-table">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Recurso</th>
-                  <th>Tipo</th>
-                  <th>Ubicación</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {recursosFiltrados.map((recurso) => (
-                  <tr key={recurso.id}>
-                    <td>
-                      <span className="resource-code">
-                        {recurso.codigo}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="resource-name">
-                        <strong>{recurso.nombre}</strong>
-
-                        <span>
-                          {recurso.marca}
-                          {recurso.modelo
-                            ? ` · ${recurso.modelo}`
-                            : ""}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td>{recurso.nombreTipoRecurso}</td>
-
-                    <td>{recurso.nombreUbicacion}</td>
-
-                    <td>
-                      <span
-                        className={`recurso-status recurso-status-${recurso.estado.toLowerCase()}`}
-                      >
-                        {recurso.estado.replaceAll("_", " ")}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-
-                {recursosFiltrados.length === 0 && (
+          <div className="recursos-table-container">
+            <div className="resources-table-wrapper">
+              <table className="resources-table">
+                <thead>
                   <tr>
-                    <td
-                      colSpan={5}
-                      className="table-empty"
-                    >
-                      No se encontraron recursos.
-                    </td>
+                    <th>CÓDIGO</th>
+                    <th>RECURSO</th>
+                    <th>TIPO</th>
+                    <th>UBICACIÓN</th>
+                    <th>ESTADO</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {recursosFiltrados.map((recurso) => (
+                    <tr key={recurso.id}>
+                      <td>
+                        <span className="recursos-code">
+                          {recurso.codigo}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="recursos-resource-cell">
+                          <strong>{recurso.nombre}</strong>
+
+                          <span>
+                            {recurso.marca}
+                            {recurso.modelo
+                              ? ` · ${recurso.modelo}`
+                              : ""}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className="recursos-type">
+                          {recurso.nombreTipoRecurso}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="recursos-location-cell">
+                          <strong>{recurso.nombreUbicacion}</strong>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`recursos-status-chip recursos-status-${recurso.estado.toLowerCase()}`}
+                        >
+                          <span className="recursos-status-dot" />
+                          {recurso.estado.replaceAll("_", " ")}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {recursosFiltrados.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="recursos-table-empty"
+                      >
+                        <strong>No se encontraron recursos</strong>
+                        <span>
+                          Prueba con otro término de búsqueda o cambia
+                          el filtro de estado.
+                        </span>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </section>

@@ -23,7 +23,11 @@ export default function OcurrenciaDetalle() {
 
     const cargarOcurrencia = async () => {
       try {
+        setCargando(true);
+        setError("");
+
         const data = await obtenerOcurrencia(ocurrenciaId);
+
         setOcurrencia(data);
       } catch (error: any) {
         const mensaje =
@@ -61,9 +65,15 @@ export default function OcurrenciaDetalle() {
 
   if (cargando) {
     return (
-      <div className="page-container">
-        <div className="empty-state">
-          <p>Cargando ocurrencia...</p>
+      <div className="ocurrencia-detalle-page">
+        <div className="ocurrencia-detalle-state">
+          <div className="ocurrencia-detalle-loading-line" />
+
+          <strong>Cargando ocurrencia</strong>
+
+          <span>
+            Obteniendo información de la bitácora...
+          </span>
         </div>
       </div>
     );
@@ -71,15 +81,25 @@ export default function OcurrenciaDetalle() {
 
   if (error || !ocurrencia) {
     return (
-      <div className="page-container">
-        <div className="empty-state">
-          <p>{error || "No se encontró la ocurrencia."}</p>
+      <div className="ocurrencia-detalle-page">
+        <Link
+          to="/ocurrencias"
+          className="ocurrencia-detalle-back"
+        >
+          <span>←</span>
+          Volver a ocurrencias
+        </Link>
+
+        <div className="ocurrencia-detalle-error">
+          <strong>
+            {error || "No se encontró la ocurrencia."}
+          </strong>
 
           <button
-            className="secondary-button"
+            type="button"
             onClick={() => navigate("/ocurrencias")}
           >
-            Volver a ocurrencias
+            Volver al registro
           </button>
         </div>
       </div>
@@ -87,90 +107,134 @@ export default function OcurrenciaDetalle() {
   }
 
   return (
-    <div className="page-container">
-      <div className="detail-back">
-        <Link to="/ocurrencias">
-          ← Volver a ocurrencias
-        </Link>
-      </div>
+    <div className="ocurrencia-detalle-page">
+      <Link
+        to="/ocurrencias"
+        className="ocurrencia-detalle-back"
+      >
+        <span>←</span>
+        Volver a ocurrencias
+      </Link>
 
-      <div className="page-header">
-        <div>
-          <p className="page-eyebrow">REGISTRO DE INCIDENCIAS</p>
+      <header className="ocurrencia-detalle-header">
+        <div className="ocurrencia-detalle-heading">
+          <span className="ocurrencia-detalle-kicker">
+            SIGMA · REGISTRO DE NOVEDAD
+          </span>
 
-          <h1>Ocurrencia #{ocurrencia.id}</h1>
+          <h1>
+            Ocurrencia #{ocurrencia.id}
+          </h1>
 
-          <p className="page-description">
+          <p>
             Detalle de la novedad registrada en el sistema.
           </p>
         </div>
 
-        <span className="status-badge">
-          {ocurrencia.leida ? "LEÍDA" : "NO LEÍDA"}
-        </span>
-      </div>
+        <div
+          className={`ocurrencia-detalle-reading ocurrencia-detalle-reading-${
+            ocurrencia.leida ? "read" : "unread"
+          }`}
+        >
+          <span className="ocurrencia-detalle-reading-dot" />
 
-      <div className="occurrence-detail-grid">
-        <div className="occurrence-detail-card">
-          <span>Fecha y hora</span>
+          <div>
+            <small>ESTADO DE LECTURA</small>
+
+            <strong>
+              {ocurrencia.leida
+                ? "Leída"
+                : "No leída"}
+            </strong>
+          </div>
+        </div>
+      </header>
+
+      <section className="ocurrencia-detalle-meta">
+        <div className="ocurrencia-detalle-meta-item">
+          <span>FECHA Y HORA</span>
+
           <strong>
             {formatearFecha(ocurrencia.fechaHora)}
           </strong>
         </div>
 
-        <div className="occurrence-detail-card">
-          <span>Tipo</span>
-          <strong>
-            {obtenerTipoTexto(ocurrencia.tipo)}
-          </strong>
-        </div>
+        <div className="ocurrencia-detalle-meta-item">
+          <span>TIPO</span>
 
-        <div className="occurrence-detail-card">
-          <span>Informante</span>
-          <strong>
-            {ocurrencia.nombreInformante}
-          </strong>
-          <small>{ocurrencia.codigoInformante}</small>
-        </div>
-
-        <div className="occurrence-detail-card">
-          <span>Destinatario</span>
-          <strong>
-            {ocurrencia.nombreDestinatario}
-          </strong>
-          <small>{ocurrencia.codigoDestinatario}</small>
-        </div>
-      </div>
-
-      <div className="content-card">
-        <div className="content-card-header">
           <div>
-            <h2>Descripción</h2>
-            <p>Detalle de la ocurrencia registrada.</p>
+            <span
+              className={`ocurrencia-detalle-type ocurrencia-detalle-type-${ocurrencia.tipo.toLowerCase()}`}
+            >
+              <span />
+              {obtenerTipoTexto(ocurrencia.tipo)}
+            </span>
           </div>
         </div>
 
-        <div className="occurrence-description-detail">
+        <div className="ocurrencia-detalle-meta-item">
+          <span>INFORMANTE</span>
+
+          <strong>
+            {ocurrencia.nombreInformante}
+          </strong>
+
+          <small>
+            {ocurrencia.codigoInformante}
+          </small>
+        </div>
+
+        <div className="ocurrencia-detalle-meta-item">
+          <span>DESTINATARIO</span>
+
+          <strong>
+            {ocurrencia.nombreDestinatario}
+          </strong>
+
+          <small>
+            {ocurrencia.codigoDestinatario}
+          </small>
+        </div>
+      </section>
+
+      <section className="ocurrencia-detalle-content">
+        <div className="ocurrencia-detalle-section-header">
+          <div>
+            <span>CONTENIDO DEL REGISTRO</span>
+
+            <h2>Descripción</h2>
+
+            <p>
+              Detalle de la ocurrencia registrada.
+            </p>
+          </div>
+        </div>
+
+        <div className="ocurrencia-detalle-description">
           {ocurrencia.descripcion}
         </div>
-      </div>
+      </section>
 
       {(ocurrencia.tipo === "UNIDAD" ||
         ocurrencia.tipo === "RECURSO") && (
-        <div className="content-card">
-          <div className="content-card-header">
+        <section className="ocurrencia-detalle-content">
+          <div className="ocurrencia-detalle-section-header">
             <div>
+              <span>REFERENCIA DEL REGISTRO</span>
+
               <h2>Relacionado</h2>
+
               <p>
-                Recurso o unidad asociada a la ocurrencia.
+                Elemento asociado a esta ocurrencia.
               </p>
             </div>
           </div>
 
-          <div className="occurrence-related-info">
+          <div className="ocurrencia-detalle-related">
             {ocurrencia.tipo === "UNIDAD" && (
-              <div className="occurrence-related-item">
-                <span>Unidad</span>
+              <div className="ocurrencia-detalle-related-item">
+                <span>UNIDAD</span>
+
                 <strong>
                   {ocurrencia.nombreUnidad || "—"}
                 </strong>
@@ -178,35 +242,36 @@ export default function OcurrenciaDetalle() {
             )}
 
             {ocurrencia.tipo === "RECURSO" && (
-              <div className="occurrence-related-item">
-                <span>Recurso</span>
+              <div className="ocurrencia-detalle-related-item">
+                <span>RECURSO</span>
+
                 <strong>
                   {ocurrencia.codigoRecurso || "—"}
                 </strong>
               </div>
             )}
           </div>
-        </div>
+        </section>
       )}
 
-      <div className="content-card occurrence-footer-card">
+      <footer className="ocurrencia-detalle-footer">
         <div>
-          <span>Estado de lectura</span>
+          <span>REGISTRO DE LECTURA</span>
 
           <strong>
             {ocurrencia.leida
-              ? "Ocurrencia leída"
-              : "Ocurrencia no leída"}
+              ? "Esta ocurrencia ha sido leída."
+              : "Esta ocurrencia permanece sin leer."}
           </strong>
         </div>
 
         <Link
           to="/ocurrencias"
-          className="secondary-button"
+          className="ocurrencia-detalle-footer-button"
         >
           Volver al registro
         </Link>
-      </div>
+      </footer>
     </div>
   );
 }

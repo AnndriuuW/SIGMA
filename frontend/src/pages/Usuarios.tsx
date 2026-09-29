@@ -45,9 +45,7 @@ export default function Usuarios() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
 
-  const [codigoEditando, setCodigoEditando] = useState<string | null>(
-    null,
-  );
+  const [codigoEditando, setCodigoEditando] = useState<string | null>(null);
 
   const [formulario, setFormulario] =
     useState<FormularioUsuario>(formularioInicial);
@@ -120,6 +118,25 @@ export default function Usuarios() {
 
       default:
         return rol;
+    }
+  };
+
+  const obtenerClaseRol = (rol: string) => {
+    switch (rol) {
+      case "ADMINISTRADOR":
+        return "administrador";
+
+      case "JEFE_MAQUINAS":
+        return "jefe";
+
+      case "PERSONAL_ADJUNTO":
+        return "personal";
+
+      case "BOMBERO":
+        return "bombero";
+
+      default:
+        return "general";
     }
   };
 
@@ -312,111 +329,204 @@ export default function Usuarios() {
   };
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <div>
-          <p className="page-eyebrow">GESTIÓN DEL SISTEMA</p>
+    <div className="usuarios-page">
+      <div className="usuarios-header">
+        <div className="usuarios-header-copy">
+          <span className="usuarios-kicker">
+            SIGMA · ADMINISTRACIÓN DEL SISTEMA
+          </span>
 
-          <h1>Usuarios</h1>
+          <div className="usuarios-title-row">
+            <div>
+              <h1>Usuarios</h1>
 
-          <p className="page-description">
-            Administración de usuarios y sus roles dentro de SIGMA.
-          </p>
-        </div>
+              <p>
+                Gestión de cuentas, roles y acceso operativo al sistema.
+              </p>
+            </div>
 
-        <button
-          className="primary-button"
-          onClick={abrirCrearUsuario}
-        >
-          + Nuevo usuario
-        </button>
-      </div>
-
-      <div className="summary-grid">
-        <div className="summary-card">
-          <span>Total</span>
-          <strong>{usuarios.length}</strong>
-        </div>
-
-        <div className="summary-card">
-          <span>Activos</span>
-          <strong>{usuariosActivos}</strong>
-        </div>
-
-        <div className="summary-card">
-          <span>Inactivos</span>
-          <strong>{usuariosInactivos}</strong>
-        </div>
-      </div>
-
-      <div className="content-card">
-        <div className="content-card-header">
-          <div>
-            <h2>Registro de usuarios</h2>
-
-            <p>
-              Consulta y administra los usuarios registrados en
-              el sistema.
-            </p>
+            <div className="usuarios-record-summary">
+              <span>REGISTROS</span>
+              <strong>{usuarios.length}</strong>
+            </div>
           </div>
         </div>
 
-        <div className="table-filters">
-          <input
-            type="text"
-            placeholder="Buscar por código, nombre o rol..."
-            value={busqueda}
-            onChange={(event) =>
-              setBusqueda(event.target.value)
-            }
-            className="table-search"
-          />
+        <button
+          type="button"
+          className="usuarios-primary-button"
+          onClick={abrirCrearUsuario}
+        >
+          <span className="usuarios-primary-icon">+</span>
+          Nuevo usuario
+        </button>
+      </div>
 
-          <select
-            value={filtroEstado}
-            onChange={(event) =>
-              setFiltroEstado(event.target.value)
-            }
-            className="table-filter-select"
-          >
-            <option value="TODOS">Todos</option>
-            <option value="ACTIVOS">Activos</option>
-            <option value="INACTIVOS">Inactivos</option>
-          </select>
+      <div className="usuarios-status-bar">
+        <div className="usuarios-status-item">
+          <span className="usuarios-status-dot total" />
+          <div>
+            <small>Total</small>
+            <strong>{usuarios.length}</strong>
+          </div>
+        </div>
+
+        <div className="usuarios-status-item">
+          <span className="usuarios-status-dot activo" />
+          <div>
+            <small>Activos</small>
+            <strong>{usuariosActivos}</strong>
+          </div>
+        </div>
+
+        <div className="usuarios-status-item">
+          <span className="usuarios-status-dot inactivo" />
+          <div>
+            <small>Inactivos</small>
+            <strong>{usuariosInactivos}</strong>
+          </div>
+        </div>
+
+        <div className="usuarios-status-divider" />
+
+        <div className="usuarios-status-caption">
+          <span>CONTROL DE ACCESO</span>
+          <strong>
+            {usuariosActivos} cuentas habilitadas actualmente
+          </strong>
+        </div>
+      </div>
+
+      <section className="usuarios-panel">
+        <div className="usuarios-panel-header">
+          <div>
+            <span className="usuarios-section-label">
+              DIRECTORIO DE PERSONAL
+            </span>
+
+            <h2>Usuarios registrados</h2>
+
+            <p>
+              Consulta, modifica o administra el estado de las cuentas.
+            </p>
+          </div>
+
+          <div className="usuarios-result-count">
+            <strong>{usuariosFiltrados.length}</strong>
+            <span>resultado{usuariosFiltrados.length === 1 ? "" : "s"}</span>
+          </div>
+        </div>
+
+        <div className="usuarios-toolbar">
+          <div className="usuarios-search">
+            <span className="usuarios-search-icon">⌕</span>
+
+            <input
+              type="text"
+              placeholder="Buscar por código, nombre o rol..."
+              value={busqueda}
+              onChange={(event) => setBusqueda(event.target.value)}
+            />
+
+            {busqueda && (
+              <button
+                type="button"
+                className="usuarios-search-clear"
+                onClick={() => setBusqueda("")}
+                aria-label="Limpiar búsqueda"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          <div className="usuarios-filter-tabs">
+            <button
+              type="button"
+              className={
+                filtroEstado === "TODOS"
+                  ? "usuarios-filter-tab active"
+                  : "usuarios-filter-tab"
+              }
+              onClick={() => setFiltroEstado("TODOS")}
+            >
+              Todos
+            </button>
+
+            <button
+              type="button"
+              className={
+                filtroEstado === "ACTIVOS"
+                  ? "usuarios-filter-tab active"
+                  : "usuarios-filter-tab"
+              }
+              onClick={() => setFiltroEstado("ACTIVOS")}
+            >
+              Activos
+            </button>
+
+            <button
+              type="button"
+              className={
+                filtroEstado === "INACTIVOS"
+                  ? "usuarios-filter-tab active"
+                  : "usuarios-filter-tab"
+              }
+              onClick={() => setFiltroEstado("INACTIVOS")}
+            >
+              Inactivos
+            </button>
+          </div>
         </div>
 
         {cargando && (
-          <div className="empty-state">
-            <p>Cargando usuarios...</p>
+          <div className="usuarios-state">
+            <div className="usuarios-state-line" />
+            <p>Cargando directorio de usuarios...</p>
           </div>
         )}
 
         {!cargando && error && (
-          <div className="empty-state">
+          <div className="usuarios-state error">
+            <strong>No fue posible cargar el directorio.</strong>
             <p>{error}</p>
+
+            <button
+              type="button"
+              className="usuarios-retry-button"
+              onClick={cargarUsuarios}
+            >
+              Reintentar
+            </button>
           </div>
         )}
 
         {!cargando &&
           !error &&
           usuariosFiltrados.length === 0 && (
-            <div className="empty-state">
-              <p>No se encontraron usuarios.</p>
+            <div className="usuarios-state">
+              <strong>No se encontraron usuarios</strong>
+              <p>
+                Prueba con otro criterio de búsqueda o cambia el filtro
+                de estado.
+              </p>
             </div>
           )}
 
         {!cargando &&
           !error &&
           usuariosFiltrados.length > 0 && (
-            <div className="table-wrapper">
-              <table className="data-table">
+            <div className="usuarios-table-wrapper">
+              <table className="usuarios-table">
                 <thead>
                   <tr>
-                    <th>Código</th>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
+                    <th>IDENTIFICACIÓN</th>
+                    <th>PERSONAL</th>
+                    <th>ROL OPERATIVO</th>
+                    <th>ESTADO</th>
+                    <th className="usuarios-table-action-head">
+                      ACCIONES
+                    </th>
                   </tr>
                 </thead>
 
@@ -424,46 +534,67 @@ export default function Usuarios() {
                   {usuariosFiltrados.map((usuario) => (
                     <tr key={usuario.codigo}>
                       <td>
-                        <strong>{usuario.codigo}</strong>
+                        <div className="usuarios-code-cell">
+                          <div>
+                            <strong>{usuario.codigo}</strong>
+                            <span>ID de acceso</span>
+                          </div>
+                        </div>
                       </td>
 
                       <td>
-                        {usuario.nombres}{" "}
-                        {usuario.apellidos}
+                        <div className="usuarios-person-cell">
+                          <strong>
+                            {usuario.nombres} {usuario.apellidos}
+                          </strong>
+
+                          <span>Cuenta de usuario SIGMA</span>
+                        </div>
                       </td>
 
                       <td>
-                        {obtenerNombreRol(usuario.rol)}
+                        <span
+                          className={`usuarios-role-badge ${obtenerClaseRol(
+                            usuario.rol,
+                          )}`}
+                        >
+                          {obtenerNombreRol(usuario.rol)}
+                        </span>
                       </td>
 
                       <td>
-                        {usuario.activo
-                          ? "Activo"
-                          : "Inactivo"}
+                        <span
+                          className={
+                            usuario.activo
+                              ? "usuarios-state-badge active"
+                              : "usuarios-state-badge inactive"
+                          }
+                        >
+                          <span className="usuarios-state-badge-dot" />
+
+                          {usuario.activo ? "Activo" : "Inactivo"}
+                        </span>
                       </td>
 
                       <td>
-                        <div className="user-table-actions">
+                        <div className="usuarios-actions">
                           <button
                             type="button"
-                            className="table-action-button"
-                            onClick={() =>
-                              abrirEditarUsuario(usuario)
-                            }
+                            className="usuarios-action edit"
+                            onClick={() => abrirEditarUsuario(usuario)}
                           >
                             Editar
                           </button>
 
+                          <span className="usuarios-action-separator" />
+
                           {usuario.activo ? (
                             <button
                               type="button"
-                              className="table-action-button danger"
-                              onClick={() =>
-                                handleDesactivar(usuario)
-                              }
+                              className="usuarios-action danger"
+                              onClick={() => handleDesactivar(usuario)}
                               disabled={
-                                procesandoEstado ===
-                                usuario.codigo
+                                procesandoEstado === usuario.codigo
                               }
                             >
                               {procesandoEstado === usuario.codigo
@@ -473,13 +604,10 @@ export default function Usuarios() {
                           ) : (
                             <button
                               type="button"
-                              className="table-action-button"
-                              onClick={() =>
-                                handleActivar(usuario)
-                              }
+                              className="usuarios-action activate"
+                              onClick={() => handleActivar(usuario)}
                               disabled={
-                                procesandoEstado ===
-                                usuario.codigo
+                                procesandoEstado === usuario.codigo
                               }
                             >
                               {procesandoEstado === usuario.codigo
@@ -495,192 +623,237 @@ export default function Usuarios() {
               </table>
             </div>
           )}
-      </div>
+      </section>
 
       {mostrarFormulario && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-header">
+        <div className="usuarios-drawer-overlay" onMouseDown={cerrarFormulario}>
+          <aside
+            className="usuarios-drawer"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="usuarios-drawer-header">
               <div>
-                <p className="page-eyebrow">
+                <span className="usuarios-section-label">
                   {modoEdicion
-                    ? "EDICIÓN DE USUARIO"
+                    ? "EDICIÓN DE CUENTA"
                     : "NUEVO REGISTRO"}
-                </p>
+                </span>
 
                 <h2>
-                  {modoEdicion
-                    ? "Editar usuario"
-                    : "Nuevo usuario"}
+                  {modoEdicion ? "Editar usuario" : "Nuevo usuario"}
                 </h2>
+
+                <p>
+                  {modoEdicion
+                    ? "Actualiza los datos y permisos de la cuenta."
+                    : "Registra una nueva cuenta dentro de SIGMA."}
+                </p>
               </div>
 
               <button
-                className="modal-close"
+                type="button"
+                className="usuarios-drawer-close"
                 onClick={cerrarFormulario}
                 disabled={guardando}
+                aria-label="Cerrar formulario"
               >
                 ×
               </button>
             </div>
 
-            <div className="modal-body">
-              {!modoEdicion && (
-                <>
-                  <label htmlFor="usuario-codigo">
-                    Código
+            <div className="usuarios-drawer-body">
+              <div className="usuarios-form-section">
+                <span className="usuarios-form-section-title">
+                  IDENTIFICACIÓN
+                </span>
+
+                {!modoEdicion && (
+                  <div className="usuarios-form-field">
+                    <label htmlFor="usuario-codigo">Código</label>
+
+                    <input
+                      id="usuario-codigo"
+                      type="text"
+                      value={formulario.codigo}
+                      onChange={(event) =>
+                        actualizarCampo(
+                          "codigo",
+                          event.target.value.toUpperCase(),
+                        )
+                      }
+                      disabled={guardando}
+                      maxLength={20}
+                      placeholder="Ej. BOM002"
+                    />
+
+                    <small>
+                      Código único utilizado para iniciar sesión.
+                    </small>
+                  </div>
+                )}
+
+                {modoEdicion && (
+                  <div className="usuarios-code-preview">
+                    <span>Código de acceso</span>
+                    <strong>{formulario.codigo}</strong>
+                  </div>
+                )}
+              </div>
+
+              <div className="usuarios-form-section">
+                <span className="usuarios-form-section-title">
+                  DATOS DEL PERSONAL
+                </span>
+
+                <div className="usuarios-form-grid">
+                  <div className="usuarios-form-field">
+                    <label htmlFor="usuario-nombres">Nombres</label>
+
+                    <input
+                      id="usuario-nombres"
+                      type="text"
+                      value={formulario.nombres}
+                      onChange={(event) =>
+                        actualizarCampo(
+                          "nombres",
+                          event.target.value,
+                        )
+                      }
+                      disabled={guardando}
+                      maxLength={100}
+                      placeholder="Nombres"
+                    />
+                  </div>
+
+                  <div className="usuarios-form-field">
+                    <label htmlFor="usuario-apellidos">
+                      Apellidos
+                    </label>
+
+                    <input
+                      id="usuario-apellidos"
+                      type="text"
+                      value={formulario.apellidos}
+                      onChange={(event) =>
+                        actualizarCampo(
+                          "apellidos",
+                          event.target.value,
+                        )
+                      }
+                      disabled={guardando}
+                      maxLength={100}
+                      placeholder="Apellidos"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="usuarios-form-section">
+                <span className="usuarios-form-section-title">
+                  ACCESO Y PERMISOS
+                </span>
+
+                <div className="usuarios-form-field">
+                  <label htmlFor="usuario-rol">Rol</label>
+
+                  <select
+                    id="usuario-rol"
+                    value={formulario.rolId}
+                    onChange={(event) =>
+                      actualizarCampo(
+                        "rolId",
+                        event.target.value
+                          ? Number(event.target.value)
+                          : "",
+                      )
+                    }
+                    disabled={guardando}
+                  >
+                    <option value="">Selecciona un rol</option>
+
+                    {ROLES.map((rol) => (
+                      <option
+                        key={rol.id}
+                        value={rol.id}
+                      >
+                        {rol.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="usuarios-form-field">
+                  <label htmlFor="usuario-contrasena">
+                    {modoEdicion
+                      ? "Nueva contraseña"
+                      : "Contraseña"}
                   </label>
 
                   <input
-                    id="usuario-codigo"
-                    type="text"
-                    value={formulario.codigo}
+                    id="usuario-contrasena"
+                    type="password"
+                    value={formulario.contrasena}
                     onChange={(event) =>
                       actualizarCampo(
-                        "codigo",
+                        "contrasena",
                         event.target.value,
                       )
                     }
                     disabled={guardando}
-                    maxLength={20}
-                    placeholder="Ej. BOM002"
-                  />
-                </>
-              )}
-
-              <label htmlFor="usuario-nombres">
-                Nombres
-              </label>
-
-              <input
-                id="usuario-nombres"
-                type="text"
-                value={formulario.nombres}
-                onChange={(event) =>
-                  actualizarCampo(
-                    "nombres",
-                    event.target.value,
-                  )
-                }
-                disabled={guardando}
-                maxLength={100}
-                placeholder="Nombres"
-              />
-
-              <label htmlFor="usuario-apellidos">
-                Apellidos
-              </label>
-
-              <input
-                id="usuario-apellidos"
-                type="text"
-                value={formulario.apellidos}
-                onChange={(event) =>
-                  actualizarCampo(
-                    "apellidos",
-                    event.target.value,
-                  )
-                }
-                disabled={guardando}
-                maxLength={100}
-                placeholder="Apellidos"
-              />
-
-              <label htmlFor="usuario-contrasena">
-                {modoEdicion
-                  ? "Nueva contraseña"
-                  : "Contraseña"}
-              </label>
-
-              <input
-                id="usuario-contrasena"
-                type="password"
-                value={formulario.contrasena}
-                onChange={(event) =>
-                  actualizarCampo(
-                    "contrasena",
-                    event.target.value,
-                  )
-                }
-                disabled={guardando}
-                minLength={8}
-                maxLength={255}
-                placeholder={
-                  modoEdicion
-                    ? "Dejar vacío para mantener la actual"
-                    : "Mínimo 8 caracteres"
-                }
-              />
-
-              <label htmlFor="usuario-rol">
-                Rol
-              </label>
-
-              <select
-                id="usuario-rol"
-                value={formulario.rolId}
-                onChange={(event) =>
-                  actualizarCampo(
-                    "rolId",
-                    event.target.value
-                      ? Number(event.target.value)
-                      : "",
-                  )
-                }
-                disabled={guardando}
-              >
-                <option value="">
-                  Selecciona un rol
-                </option>
-
-                {ROLES.map((rol) => (
-                  <option
-                    key={rol.id}
-                    value={rol.id}
-                  >
-                    {rol.nombre}
-                  </option>
-                ))}
-              </select>
-
-              {modoEdicion && (
-                <>
-                  <label htmlFor="usuario-estado">
-                    Estado
-                  </label>
-
-                  <select
-                    id="usuario-estado"
-                    value={formulario.activo ? "ACTIVO" : "INACTIVO"}
-                    onChange={(event) =>
-                      actualizarCampo(
-                        "activo",
-                        event.target.value === "ACTIVO",
-                      )
+                    minLength={8}
+                    maxLength={255}
+                    placeholder={
+                      modoEdicion
+                        ? "Dejar vacío para mantener la actual"
+                        : "Mínimo 8 caracteres"
                     }
-                    disabled={guardando}
-                  >
-                    <option value="ACTIVO">
-                      Activo
-                    </option>
+                  />
 
-                    <option value="INACTIVO">
-                      Inactivo
-                    </option>
-                  </select>
-                </>
-              )}
+                  <small>
+                    {modoEdicion
+                      ? "Solo completa este campo si deseas cambiarla."
+                      : "La contraseña debe contener al menos 8 caracteres."}
+                  </small>
+                </div>
+
+                {modoEdicion && (
+                  <div className="usuarios-form-field">
+                    <label htmlFor="usuario-estado">Estado</label>
+
+                    <select
+                      id="usuario-estado"
+                      value={
+                        formulario.activo
+                          ? "ACTIVO"
+                          : "INACTIVO"
+                      }
+                      onChange={(event) =>
+                        actualizarCampo(
+                          "activo",
+                          event.target.value === "ACTIVO",
+                        )
+                      }
+                      disabled={guardando}
+                    >
+                      <option value="ACTIVO">Activo</option>
+                      <option value="INACTIVO">Inactivo</option>
+                    </select>
+                  </div>
+                )}
+              </div>
 
               {errorFormulario && (
-                <p className="form-error">
-                  {errorFormulario}
-                </p>
+                <div className="usuarios-form-error">
+                  <strong>No se pudo guardar la cuenta.</strong>
+                  <span>{errorFormulario}</span>
+                </div>
               )}
             </div>
 
-            <div className="modal-footer">
+            <div className="usuarios-drawer-footer">
               <button
-                className="secondary-button"
+                type="button"
+                className="usuarios-secondary-button"
                 onClick={cerrarFormulario}
                 disabled={guardando}
               >
@@ -688,7 +861,8 @@ export default function Usuarios() {
               </button>
 
               <button
-                className="primary-button"
+                type="button"
+                className="usuarios-save-button"
                 onClick={guardarUsuario}
                 disabled={guardando}
               >
@@ -699,7 +873,7 @@ export default function Usuarios() {
                     : "Crear usuario"}
               </button>
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </div>

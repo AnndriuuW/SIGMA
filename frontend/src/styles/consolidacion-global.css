@@ -1,0 +1,239 @@
+/* =========================================================
+   SIGMA · CONSOLIDACIÓN VISUAL
+   Última capa de estilos
+   ========================================================= */
+
+/* ---------- Tipografía base ---------- */
+
+html,
+body,
+#root {
+  font-family: var(--sigma-font);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--sigma-font);
+}
+
+
+/* ---------- Jerarquía general ---------- */
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--sigma-text);
+}
+
+p {
+  color: var(--sigma-text-secondary);
+}
+
+
+/* ---------- Textos secundarios ---------- */
+
+.dashboard-description,
+.dashboard-section-heading > div > span,
+.dashboard-panel-heading > div > span,
+.dashboard-info-list span,
+.dashboard-info-note,
+.dashboard-link,
+
+.vehiculos-heading p,
+.vehiculos-section-header p,
+.vehiculos-section-count,
+.vehiculos-overview-item small,
+.vehiculos-operativo-label,
+
+.resources-section-header p,
+.resources-result-count,
+.resources-table td,
+
+.inventario-section-header p,
+.inventario-result-count span,
+.inventario-unit-cell span,
+.inventario-table td,
+
+.ocurrencia-related-cell span,
+.ocurrencia-date-cell span,
+.ocurrencia-description-cell span,
+.ocurrencias-table td,
+
+.usuarios-section-header p,
+.usuarios-code-cell span,
+.usuarios-person-cell span,
+.usuarios-table td,
+
+.perfil-identity-info span,
+.perfil-section-label {
+  color: var(--sigma-text-secondary);
+}
+
+
+/* ---------- Etiquetas técnicas ---------- */
+
+.dashboard-kicker,
+.vehiculos-kicker,
+.resources-kicker,
+.inventario-kicker,
+.ocurrencias-kicker,
+.usuarios-kicker,
+.perfil-kicker {
+  color: var(--sigma-red);
+}
+
+
+/* ---------- Títulos de sección ---------- */
+
+.dashboard-section-heading h2,
+.dashboard-panel-heading h2,
+
+.vehiculos-section-header h2,
+
+.resources-section-header h2,
+
+.inventario-section-header h2,
+
+.ocurrencia-section-header h2,
+
+.usuarios-section-header h2,
+
+.perfil-panel-heading h2 {
+  color: var(--sigma-text);
+}
+
+
+/* ---------- Tablas ---------- */
+
+.dashboard-table th,
+.resources-table th,
+.inventario-table th,
+.ocurrencias-table th,
+.usuarios-table th {
+  color: #5f6d80;
+  font-weight: 700;
+}
+
+.dashboard-table td,
+.resources-table td,
+.inventario-table td,
+.ocurrencias-table td,
+.usuarios-table td {
+  color: var(--sigma-text-secondary);
+}
+
+.dashboard-table td strong,
+.resources-table td strong,
+.inventario-table td strong,
+.ocurrencias-table td strong,
+.usuarios-table td strong {
+  color: var(--sigma-text);
+}
+
+
+/* ---------- Inputs ---------- */
+
+input,
+select,
+textarea {
+  color: var(--sigma-text);
+  background: var(--sigma-surface);
+  border-color: var(--sigma-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #7f8998;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #8290a3;
+}
+
+
+/* ---------- Enlaces ---------- */
+
+a {
+  color: var(--sigma-navy-2);
+}
+
+a:hover {
+  color: var(--sigma-red);
+}
+
+
+/* ---------- Estados ---------- */
+
+/* Operativo */
+.dashboard-status-operativa,
+.vehiculo-operativo-status-operativo,
+.vehiculo-operativo-status-operativa {
+  color: var(--sigma-success);
+}
+
+/* Mantenimiento */
+.dashboard-status-mantenimiento,
+.vehiculo-operativo-status-en_mantenimiento {
+  color: var(--sigma-warning);
+}
+
+/* Fuera de servicio */
+.dashboard-status-fuera_de_servicio,
+.vehiculo-operativo-status-fuera_de_servicio,
+.vehiculo-operativo-status-fuera_servicio {
+  color: var(--sigma-danger);
+}
+
+
+/* ---------- Hover de filas ---------- */
+
+.dashboard-table tbody tr:hover,
+.resources-table tbody tr:hover,
+.inventario-table tbody tr:hover,
+.ocurrencias-table tbody tr:hover,
+.usuarios-table tbody tr:hover {
+  background: var(--sigma-surface-soft);
+}
+
+
+/* ---------- Bordes institucionales ---------- */
+
+.dashboard-table-wrapper,
+.dashboard-bottom-panel {
+  border-color: var(--sigma-border);
+}
+
+.dashboard-table th,
+.dashboard-table td,
+.resources-table th,
+.resources-table td,
+.inventario-table th,
+.inventario-table td,
+.ocurrencias-table th,
+.ocurrencias-table td,
+.usuarios-table th,
+.usuarios-table td {
+  border-color: var(--sigma-border-soft);
+}
+
+
+/* ---------- Códigos y datos técnicos ---------- */
+
+.dashboard-unit-code,
+.usuarios-code-cell strong {
+  font-family: var(--sigma-font-mono);
+}
+
+
+/* ---------- Selección ---------- */
+
+::selection {
+  background: rgba(200, 16, 46, 0.12);
+  color: var(--sigma-text);
+}
+

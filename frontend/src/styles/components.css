@@ -1,0 +1,80 @@
+/* =========================================================
+   SIGMA · COMPONENTES COMPARTIDOS
+   Estilos reutilizables entre módulos
+   ========================================================= */
+
+/* ---------- Tablas ---------- */
+
+.resources-table th,
+.inventario-table th,
+.ocurrencias-table th,
+.usuarios-table th {
+  color: #5f6d80;
+  font-weight: 700;
+  border-color: var(--sigma-border-soft);
+}
+
+.resources-table td,
+.inventario-table td,
+.ocurrencias-table td,
+.usuarios-table td {
+  border-color: var(--sigma-border-soft);
+}
+
+.resources-table td strong,
+.inventario-table td strong,
+.ocurrencias-table td strong,
+.usuarios-table td strong {
+  color: var(--sigma-text);
+}
+
+.resources-table tbody tr:hover,
+.inventario-table tbody tr:hover,
+.ocurrencias-table tbody tr:hover,
+.usuarios-table tbody tr:hover {
+  background: var(--sigma-surface-soft);
+}
+
+/* ---------- Campos ---------- */
+
+input,
+select,
+textarea {
+  color: var(--sigma-text);
+  background: var(--sigma-surface);
+  border-color: var(--sigma-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #7f8998;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #8290a3;
+}
+
+/* ---------- Enlaces ---------- */
+
+a {
+  color: var(--sigma-navy-2);
+}
+
+a:hover {
+  color: var(--sigma-red);
+}
+
+/* ---------- Códigos técnicos ---------- */
+
+.usuarios-code-cell strong {
+  font-family: var(--sigma-font-mono);
+}
+
+/* ---------- Selección ---------- */
+
+::selection {
+  background: rgba(200, 16, 46, 0.12);
+  color: var(--sigma-text);
+}

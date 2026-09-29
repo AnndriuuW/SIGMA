@@ -1,29 +1,54 @@
+/* =========================================================
+   SIGMA · LAYOUT PRINCIPAL
+   ========================================================= */
+
 .app-layout {
   min-height: 100vh;
   display: flex;
-  background: #f8f9ff;
+  background: var(--sigma-bg);
 }
 
-/* =========================
+/* =========================================================
    SIDEBAR
-   ========================= */
+   ========================================================= */
 
 .sidebar {
-  width: 250px;
+  position: relative;
+  width: 264px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  background: #000d24;
-  color: white;
+
+  background: var(--sigma-navy);
+  color: #ffffff;
+
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Acento institucional */
+.sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--sigma-yellow);
+}
+
+/* =========================================================
+   HEADER DEL SIDEBAR
+   ========================================================= */
+
 .sidebar-header {
-  min-height: 92px;
-  padding: 20px;
+  min-height: 88px;
+  padding: 18px 20px;
+
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
+
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -31,212 +56,325 @@
   width: 48px;
   height: 48px;
   flex-shrink: 0;
+
   object-fit: cover;
+
   border-radius: 50%;
-  background: white;
+  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.92);
 }
 
 .sidebar-header h1 {
   margin: 0;
-  color: white;
+
+  color: #ffffff;
   font-size: 22px;
   line-height: 1;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: -0.35px;
 }
 
 .sidebar-header span {
   display: block;
   margin-top: 5px;
-  color: #aab5c5;
-  font-size: 11px;
+
+  color: #c1cad7;
+  font-size: 10px;
   line-height: 1.2;
+  font-weight: 500;
 }
+
+/* =========================================================
+   NAVEGACIÓN
+   ========================================================= */
 
 .sidebar-nav {
   flex: 1;
-  padding: 24px 12px;
+  padding: 28px 14px;
 }
 
 .sidebar-section-title {
-  margin: 0 12px 12px;
-  color: #718096;
+  margin: 0 12px 14px;
+
+  color: #d4b34f;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.13em;
 }
+
+/* =========================================================
+   LINKS
+   ========================================================= */
 
 .sidebar-link {
   position: relative;
-  height: 46px;
+
+  min-height: 45px;
   margin-bottom: 4px;
   padding: 0 14px;
+
   display: flex;
   align-items: center;
-  gap: 10px;
-  border-radius: 6px;
-  color: #c5ceda;
+  gap: 11px;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  color: #bdc8d8;
   text-decoration: none;
-  font-size: 14px;
+
+  font-size: 13px;
   font-weight: 500;
+
   transition:
-    background 0.2s ease,
-    color 0.2s ease;
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .sidebar-link:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: white;
+  background: rgba(255, 255, 255, 0.045);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.045);
 }
 
 .sidebar-link.active {
-  background: #b90c1b;
-  color: white;
+  background: var(--sigma-red);
+  color: #ffffff;
+
+  border-color: rgba(255, 255, 255, 0.04);
+
+  box-shadow: 0 5px 14px rgba(200, 16, 46, 0.16);
+
   font-weight: 600;
 }
 
+.sidebar-link.active:hover {
+  background: #b40e29;
+}
+
+/* Indicador */
 .sidebar-link-indicator {
   width: 5px;
   height: 5px;
+  flex-shrink: 0;
+
   border-radius: 50%;
+
   background: currentColor;
-  opacity: 0.7;
+  opacity: 0.62;
 }
 
+.sidebar-link.active .sidebar-link-indicator {
+  opacity: 1;
+}
+
+/* =========================================================
+   PARTE INFERIOR
+   ========================================================= */
+
 .sidebar-bottom {
-  padding: 12px;
+  padding: 14px;
+
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .logout-button {
   width: 100%;
-  height: 44px;
+  height: 45px;
+
   margin-top: 4px;
   padding: 0 14px;
+
   display: flex;
   align-items: center;
   gap: 10px;
-  border: none;
-  border-radius: 6px;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
   background: transparent;
-  color: #aab5c5;
+  color: #9eabbf;
+
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
+
   cursor: pointer;
   text-align: left;
+
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.logout-button span:first-child {
+  font-size: 17px;
+  line-height: 1;
 }
 
 .logout-button:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: white;
+  background: rgba(255, 255, 255, 0.045);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
-/* =========================
+/* =========================================================
    CONTENIDO
-   ========================= */
+   ========================================================= */
 
 .app-content {
   min-width: 0;
   flex: 1;
+
   display: flex;
   flex-direction: column;
+
+  background: var(--sigma-bg);
 }
 
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
 .topbar {
-  height: 76px;
-  padding: 0 32px;
+  height: 90px;
+  flex-shrink: 0;
+
+  padding: 0px 40px; 
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e1e5eb;
-  background: white;
+
+  gap: 24px;
+
+  background: var(--sigma-surface);
+  border-bottom: 1px solid var(--sigma-border);
+
+  box-shadow: 0 1px 5px rgba(6, 20, 45, 0.025);
 }
 
+
+/* ---------------------------------------------------------
+   IDENTIDAD DEL SISTEMA
+   --------------------------------------------------------- */
+
 .topbar-system {
-  margin: 0 0 3px;
-  color: #98a2b3;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  margin: 0 0 6px;
+
+  color: var(--sigma-navy-2);
+
+  font-size: 15px;
+  font-weight: 800;
+
+  
 }
 
 .topbar-company {
   margin: 0;
-  color: #0b1c30;
-  font-size: 13px;
-  font-weight: 600;
+
+  color: var(--sigma-text);
+
+  font-size: 18px;
+  font-weight: 800;
+
+  
 }
+
+
+/* ---------------------------------------------------------
+   USUARIO
+   --------------------------------------------------------- */
 
 .topbar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
+
+  gap: 15px;
 }
 
 .user-avatar {
-  width: 38px;
-  height: 38px;
+  width: 45px;
+  height: 45px;
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 50%;
-  background: #12233e;
-  color: white;
-  font-size: 14px;
-  font-weight: 700;
+
+  background: var(--sigma-navy-2);
+  color: #ffffff;
+
+  font-size: 23px;
+  font-weight: 900;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
+
   gap: 2px;
 }
 
 .user-info strong {
-  color: #0b1c30;
-  font-size: 13px;
+  color: var(--sigma-text);
+
+  font-size: 18px;
+  font-weight: 800;
 }
 
 .user-info span {
-  color: #667085;
-  font-size: 11px;
+  color: var(--sigma-text-secondary);
+
+  font-size: 12px;
+  font-weight: 800;
 }
+
+/* =========================================================
+   CONTENIDO DE LAS PÁGINAS
+   ========================================================= */
 
 .page-content {
   flex: 1;
-  padding: 32px;
+
+  padding: 34px;
+
+  overflow-x: hidden;
 }
 
-/* =========================
+/* =========================================================
    RESPONSIVE
-   ========================= */
+   ========================================================= */
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .sidebar {
-    width: 210px;
-  }
-
-  .sidebar-header {
-    padding: 16px;
+    width: 230px;
   }
 
   .topbar {
-    padding: 0 20px;
+    padding: 0 24px;
   }
 
   .page-content {
-    padding: 24px 20px;
+    padding: 26px 24px;
   }
 }
 
-@media (max-width: 650px) {
+@media (max-width: 680px) {
   .sidebar {
-    width: 72px;
+    width: 76px;
   }
 
   .sidebar-header {
     justify-content: center;
-    padding: 16px 8px;
+    padding: 16px 10px;
   }
 
   .sidebar-header > div {
@@ -250,6 +388,10 @@
 
   .sidebar-section-title {
     display: none;
+  }
+
+  .sidebar-nav {
+    padding: 20px 10px;
   }
 
   .sidebar-link {
@@ -267,16 +409,34 @@
     height: 7px;
   }
 
+  .sidebar-bottom {
+    padding: 10px;
+  }
+
   .logout-button {
     justify-content: center;
     padding: 0;
   }
 
-  .topbar-company {
+  .topbar {
+    height: 74px;
+    padding: 0 18px;
+  }
+
+  .topbar-system {
     display: none;
+  }
+
+  .topbar-company {
+    font-size: 12px;
   }
 
   .user-info {
     display: none;
   }
+
+  .page-content {
+    padding: 22px 18px;
+  }
 }
+

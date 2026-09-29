@@ -1,0 +1,506 @@
+/* =========================================================
+   VEHÍCULOS
+   ========================================================= */
+
+.vehiculos-page {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.vehiculos-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 26px;
+}
+
+.vehiculos-heading {
+  max-width: 760px;
+}
+
+.vehiculos-kicker {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #c8102e;
+}
+
+.vehiculos-heading h1 {
+  margin: 0;
+  color: #07152d;
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.vehiculos-heading p {
+  max-width: 700px;
+  margin: 10px 0 0;
+  color: #667085;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.vehiculos-header-meta {
+  min-width: 180px;
+  padding: 15px 20px;
+  border-left: 3px solid #c8102e;
+  background: #f5f7fa;
+}
+
+.vehiculos-header-meta span {
+  display: block;
+  margin-bottom: 6px;
+  color: #8a95a5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.vehiculos-header-meta strong {
+  color: #07152d;
+  font-size: 28px;
+  line-height: 1;
+}
+
+/* ---------- overview ---------- */
+
+.vehiculos-overview {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr 1fr;
+  margin-bottom: 28px;
+  border: 1px solid #dbe1e8;
+  background: #ffffff;
+}
+
+.vehiculos-overview-item {
+  min-height: 108px;
+  padding: 21px 24px;
+  border-right: 1px solid #e5e9ef;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.vehiculos-overview-item:last-child {
+  border-right: 0;
+}
+
+.vehiculos-overview-item span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.vehiculos-overview-item strong {
+  margin-top: 12px;
+  color: #07152d;
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.vehiculos-overview-item small {
+  margin-top: 10px;
+  color: #8993a3;
+  font-size: 11px;
+}
+
+.vehiculos-overview-total {
+  background: #07152d;
+}
+
+.vehiculos-overview-total span,
+.vehiculos-overview-total small {
+  color: #c9d1dd;
+}
+
+.vehiculos-overview-total strong {
+  color: #ffffff;
+}
+
+/* ---------- section ---------- */
+
+.vehiculos-section {
+  overflow: hidden;
+  border: 1px solid #dbe1e8;
+  background: #ffffff;
+  box-shadow: 0 5px 18px rgba(6, 20, 45, 0.035);
+}
+
+.vehiculos-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 30px 24px;
+  border-bottom: 1px solid #e4e8ee;
+}
+
+.vehiculos-section-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #8a95a5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.vehiculos-section-header h2 {
+  margin: 0;
+  color: #07152d;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.vehiculos-section-header p {
+  margin: 6px 0 0;
+  color: #778294;
+  font-size: 13px;
+}
+
+.vehiculos-section-count {
+  flex-shrink: 0;
+  color: #7c8796;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ---------- unit list ---------- */
+
+.vehiculos-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: #dfe4ea;
+}
+
+.vehiculo-operativo-card {
+  position: relative;
+  min-height: 245px;
+  padding: 23px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.vehiculo-operativo-card:hover {
+  z-index: 1;
+  background: #fbfcfd;
+  box-shadow: 0 8px 22px rgba(6, 20, 45, 0.08);
+  transform: translateY(-2px);
+}
+
+.vehiculo-operativo-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: transparent;
+  transition: background 0.18s ease;
+}
+
+.vehiculo-operativo-card:hover::before {
+  background: #c8102e;
+}
+
+/* ---------- card top ---------- */
+
+.vehiculo-operativo-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vehiculo-operativo-label {
+  color: #97a1af;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.vehiculo-operativo-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 27px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.vehiculo-operativo-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* estados */
+
+.vehiculo-operativo-status-operativo,
+.vehiculo-operativo-status-operativa {
+  color: #12663f;
+  background: #edf8f2;
+  border-color: #cfeadb;
+}
+
+.vehiculo-operativo-status-en_mantenimiento {
+  color: #815f17;
+  background: #fff8e8;
+  border-color: #eedfae;
+}
+
+.vehiculo-operativo-status-fuera_de_servicio,
+.vehiculo-operativo-status-fuera_servicio {
+  color: #a33030;
+  background: #fdf0f0;
+  border-color: #f1d1d1;
+}
+
+/* ---------- main identifier ---------- */
+
+.vehiculo-operativo-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 23px;
+}
+
+.vehiculo-operativo-indicativo {
+  display: block;
+  color: #07152d;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 31px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
+
+.vehiculo-operativo-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border: 1px solid #dfe4ea;
+  border-radius: 50%;
+  background: #f8f9fb;
+}
+
+.vehiculo-operativo-arrow span {
+  width: 7px;
+  height: 7px;
+  border-top: 1.5px solid #697586;
+  border-right: 1.5px solid #697586;
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+.vehiculo-operativo-card:hover .vehiculo-operativo-arrow span {
+  transform: translateX(2px) rotate(45deg);
+}
+
+.vehiculo-operativo-card h3 {
+  margin: 12px 0 20px;
+  color: #263244;
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 750;
+}
+
+/* ---------- information ---------- */
+
+.vehiculo-operativo-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #edf0f4;
+}
+
+.vehiculo-operativo-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.vehiculo-operativo-info span {
+  color: #929cab;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.vehiculo-operativo-info strong {
+  color: #425066;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ---------- footer ---------- */
+
+.vehiculo-operativo-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #edf0f4;
+}
+
+.vehiculo-operativo-footer > span:first-child {
+  color: #7b8798;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vehiculo-operativo-footer-arrow {
+  color: #c8102e;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ---------- loading / error ---------- */
+
+.vehiculos-state {
+  min-height: 270px;
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.vehiculos-state-line {
+  width: 46px;
+  height: 3px;
+  margin-bottom: 18px;
+  border-radius: 4px;
+  background: #c8102e;
+  animation: vehiculos-loading 1.1s ease-in-out infinite;
+}
+
+.vehiculos-state strong {
+  color: #172033;
+  font-size: 14px;
+}
+
+.vehiculos-state span {
+  margin-top: 6px;
+  color: #8a95a5;
+  font-size: 12px;
+}
+
+.vehiculos-state-error {
+  min-height: 220px;
+  align-items: flex-start;
+  text-align: left;
+  background: #fffafa;
+  border-top: 2px solid #c8102e;
+}
+
+.vehiculos-state-error strong {
+  color: #992b2b;
+}
+
+@keyframes vehiculos-loading {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scaleX(0.65);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1100px) {
+  .vehiculos-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vehiculos-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .vehiculos-overview-item:nth-child(2) {
+    border-right: 0;
+  }
+
+  .vehiculos-overview-item:nth-child(3),
+  .vehiculos-overview-item:nth-child(4) {
+    border-top: 1px solid #e5e9ef;
+  }
+}
+
+@media (max-width: 760px) {
+  .vehiculos-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .vehiculos-header-meta {
+    min-width: 0;
+  }
+
+  .vehiculos-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .vehiculos-overview-item {
+    border-right: 0;
+    border-bottom: 1px solid #e5e9ef;
+  }
+
+  .vehiculos-overview-item:last-child {
+    border-bottom: 0;
+  }
+
+  .vehiculos-overview-item:nth-child(3),
+  .vehiculos-overview-item:nth-child(4) {
+    border-top: 0;
+  }
+
+  .vehiculos-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 22px 18px;
+  }
+
+  .vehiculos-list {
+    grid-template-columns: 1fr;
+  }
+
+  .vehiculo-operativo-card {
+    min-height: 225px;
+  }
+}
+

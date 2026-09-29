@@ -1,0 +1,68 @@
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans/700.css";
+
+:root {
+  /* =========================
+     SIGMA · DESIGN TOKENS
+     ========================= */
+
+  /* Tipografía */
+  --sigma-font:
+    "IBM Plex Sans",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  --sigma-font-mono:
+    "Consolas",
+    "Courier New",
+    monospace;
+
+  /* Identidad */
+  --sigma-navy: #07152f;
+  --sigma-navy-2: #122442;
+  --sigma-red: #c8102e;
+  --sigma-yellow: #d9a514;
+
+  /* Estados */
+  --sigma-success: #2d7650;
+  --sigma-warning: #9a6b10;
+  --sigma-danger: #a02d3f;
+  --sigma-neutral: #788392;
+
+  /* Superficies */
+  --sigma-bg: #f3f5f8;
+  --sigma-surface: #ffffff;
+  --sigma-surface-soft: #f8fafb;
+
+  /* Bordes */
+  --sigma-border: #dfe5eb;
+  --sigma-border-soft: #e9edf1;
+
+  /* Texto */
+  --sigma-text: #182338;
+  --sigma-text-secondary: #46546a;
+  --sigma-text-muted: #7d8898;
+
+  /* Radios */
+  --sigma-radius-sm: 6px;
+  --sigma-radius-md: 8px;
+  --sigma-radius-lg: 11px;
+
+  /* Sombras */
+  --sigma-shadow-soft:
+    0 4px 16px rgba(6, 20, 45, 0.035);
+
+  /* Base */
+  font-family: var(--sigma-font);
+
+  color: var(--sigma-text);
+  background: var(--sigma-bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

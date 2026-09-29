@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 
 import { listarUnidades } from "../services/unidadService";
 import type { Unidad } from "../types/unidad";
@@ -38,72 +39,212 @@ function Dashboard() {
     (unidad) => unidad.estado === "MANTENIMIENTO",
   ).length;
 
+  const porcentajeOperativas =
+    unidades.length > 0
+      ? Math.round((unidadesOperativas / unidades.length) * 100)
+      : 0;
+
   return (
     <div className="dashboard">
-      <div className="page-header">
+      <header className="dashboard-header">
         <div>
-          <p className="page-eyebrow">RESUMEN OPERATIVO</p>
+          <p className="dashboard-kicker">SIGMA · CONTROL OPERATIVO</p>
+
           <h1>Dashboard</h1>
-          <p>Estado actual de las unidades de la Compañía 120.</p>
+
+          <p className="dashboard-description">
+            Estado actual de la Sección de Máquinas de la Compañía 120.
+          </p>
         </div>
-      </div>
 
-      {cargando && <p>Cargando unidades...</p>}
+        {!cargando && !error && (
+          <div className="dashboard-system-status">
+            <span className="system-status-dot" />
+            <div>
+              <strong>Sistema operativo</strong>
+              <span>Información actualizada</span>
+            </div>
+          </div>
+        )}
+      </header>
 
-      {error && <p>{error}</p>}
+      {cargando && (
+        <div className="dashboard-message">
+          <div className="dashboard-loader" />
+          <span>Cargando información operativa...</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="dashboard-message dashboard-message-error">
+          <strong>No se pudo cargar la información</strong>
+          <span>{error}</span>
+        </div>
+      )}
 
       {!cargando && !error && (
         <>
-          <section className="dashboard-summary">
-            <div className="summary-card">
+          <section className="dashboard-overview">
+            <div className="dashboard-overview-item">
               <span>Total de unidades</span>
               <strong>{unidades.length}</strong>
+              <small>registradas</small>
             </div>
 
-            <div className="summary-card">
+            <div className="dashboard-overview-item">
               <span>Operativas</span>
               <strong>{unidadesOperativas}</strong>
+              <small>disponibles actualmente</small>
             </div>
 
-            <div className="summary-card">
+            <div className="dashboard-overview-item">
               <span>Fuera de servicio</span>
               <strong>{unidadesFueraServicio}</strong>
+              <small>requieren atención</small>
             </div>
 
-            <div className="summary-card">
-              <span>En mantenimiento</span>
+            <div className="dashboard-overview-item">
+              <span>Mantenimiento</span>
               <strong>{unidadesMantenimiento}</strong>
+              <small>en proceso</small>
+            </div>
+
+            <div className="dashboard-overview-availability">
+              <span>Disponibilidad</span>
+              <strong>{porcentajeOperativas}%</strong>
+              <div className="availability-line">
+                <span style={{ width: `${porcentajeOperativas}%` }} />
+              </div>
             </div>
           </section>
 
-          <section className="dashboard-section">
-            <div className="section-header">
+          <section className="dashboard-main-section">
+            <div className="dashboard-section-heading">
               <div>
-                <h2>Unidades</h2>
-                <p>Estado actual de la flota registrada.</p>
+                <h2>Estado de las unidades</h2>
+              </div>
+
+              <NavLink to="/vehiculos" className="dashboard-link">
+                Ver vehículos
+                <span>→</span>
+              </NavLink>
+            </div>
+
+            <div className="dashboard-table-wrapper">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Indicativo</th>
+                    <th>Unidad</th>
+                    <th>Estado</th>
+                    <th>Situación</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {unidades.map((unidad) => (
+                    <tr key={unidad.id}>
+                      <td>
+                        <span className="dashboard-unit-code">
+                          {unidad.indicativo}
+                        </span>
+                      </td>
+
+                      <td>
+                        <strong>{unidad.nombre}</strong>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`dashboard-status dashboard-status-${unidad.estado.toLowerCase()}`}
+                        >
+                          <span className="dashboard-status-indicator" />
+                          {unidad.estado.replaceAll("_", " ")}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span className="dashboard-unit-situation">
+                          {unidad.estado === "OPERATIVA"
+                            ? "Disponible"
+                            : unidad.estado === "MANTENIMIENTO"
+                              ? "En mantenimiento"
+                              : "Fuera de servicio"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="dashboard-bottom">
+            <div className="dashboard-bottom-panel">
+              <div className="dashboard-panel-heading">
+                <div>
+                  <h2>Acciones rápidas</h2>
+                </div>
+              </div>
+
+              <div className="dashboard-actions">
+                <NavLink to="/vehiculos" className="dashboard-action">
+                  <div>
+                    <strong>Consultar vehículos</strong>
+                    <span>Estado y detalle de las unidades</span>
+                  </div>
+
+                  <span className="dashboard-action-arrow">→</span>
+                </NavLink>
+
+                <NavLink to="/recursos" className="dashboard-action">
+                  <div>
+                    <strong>Consultar recursos</strong>
+                    <span>Recursos registrados y su ubicación</span>
+                  </div>
+
+                  <span className="dashboard-action-arrow">→</span>
+                </NavLink>
+
+                <NavLink to="/ocurrencias" className="dashboard-action">
+                  <div>
+                    <strong>Consultar ocurrencias</strong>
+                    <span>Registro histórico de novedades</span>
+                  </div>
+
+                  <span className="dashboard-action-arrow">→</span>
+                </NavLink>
               </div>
             </div>
 
-            <div className="units-grid">
-              {unidades.map((unidad) => (
-                <article className="unit-card" key={unidad.id}>
-                  <div className="unit-card-header">
-                    <div>
-                      <span className="unit-indicativo">
-                        {unidad.indicativo}
-                      </span>
+            <div className="dashboard-bottom-panel dashboard-info-panel">
+              <div className="dashboard-panel-heading">
+                <div>
+                  <h2>Resumen operativo</h2>
+                </div>
+              </div>
 
-                      <h3>{unidad.nombre}</h3>
-                    </div>
+              <div className="dashboard-info-list">
+                <div>
+                  <span>Unidades registradas</span>
+                  <strong>{unidades.length}</strong>
+                </div>
 
-                    <span
-                      className={`unit-status unit-status-${unidad.estado.toLowerCase()}`}
-                    >
-                      {unidad.estado.replaceAll("_", " ")}
-                    </span>
-                  </div>
-                </article>
-              ))}
+                <div>
+                  <span>Unidades operativas</span>
+                  <strong>{unidadesOperativas}</strong>
+                </div>
+
+                <div>
+                  <span>Disponibilidad actual</span>
+                  <strong>{porcentajeOperativas}%</strong>
+                </div>
+              </div>
+
+              <p className="dashboard-info-note">
+                La información mostrada corresponde al estado actual registrado
+                en SIGMA.
+              </p>
             </div>
           </section>
         </>

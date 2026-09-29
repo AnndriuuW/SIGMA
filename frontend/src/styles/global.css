@@ -1,0 +1,84 @@
+/* =========================================================
+   SIGMA · GLOBAL
+   Reglas globales compartidas entre módulos
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--sigma-text);
+}
+
+p {
+  color: var(--sigma-text-secondary);
+}
+
+/* Etiquetas compartidas */
+.page-eyebrow,
+.inventario-section-label,
+.usuarios-section-label {
+  color: var(--sigma-navy-2);
+}
+
+/* Etiquetas de módulo */
+.vehiculos-kicker,
+.resources-kicker,
+.inventario-kicker,
+.ocurrencias-kicker,
+.usuarios-kicker,
+.perfil-kicker {
+  color: var(--sigma-red);
+}
+
+/* Textos secundarios */
+.vehiculos-heading p,
+.vehiculos-section-header p,
+.vehiculos-section-count,
+.vehiculos-overview-item small,
+.vehiculos-operativo-label,
+.resources-section-header p,
+.resources-result-count,
+.resources-table td,
+.inventario-section-header p,
+.inventario-result-count span,
+.inventario-unit-cell span,
+.inventario-table td,
+.ocurrencia-related-cell span,
+.ocurrencia-date-cell span,
+.ocurrencia-description-cell span,
+.ocurrencias-table td,
+.usuarios-section-header p,
+.usuarios-code-cell span,
+.usuarios-person-cell span,
+.usuarios-table td,
+.perfil-identity-info span,
+.perfil-section-label {
+  color: var(--sigma-text-secondary);
+}
+
+/* Títulos de sección */
+.vehiculos-section-header h2,
+.resources-section-header h2,
+.inventario-section-header h2,
+.ocurrencia-section-header h2,
+.usuarios-section-header h2,
+.perfil-panel-heading h2 {
+  color: var(--sigma-text);
+}
+
+/* Estados compartidos */
+.vehiculo-operativo-status-operativo,
+.vehiculo-operativo-status-operativa {
+  color: var(--sigma-success);
+}
+
+.vehiculo-operativo-status-en_mantenimiento {
+  color: var(--sigma-warning);
+}
+
+.vehiculo-operativo-status-fuera_de_servicio,
+.vehiculo-operativo-status-fuera_servicio {
+  color: var(--sigma-danger);
+}
+
