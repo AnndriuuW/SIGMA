@@ -53,7 +53,7 @@ function Dashboard() {
           <h1>Dashboard</h1>
 
           <p className="dashboard-description">
-            Estado actual de la Sección de Máquinas de la Compañía 120.
+            Estado actual de la Sección de Máquinas de la Compañía De Bomberos N°120.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ function Dashboard() {
 
               <NavLink to="/vehiculos" className="dashboard-link">
                 Ver vehículos
-                <span>→</span>
+                <span className="dashboard-link-arrow">→</span>
               </NavLink>
             </div>
 
