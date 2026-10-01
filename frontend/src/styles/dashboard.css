@@ -18,8 +18,8 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: 32px;
+  margin-bottom: 26px;
 }
 
 .dashboard-kicker {

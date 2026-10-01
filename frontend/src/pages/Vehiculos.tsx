@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { RefreshCw, Truck } from "lucide-react";
 
 import { listarUnidades } from "../services/unidadService";
 import type { Unidad } from "../types/unidad";
@@ -7,41 +8,39 @@ import type { Unidad } from "../types/unidad";
 function Vehiculos() {
   const [unidades, setUnidades] = useState<Unidad[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [actualizando, setActualizando] = useState(false);
   const [error, setError] = useState("");
+  const [ultimaActualizacion, setUltimaActualizacion] = useState(new Date());
 
-  useEffect(() => {
-    const cargarUnidades = async () => {
-      try {
+  const cargarUnidades = useCallback(async (esActualizacion = false) => {
+    try {
+      if (esActualizacion) {
+        setActualizando(true);
+      } else {
         setCargando(true);
-        setError("");
+      }
 
-        const data = await listarUnidades();
+      setError("");
 
-        setUnidades(data);
-      } catch {
-        setError("No se pudieron cargar las unidades.");
-      } finally {
+      const data = await listarUnidades();
+
+      setUnidades(data);
+      setUltimaActualizacion(new Date());
+    } catch {
+      setError("No se pudieron cargar las unidades.");
+    } finally {
+      if (esActualizacion) {
+        setActualizando(false);
+      } else {
         setCargando(false);
       }
-    };
-
-    cargarUnidades();
+    }
   }, []);
 
-  const resumen = useMemo(() => {
-    return {
-      total: unidades.length,
-      operativas: unidades.filter((unidad) =>
-        unidad.estado.toUpperCase().includes("OPER")
-      ).length,
-      mantenimiento: unidades.filter((unidad) =>
-        unidad.estado.toUpperCase().includes("MANT")
-      ).length,
-      fueraServicio: unidades.filter((unidad) =>
-        unidad.estado.toUpperCase().includes("FUERA")
-      ).length,
-    };
-  }, [unidades]);
+  useEffect(() => {
+    cargarUnidades();
+  }, [cargarUnidades]);
+
 
   return (
     <div className="vehiculos-page">
@@ -60,56 +59,66 @@ function Vehiculos() {
         </div>
 
         <div className="vehiculos-header-meta">
-          <span>UNIDADES REGISTRADAS</span>
-          <strong>{resumen.total}</strong>
+          <span>ACTUALIZADO</span>
+
+          <div className="vehiculos-header-meta-row">
+            <strong>
+              {ultimaActualizacion.toLocaleDateString("es-PE", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+              {" · "}
+              {ultimaActualizacion.toLocaleTimeString("es-PE", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
+            </strong>
+
+            <button
+              type="button"
+              className={`vehiculos-refresh-button ${
+                actualizando ? "is-refreshing" : ""
+              }`}
+              aria-label="Actualizar unidades"
+              title="Actualizar"
+              onClick={() => cargarUnidades(true)}
+              disabled={actualizando}
+            >
+              <RefreshCw size={18} />
+            </button>
+          </div>
         </div>
       </header>
 
-      <section className="vehiculos-overview">
-        <div className="vehiculos-overview-item vehiculos-overview-total">
-          <span>Total de unidades</span>
-          <strong>{resumen.total}</strong>
-          <small>Flota registrada</small>
-        </div>
-
-        <div className="vehiculos-overview-item">
-          <span>Operativas</span>
-          <strong>{resumen.operativas}</strong>
-          <small>Disponibles actualmente</small>
-        </div>
-
-        <div className="vehiculos-overview-item">
-          <span>En mantenimiento</span>
-          <strong>{resumen.mantenimiento}</strong>
-          <small>Unidades en revisión</small>
-        </div>
-
-        <div className="vehiculos-overview-item">
-          <span>Fuera de servicio</span>
-          <strong>{resumen.fueraServicio}</strong>
-          <small>No disponibles</small>
-        </div>
-      </section>
 
       <section className="vehiculos-section">
         <div className="vehiculos-section-header">
-          <div>
-            <span className="vehiculos-section-label">
-              FLOTA DE LA COMPAÑÍA
-            </span>
-
+          <div className="vehiculos-section-heading">
             <h2>Unidades registradas</h2>
 
             <p>
-              Selecciona una unidad para consultar su información
-              detallada.
+              Selecciona una unidad para consultar su información detallada.
             </p>
           </div>
 
-          <span className="vehiculos-section-count">
-            {unidades.length}{" "}
-            {unidades.length === 1 ? "unidad" : "unidades"}
-          </span>
+          <div className="vehiculos-legend" aria-label="Estados de las unidades">
+            <span className="vehiculos-legend-item">
+              <span className="vehiculos-legend-dot vehiculos-legend-dot-operativa" />
+              Operativa
+            </span>
+
+            <span className="vehiculos-legend-item">
+              <span className="vehiculos-legend-dot vehiculos-legend-dot-mantenimiento" />
+              En mantenimiento
+            </span>
+
+            <span className="vehiculos-legend-item">
+              <span className="vehiculos-legend-dot vehiculos-legend-dot-fuera" />
+              Fuera de servicio
+            </span>
+          </div>
         </div>
 
         {cargando && (
@@ -138,59 +147,58 @@ function Vehiculos() {
 
         {!cargando && !error && unidades.length > 0 && (
           <div className="vehiculos-list">
-            {unidades.map((unidad) => (
-              <Link
-                to={`/vehiculos/${unidad.id}`}
-                className="vehiculo-operativo-card"
-                key={unidad.id}
-              >
-                <div className="vehiculo-operativo-top">
-                  <span className="vehiculo-operativo-label">
-                    UNIDAD
-                  </span>
+            {unidades.map((unidad) => {
+              const estadoNormalizado = unidad.estado
+                .toLowerCase()
+                .replaceAll("_", "-");
 
-                  <span
-                    className={`vehiculo-operativo-status vehiculo-operativo-status-${unidad.estado.toLowerCase()}`}
-                  >
-                    <span className="vehiculo-operativo-dot" />
-                    {unidad.estado.replaceAll("_", " ")}
-                  </span>
-                </div>
+              const estadoTexto = unidad.estado.replaceAll("_", " ");
 
-                <div className="vehiculo-operativo-main">
-                  <span className="vehiculo-operativo-indicativo">
-                    {unidad.indicativo}
-                  </span>
+              return (
+                <Link
+                  to={`/vehiculos/${unidad.id}`}
+                  className="vehiculo-operativo-card"
+                  key={unidad.id}
+                >
+                  <div className="vehiculo-operativo-top">
+                    <span className="vehiculo-operativo-label">
+                      UNIDAD
+                    </span>
 
-                  <div className="vehiculo-operativo-arrow">
-                    <span />
-                  </div>
-                </div>
-
-                <h3>{unidad.nombre}</h3>
-
-                <div className="vehiculo-operativo-info">
-                  <div>
-                    <span>Indicativo</span>
-                    <strong>{unidad.indicativo}</strong>
+                    <span
+                      className={`vehiculo-operativo-status vehiculo-operativo-status-${estadoNormalizado}`}
+                    >
+                      <span className="vehiculo-operativo-dot" />
+                      {estadoTexto}
+                    </span>
                   </div>
 
-                  <div>
-                    <span>Estado actual</span>
-                    <strong>
-                      {unidad.estado.replaceAll("_", " ")}
-                    </strong>
-                  </div>
-                </div>
+                  <div className="vehiculo-operativo-visual">
+                    <Truck className="vehiculo-operativo-icon" />
 
-                <div className="vehiculo-operativo-footer">
-                  <span>Consultar detalle</span>
-                  <span className="vehiculo-operativo-footer-arrow">
-                    →
-                  </span>
-                </div>
-              </Link>
-            ))}
+                    <span className="vehiculo-operativo-visual-code">
+                      {unidad.indicativo}
+                    </span>
+                  </div>
+
+                  <div className="vehiculo-operativo-content">
+                    <h3>{unidad.nombre}</h3>
+
+                    <span className="vehiculo-operativo-state">
+                      {estadoTexto}
+                    </span>
+                  </div>
+
+                  <div className="vehiculo-operativo-footer">
+                    <span>Consultar detalle</span>
+
+                    <span className="vehiculo-operativo-footer-arrow">
+                      →
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>
