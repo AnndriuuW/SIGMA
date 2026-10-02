@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { FileDown, Trash2 } from "lucide-react";
+import { pdf } from "@react-pdf/renderer";
 
 import { listarUnidades } from "../services/unidadService";
 import { listarUbicaciones } from "../services/ubicacionService";
@@ -8,6 +10,7 @@ import { listarRecursos } from "../services/recursoService";
 import type { Unidad } from "../types/unidad";
 import type { Ubicacion } from "../types/ubicacion";
 import type { Recurso } from "../types/recurso";
+import VehiculoDetallePDF from "../components/VehiculoDetallePDF";
 
 const formatearTexto = (valor: string) =>
   valor.replaceAll("_", " ");
@@ -28,6 +31,8 @@ function VehiculoDetalle() {
     useState<number | null>(null);
 
   const [mostrarAsignar, setMostrarAsignar] = useState(false);
+  const [recursoARetirar, setRecursoARetirar] =
+  useState<Recurso | null>(null);
 
   useEffect(() => {
     const cargarDetalle = async () => {
@@ -190,8 +195,31 @@ const recursosFiltrados = !terminoBusqueda
      EXPORTAR REPORTE
      ========================================================= */
 
-  const exportarReporte = () => {
-    window.print();
+  const exportarReporte = async () => {
+    if (!unidad) return;
+
+    const blob = await pdf(
+      <VehiculoDetallePDF
+        unidad={unidad}
+        ubicaciones={ubicaciones}
+        recursos={recursos}
+      />
+    ).toBlob();
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `reporte-${unidad.nombre
+      .trim()
+      .replace(/\s+/g, "-")
+      .toLowerCase()}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
   };
 
   /* =========================================================
@@ -275,7 +303,7 @@ const recursosFiltrados = !terminoBusqueda
               className="vehiculo-detalle-button vehiculo-detalle-button-secondary"
               onClick={exportarReporte}
             >
-              <span>▧</span>
+              <FileDown size={17} strokeWidth={2.2} />
               Exportar reporte
             </button>
 
@@ -443,21 +471,13 @@ const recursosFiltrados = !terminoBusqueda
             <div className="vehiculo-detalle-inventory-head">
 
               <div className="vehiculo-detalle-inventory-columns">
-
                 <span>
                   RECURSO
                 </span>
-
                 <span>
                   CÓDIGO
                 </span>
-
-                <span>
-                  ESTADO
-                </span>
-
               </div>
-
             </div>
 
 
@@ -503,7 +523,11 @@ const recursosFiltrados = !terminoBusqueda
 
                     <button
                       type="button"
-                      className="vehiculo-detalle-location-block-header"
+                      className={`vehiculo-detalle-location-block-header ${
+                        ubicacionSeleccionada === ubicacion.id
+                          ? "is-active"
+                          : ""
+                      }`}
                       onClick={() =>
                         setUbicacionSeleccionada(
                           ubicacion.id,
@@ -562,39 +586,27 @@ const recursosFiltrados = !terminoBusqueda
                               className="vehiculo-detalle-resource"
                               key={recurso.id}
                             >
-
                               <div className="vehiculo-detalle-resource-name">
-
-                                <strong>
-                                  {recurso.nombre}
-                                </strong>
-
+                                <strong>{recurso.nombre}</strong>
                                 <span>
                                   {recurso.nombreTipoRecurso}
-
-                                  {recurso.marca
-                                    ? ` · ${recurso.marca}`
-                                    : ""}
+                                  {recurso.marca ? ` · ${recurso.marca}` : ""}
                                 </span>
-
                               </div>
-
 
                               <span className="vehiculo-detalle-resource-code">
                                 {recurso.codigo}
                               </span>
 
-
-                              <span
-                                className={`vehiculo-detalle-resource-status vehiculo-detalle-resource-${recurso.estado.toLowerCase()}`}
+                              <button
+                                type="button"
+                                className="vehiculo-detalle-resource-remove"
+                                onClick={() => setRecursoARetirar(recurso)}
+                                aria-label={`Retirar ${recurso.nombre}`}
+                                title="Retirar recurso"
                               >
-                                <span />
-
-                                {formatearTexto(
-                                  recurso.estado,
-                                )}
-                              </span>
-
+                                <Trash2 size={20} strokeWidth={2} />
+                              </button>
                             </div>
 
                           ),
@@ -761,9 +773,80 @@ const recursosFiltrados = !terminoBusqueda
           </div>
 
         </div>
+        )}
 
+              {recursoARetirar && (
+        <div
+          className="vehiculo-detalle-modal-overlay"
+          onClick={() => setRecursoARetirar(null)}
+        >
+          <div
+            className="vehiculo-detalle-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="vehiculo-detalle-modal-header">
+              <div>
+                <span>GESTIÓN DE EQUIPAMIENTO</span>
+
+                <h2>Retirar recurso</h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setRecursoARetirar(null)}
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="vehiculo-detalle-modal-body">
+              <p>
+                ¿Seguro que deseas retirar este recurso del{" "}
+                <strong>
+                  {
+                    ubicaciones.find(
+                      (ubicacion) =>
+                        ubicacion.id === recursoARetirar.idUbicacion,
+                    )?.nombre
+                  }
+                </strong>
+                ?
+              </p>
+
+              <div className="vehiculo-detalle-modal-resource">
+                <strong>{recursoARetirar.nombre}</strong>
+
+                <span>{recursoARetirar.codigo}</span>
+              </div>
+
+              <p>
+                El recurso no será eliminado de SIGMA. Solo dejará
+                de estar asignado a este casillero.
+              </p>
+            </div>
+
+            <div className="vehiculo-detalle-modal-footer">
+              <button
+                type="button"
+                className="vehiculo-detalle-modal-cancel"
+                onClick={() => setRecursoARetirar(null)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="vehiculo-detalle-modal-confirm"
+                onClick={() => setRecursoARetirar(null)}
+              >
+                Retirar recurso
+              </button>
+            </div>
+          </div>
+        </div>
+      
       )}
-
     </div>
   );
 }
