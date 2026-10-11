@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FileDown, Trash2 } from "lucide-react";
+import { ArrowLeftRight, FileDown, Trash2 } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
+import "../styles/vehiculo-detalle.css";
 
 import { listarUnidades } from "../services/unidadService";
 import { listarUbicaciones } from "../services/ubicacionService";
-import { listarRecursos } from "../services/recursoService";
+import {
+  cambiarUbicacionRecurso,
+  listarRecursos,
+} from "../services/recursoService";
 
 import type { Unidad } from "../types/unidad";
 import type { Ubicacion } from "../types/ubicacion";
 import type { Recurso } from "../types/recurso";
 import VehiculoDetallePDF from "../components/VehiculoDetallePDF";
 
-const formatearTexto = (valor: string) =>
-  valor.replaceAll("_", " ");
+const formatearTexto = (valor: string) => valor.replaceAll("_", " ");
 
 function VehiculoDetalle() {
   const { id } = useParams<{ id: string }>();
@@ -22,21 +25,31 @@ function VehiculoDetalle() {
   const [unidad, setUnidad] = useState<Unidad | null>(null);
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
   const [recursos, setRecursos] = useState<Recurso[]>([]);
+  const [recursosDisponibles, setRecursosDisponibles] = useState<Recurso[]>([]);
+  const [ubicacionSalaOperaciones, setUbicacionSalaOperaciones] =
+    useState<Ubicacion | null>(null);
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
-
   const [busqueda, setBusqueda] = useState("");
   const [ubicacionSeleccionada, setUbicacionSeleccionada] =
     useState<number | null>(null);
 
   const [mostrarAsignar, setMostrarAsignar] = useState(false);
-  const [recursoARetirar, setRecursoARetirar] =
-  useState<Recurso | null>(null);
+  const [recursoAAsignarId, setRecursoAAsignarId] = useState<number | null>(null);
+  const [ubicacionDestinoId, setUbicacionDestinoId] = useState<number | null>(null);
+
+  const [mostrarMover, setMostrarMover] = useState(false);
+  const [recursoAMover, setRecursoAMover] = useState<Recurso | null>(null);
+  const [ubicacionMoverId, setUbicacionMoverId] = useState<number | null>(null);
+
+  const [recursoARetirar, setRecursoARetirar] = useState<Recurso | null>(null);
 
   useEffect(() => {
+    let cancelado = false;
+
     const cargarDetalle = async () => {
-      if (!id || Number.isNaN(unidadId)) {
+      if (!id || !Number.isInteger(unidadId) || unidadId <= 0) {
         setError("La unidad indicada no es válida.");
         setCargando(false);
         return;
@@ -46,16 +59,15 @@ function VehiculoDetalle() {
         setCargando(true);
         setError("");
 
-        const [unidadesData, ubicacionesData, recursosData] =
-          await Promise.all([
-            listarUnidades(),
-            listarUbicaciones(),
-            listarRecursos(),
-          ]);
+        const [unidadesData, ubicacionesData, recursosData] = await Promise.all([
+          listarUnidades(),
+          listarUbicaciones(),
+          listarRecursos(),
+        ]);
 
-        const unidadEncontrada = unidadesData.find(
-          (item) => item.id === unidadId,
-        );
+        if (cancelado) return;
+
+        const unidadEncontrada = unidadesData.find((item) => item.id === unidadId);
 
         if (!unidadEncontrada) {
           setError("La unidad no fue encontrada.");
@@ -64,9 +76,20 @@ function VehiculoDetalle() {
 
         const ubicacionesDeUnidad = ubicacionesData.filter(
           (ubicacion) =>
-            ubicacion.idUnidad === unidadEncontrada.id &&
-            ubicacion.activo,
+            ubicacion.idUnidad === unidadEncontrada.id && ubicacion.activo,
         );
+
+        const salaOperaciones =
+          ubicacionesData.find(
+            (ubicacion) =>
+              ubicacion.tipo === "SALA_DE_OPERACIONES" && ubicacion.activo,
+          ) ?? null;
+
+        const recursosDeSalaOperaciones = salaOperaciones
+          ? recursosData.filter(
+              (recurso) => recurso.idUbicacion === salaOperaciones.id,
+            )
+          : [];
 
         const idsUbicaciones = new Set(
           ubicacionesDeUnidad.map((ubicacion) => ubicacion.id),
@@ -78,226 +101,274 @@ function VehiculoDetalle() {
 
         setUnidad(unidadEncontrada);
         setUbicaciones(ubicacionesDeUnidad);
+        setUbicacionSalaOperaciones(salaOperaciones);
         setRecursos(recursosDeUnidad);
+        setRecursosDisponibles(recursosDeSalaOperaciones);
 
-        if (ubicacionesDeUnidad.length > 0) {
-          setUbicacionSeleccionada(ubicacionesDeUnidad[0].id);
+        setUbicacionSeleccionada((actual) => {
+          if (actual !== null && idsUbicaciones.has(actual)) return actual;
+          return ubicacionesDeUnidad[0]?.id ?? null;
+        });
+      } catch (errorCarga) {
+        console.error("Error al cargar el detalle de la unidad:", errorCarga);
+        if (!cancelado) {
+          setError("No se pudo cargar la información de la unidad.");
         }
-      } catch {
-        setError("No se pudo cargar la información de la unidad.");
       } finally {
-        setCargando(false);
+        if (!cancelado) setCargando(false);
       }
     };
 
-    cargarDetalle();
+    void cargarDetalle();
+
+    return () => {
+      cancelado = true;
+    };
   }, [id, unidadId]);
 
-  /* =========================================================
-     CARGA
-     ========================================================= */
+  const terminoBusqueda = busqueda.trim().toLowerCase();
+
+  const recursosFiltrados = !terminoBusqueda
+    ? recursos
+    : recursos.filter((recurso) => {
+        const nombre = recurso.nombre?.toLowerCase() ?? "";
+        const codigo = recurso.codigo?.toLowerCase() ?? "";
+        const tipo = recurso.nombreTipoRecurso?.toLowerCase() ?? "";
+        const marca = recurso.marca?.toLowerCase() ?? "";
+
+        return (
+          nombre.includes(terminoBusqueda) ||
+          codigo.includes(terminoBusqueda) ||
+          tipo.includes(terminoBusqueda) ||
+          marca.includes(terminoBusqueda)
+        );
+      });
+
+  const recursosPorUbicacion = new Map<number, Recurso[]>();
+
+  recursos.forEach((recurso) => {
+    const actuales = recursosPorUbicacion.get(recurso.idUbicacion) ?? [];
+    recursosPorUbicacion.set(recurso.idUbicacion, [...actuales, recurso]);
+  });
+
+  const obtenerRecursosUbicacion = (ubicacionId: number) =>
+    recursosFiltrados.filter((recurso) => recurso.idUbicacion === ubicacionId);
+
+  const cerrarModalAsignar = () => {
+    setMostrarAsignar(false);
+    setRecursoAAsignarId(null);
+    setUbicacionDestinoId(null);
+  };
+
+  const cerrarModalMover = () => {
+    setMostrarMover(false);
+    setRecursoAMover(null);
+    setUbicacionMoverId(null);
+  };
+
+  const exportarReporte = async () => {
+    if (!unidad) return;
+
+    try {
+      const blob = await pdf(
+        <VehiculoDetallePDF
+          unidad={unidad}
+          ubicaciones={ubicaciones}
+          recursos={recursos}
+        />,
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `reporte-${unidad.nombre
+        .trim()
+        .replace(/\s+/g, "-")
+        .toLowerCase()}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (errorExportacion) {
+      console.error("Error al exportar el reporte:", errorExportacion);
+      window.alert("No se pudo exportar el reporte. Inténtalo nuevamente.");
+    }
+  };
+
+  const confirmarRetiroRecurso = async () => {
+    if (!recursoARetirar || !ubicacionSalaOperaciones) {
+      window.alert(
+        "No se encontró la Sala de Operaciones o el recurso seleccionado.",
+      );
+      return;
+    }
+
+    try {
+      const recursoActualizado = await cambiarUbicacionRecurso(
+        recursoARetirar.id,
+        ubicacionSalaOperaciones.id,
+      );
+
+      setRecursos((actuales) =>
+        actuales.filter((recurso) => recurso.id !== recursoActualizado.id),
+      );
+
+      setRecursosDisponibles((actuales) => [
+        ...actuales.filter((recurso) => recurso.id !== recursoActualizado.id),
+        recursoActualizado,
+      ]);
+
+      setRecursoARetirar(null);
+    } catch (errorRetiro) {
+      console.error("Error al retirar el recurso:", errorRetiro);
+      window.alert("No se pudo retirar el recurso. Inténtalo nuevamente.");
+    }
+  };
+
+  const confirmarAsignacionRecurso = async () => {
+    if (recursoAAsignarId === null || ubicacionDestinoId === null) {
+      window.alert("Selecciona un recurso y una ubicación de destino.");
+      return;
+    }
+
+    const ubicacionDestino = ubicaciones.find(
+      (ubicacion) => ubicacion.id === ubicacionDestinoId,
+    );
+
+    if (!ubicacionDestino) {
+      window.alert("La ubicación seleccionada no pertenece a esta unidad.");
+      return;
+    }
+
+    try {
+      const recursoActualizado = await cambiarUbicacionRecurso(
+        recursoAAsignarId,
+        ubicacionDestino.id,
+      );
+
+      setRecursos((actuales) => [
+        ...actuales.filter((recurso) => recurso.id !== recursoActualizado.id),
+        recursoActualizado,
+      ]);
+
+      setRecursosDisponibles((actuales) =>
+        actuales.filter((recurso) => recurso.id !== recursoActualizado.id),
+      );
+
+      setUbicacionSeleccionada(ubicacionDestino.id);
+      cerrarModalAsignar();
+    } catch (errorAsignacion) {
+      console.error("Error al asignar el recurso:", errorAsignacion);
+      window.alert("No se pudo asignar el recurso. Inténtalo nuevamente.");
+    }
+  };
+
+  const confirmarMoverRecurso = async () => {
+    if (!recursoAMover || ubicacionMoverId === null) {
+      window.alert("Selecciona una ubicación de destino.");
+      return;
+    }
+
+    const ubicacionDestino = ubicaciones.find(
+      (ubicacion) => ubicacion.id === ubicacionMoverId,
+    );
+
+    if (!ubicacionDestino) {
+      window.alert("La ubicación seleccionada no pertenece a esta unidad.");
+      return;
+    }
+
+    if (ubicacionDestino.id === recursoAMover.idUbicacion) {
+      window.alert("El recurso ya se encuentra en esa ubicación.");
+      return;
+    }
+
+    try {
+      const recursoActualizado = await cambiarUbicacionRecurso(
+        recursoAMover.id,
+        ubicacionDestino.id,
+      );
+
+      setRecursos((actuales) =>
+        actuales.map((recurso) =>
+          recurso.id === recursoActualizado.id ? recursoActualizado : recurso,
+        ),
+      );
+
+      setUbicacionSeleccionada(recursoActualizado.idUbicacion);
+      cerrarModalMover();
+    } catch (errorMovimiento) {
+      console.error("Error al mover el recurso:", errorMovimiento);
+      window.alert("No se pudo mover el recurso. Inténtalo nuevamente.");
+    }
+  };
 
   if (cargando) {
     return (
       <div className="vehiculo-detalle-page">
         <div className="vehiculo-detalle-loading">
           <div className="vehiculo-detalle-loading-line" />
-
           <strong>Cargando unidad</strong>
-
-          <span>
-            Obteniendo información operativa...
-          </span>
+          <span>Obteniendo información operativa...</span>
         </div>
       </div>
     );
   }
-
-  /* =========================================================
-     ERROR
-     ========================================================= */
 
   if (error || !unidad) {
     return (
       <div className="vehiculo-detalle-page">
-        <Link
-          to="/vehiculos"
-          className="vehiculo-detalle-back"
-        >
+        <Link to="/vehiculos" className="vehiculo-detalle-back">
           <span>←</span>
           Vehículos
         </Link>
-
         <div className="vehiculo-detalle-error">
-          <strong>
-            {error || "La unidad no fue encontrada."}
-          </strong>
+          <strong>{error || "La unidad no fue encontrada."}</strong>
         </div>
       </div>
     );
   }
 
-  /* =========================================================
-     RECURSOS POR UBICACIÓN
-     ========================================================= */
-
-  const recursosPorUbicacion = new Map<number, Recurso[]>();
-
-  recursos.forEach((recurso) => {
-    const actuales =
-      recursosPorUbicacion.get(recurso.idUbicacion) ?? [];
-
-    recursosPorUbicacion.set(recurso.idUbicacion, [
-      ...actuales,
-      recurso,
-    ]);
-  });
-
-
-  /* =========================================================
-     RECURSOS FILTRADOS POR UBICACIÓN
-     ========================================================= */
-
-  const obtenerRecursosUbicacion = (ubicacionId: number) => {
-    const recursosUbicacion =
-      recursosFiltrados.filter(
-        (recurso) =>
-          recurso.idUbicacion === ubicacionId,
-      );
-
-    return recursosUbicacion;
-  };
-
-  /* =========================================================
-     ESTADÍSTICAS
-     ========================================================= */
-
-  const terminoBusqueda = busqueda.trim().toLowerCase();
-
-const recursosFiltrados = !terminoBusqueda
-  ? recursos
-  : recursos.filter((recurso) => {
-      const nombre = recurso.nombre?.toLowerCase() ?? "";
-      const codigo = recurso.codigo?.toLowerCase() ?? "";
-      const tipo =
-        recurso.nombreTipoRecurso?.toLowerCase() ?? "";
-      const marca = recurso.marca?.toLowerCase() ?? "";
-
-      return (
-        nombre.includes(terminoBusqueda) ||
-        codigo.includes(terminoBusqueda) ||
-        tipo.includes(terminoBusqueda) ||
-        marca.includes(terminoBusqueda)
-      );
-    });
-
-  /* =========================================================
-     EXPORTAR REPORTE
-     ========================================================= */
-
-  const exportarReporte = async () => {
-    if (!unidad) return;
-
-    const blob = await pdf(
-      <VehiculoDetallePDF
-        unidad={unidad}
-        ubicaciones={ubicaciones}
-        recursos={recursos}
-      />
-    ).toBlob();
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `reporte-${unidad.nombre
-      .trim()
-      .replace(/\s+/g, "-")
-      .toLowerCase()}.pdf`;
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-  };
-
-  /* =========================================================
-     RENDER
-     ========================================================= */
-
   return (
     <div className="vehiculo-detalle-page">
-
-      {/* =====================================================
-          NAVEGACIÓN
-          ===================================================== */}
-
-      <Link
-        to="/vehiculos"
-        className="vehiculo-detalle-back"
-      >
+      <Link to="/vehiculos" className="vehiculo-detalle-back">
         <span>←</span>
         Vehículos
       </Link>
 
-
-      {/* =====================================================
-          CABECERA DE UNIDAD
-          ===================================================== */}
-
       <section className="vehiculo-detalle-header">
-
         <div className="vehiculo-detalle-header-main">
-
           <span className="vehiculo-detalle-eyebrow">
             SIGMA · DETALLE DE UNIDAD
           </span>
-
           <div className="vehiculo-detalle-title-row">
-
             <div>
-              <h1>
-                {unidad.nombre}
-              </h1>
-
+              <h1>{unidad.nombre}</h1>
               <p>
-                Información operativa y equipamiento asociado
-                a la unidad.
+                Información operativa y equipamiento asociado a la unidad.
               </p>
             </div>
           </div>
         </div>
 
-
-        {/* ===================================================
-            DATOS RÁPIDOS
-            =================================================== */}
-
         <div className="vehiculo-detalle-header-actions">
-
           <div className="vehiculo-detalle-quick-info">
-
             <div>
               <span>INDICATIVO</span>
               <strong>{unidad.indicativo}</strong>
             </div>
-
             <div>
               <span>UBICACIONES</span>
               <strong>{ubicaciones.length}</strong>
             </div>
-
             <div>
               <span>RECURSOS</span>
               <strong>{recursos.length}</strong>
             </div>
-
           </div>
 
-
           <div className="vehiculo-detalle-actions">
-
             <button
               type="button"
               className="vehiculo-detalle-button vehiculo-detalle-button-secondary"
@@ -306,7 +377,6 @@ const recursosFiltrados = !terminoBusqueda
               <FileDown size={17} strokeWidth={2.2} />
               Exportar reporte
             </button>
-
             <button
               type="button"
               className="vehiculo-detalle-button vehiculo-detalle-button-primary"
@@ -315,251 +385,117 @@ const recursosFiltrados = !terminoBusqueda
               <span>+</span>
               Asignar recurso
             </button>
-
           </div>
-
         </div>
-
       </section>
 
-
-      {/* =====================================================
-          CONTENIDO
-          ===================================================== */}
-
       <section className="vehiculo-detalle-content">
-
         <header className="vehiculo-detalle-content-header">
-
           <div>
-
-            <h2>
-              Ubicaciones y recursos
-            </h2>
-
-            <p>
-              Espacios registrados y equipamiento asociado
-              a esta unidad.
-            </p>
-
+            <h2>Ubicaciones y recursos</h2>
+            <p>Espacios registrados y equipamiento asociado a esta unidad.</p>
           </div>
-
           <div className="vehiculo-detalle-total">
-
-            <strong>
-              {recursos.length}
-            </strong>
-
-            <span>
-              {recursos.length === 1
-                ? "RECURSO"
-                : "RECURSOS"}
-            </span>
-
+            <strong>{recursos.length}</strong>
+            <span>{recursos.length === 1 ? "RECURSO" : "RECURSOS"}</span>
           </div>
-
         </header>
 
-
         <div className="vehiculo-detalle-workspace">
-
-          {/* =================================================
-              PANEL IZQUIERDO
-              ================================================= */}
-
           <aside className="vehiculo-detalle-sidebar">
-
             <div className="vehiculo-detalle-search">
-
-              <label>
-                BUSCAR RECURSO
-              </label>
-
+              <label htmlFor="buscar-recurso">BUSCAR RECURSO</label>
               <input
+                id="buscar-recurso"
                 type="text"
                 value={busqueda}
-                onChange={(event) =>
-                  setBusqueda(event.target.value)
-                }
+                onChange={(event) => setBusqueda(event.target.value)}
                 placeholder="Nombre o código"
               />
-
             </div>
 
-
             <div className="vehiculo-detalle-location-list">
-
               <div className="vehiculo-detalle-location-list-header">
-
-                <span>
-                  UBICACIONES
-                </span>
-
-                <strong>
-                  {ubicaciones.length}
-                </strong>
-
+                <span>UBICACIONES</span>
+                <strong>{ubicaciones.length}</strong>
               </div>
 
-
               <div className="vehiculo-detalle-location-items">
-
                 {ubicaciones.map((ubicacion, index) => {
-
                   const cantidad =
-                    recursosPorUbicacion.get(
-                      ubicacion.id,
-                    )?.length ?? 0;
-
-                  const seleccionada =
-                    ubicacionSeleccionada ===
-                    ubicacion.id;
+                    recursosPorUbicacion.get(ubicacion.id)?.length ?? 0;
+                  const seleccionada = ubicacionSeleccionada === ubicacion.id;
 
                   return (
                     <button
                       type="button"
                       key={ubicacion.id}
                       className={`vehiculo-detalle-location-item ${
-                        seleccionada
-                          ? "is-selected"
-                          : ""
+                        seleccionada ? "is-selected" : ""
                       }`}
-                      onClick={() =>
-                        setUbicacionSeleccionada(
-                          ubicacion.id,
-                        )
-                      }
+                      onClick={() => setUbicacionSeleccionada(ubicacion.id)}
                     >
-
                       <span className="vehiculo-detalle-location-number">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-
                       <span className="vehiculo-detalle-location-name">
                         {ubicacion.nombre}
                       </span>
-
                       <span
                         className={`vehiculo-detalle-location-amount ${
-                          cantidad > 0
-                            ? "has-resources"
-                            : ""
+                          cantidad > 0 ? "has-resources" : ""
                         }`}
                       >
-                        {cantidad > 0
-                          ? cantidad
-                          : "—"}
+                        {cantidad > 0 ? cantidad : "—"}
                       </span>
-
                     </button>
                   );
                 })}
-
               </div>
-
             </div>
-
           </aside>
 
-
-          {/* =================================================
-              PANEL DERECHO
-              ================================================= */}
-
           <div className="vehiculo-detalle-inventory">
-
             <div className="vehiculo-detalle-inventory-head">
-
               <div className="vehiculo-detalle-inventory-columns">
-                <span>
-                  RECURSO
-                </span>
-                <span>
-                  CÓDIGO
-                </span>
+                <span>RECURSO</span>
+                <span>CÓDIGO</span>
               </div>
             </div>
 
-
             <div className="vehiculo-detalle-inventory-list">
-
               {ubicaciones.map((ubicacion, index) => {
-
-                const recursosUbicacion =
-                  obtenerRecursosUbicacion(
-                    ubicacion.id,
-                  );
-
-                const estaSeleccionada =
-                  ubicacionSeleccionada ===
-                  ubicacion.id;
-
-                /*
-                 * Si existe una búsqueda activa,
-                 * no ocultamos la ubicación.
-                 * Simplemente mostramos solo sus
-                 * recursos coincidentes.
-                 */
-
+                const recursosUbicacion = obtenerRecursosUbicacion(ubicacion.id);
+                const estaSeleccionada = ubicacionSeleccionada === ubicacion.id;
                 const mostrarUbicacion =
-                  busqueda.trim().length === 0 ||
-                  recursosUbicacion.length > 0;
+                  terminoBusqueda.length === 0 || recursosUbicacion.length > 0;
 
-                if (!mostrarUbicacion) {
-                  return null;
-                }
+                if (!mostrarUbicacion) return null;
 
                 return (
                   <article
                     key={ubicacion.id}
                     className={`vehiculo-detalle-location-block ${
-                      estaSeleccionada
-                        ? "is-active"
-                        : ""
+                      estaSeleccionada ? "is-active" : ""
                     }`}
                   >
-
-                    {/* CABECERA UBICACIÓN */}
-
                     <button
                       type="button"
                       className={`vehiculo-detalle-location-block-header ${
-                        ubicacionSeleccionada === ubicacion.id
-                          ? "is-active"
-                          : ""
+                        estaSeleccionada ? "is-active" : ""
                       }`}
-                      onClick={() =>
-                        setUbicacionSeleccionada(
-                          ubicacion.id,
-                        )
-                      }
+                      onClick={() => setUbicacionSeleccionada(ubicacion.id)}
                     >
-
                       <div className="vehiculo-detalle-location-block-title">
-
                         <span className="vehiculo-detalle-block-number">
                           {String(index + 1).padStart(2, "0")}
                         </span>
-
                         <div>
-
-                          <span>
-                            {formatearTexto(
-                              ubicacion.tipo,
-                            )}
-                          </span>
-
-                          <strong>
-                            {ubicacion.nombre}
-                          </strong>
-
+                          <span>{formatearTexto(ubicacion.tipo)}</span>
+                          <strong>{ubicacion.nombre}</strong>
                         </div>
-
                       </div>
-
-
                       <span className="vehiculo-detalle-block-count">
-
                         {recursosUbicacion.length > 0
                           ? `${recursosUbicacion.length} ${
                               recursosUbicacion.length === 1
@@ -567,37 +503,42 @@ const recursosFiltrados = !terminoBusqueda
                                 : "recursos"
                             }`
                           : "Sin recursos"}
-
                       </span>
-
                     </button>
 
-
-                    {/* RECURSOS */}
-
                     {recursosUbicacion.length > 0 && (
-
                       <div className="vehiculo-detalle-resource-list">
-
-                        {recursosUbicacion.map(
-                          (recurso) => (
-
-                            <div
-                              className="vehiculo-detalle-resource"
-                              key={recurso.id}
-                            >
-                              <div className="vehiculo-detalle-resource-name">
-                                <strong>{recurso.nombre}</strong>
-                                <span>
-                                  {recurso.nombreTipoRecurso}
-                                  {recurso.marca ? ` · ${recurso.marca}` : ""}
-                                </span>
-                              </div>
-
-                              <span className="vehiculo-detalle-resource-code">
-                                {recurso.codigo}
+                        {recursosUbicacion.map((recurso) => (
+                          <div
+                            className="vehiculo-detalle-resource"
+                            key={recurso.id}
+                          >
+                            <div className="vehiculo-detalle-resource-name">
+                              <strong>{recurso.nombre}</strong>
+                              <span>
+                                {recurso.nombreTipoRecurso}
+                                {recurso.marca ? ` · ${recurso.marca}` : ""}
                               </span>
+                            </div>
 
+                            <span className="vehiculo-detalle-resource-code">
+                              {recurso.codigo}
+                            </span>
+
+                            <div className="vehiculo-detalle-resource-actions">
+                              <button
+                                type="button"
+                                className="vehiculo-detalle-resource-move"
+                                onClick={() => {
+                                  setRecursoAMover(recurso);
+                                  setUbicacionMoverId(null);
+                                  setMostrarMover(true);
+                                }}
+                                aria-label={`Mover ${recurso.nombre}`}
+                                title="Mover recurso"
+                              >
+                                <ArrowLeftRight size={20} strokeWidth={2} />
+                              </button>
                               <button
                                 type="button"
                                 className="vehiculo-detalle-resource-remove"
@@ -608,174 +549,213 @@ const recursosFiltrados = !terminoBusqueda
                                 <Trash2 size={20} strokeWidth={2} />
                               </button>
                             </div>
-
-                          ),
-                        )}
-
+                          </div>
+                        ))}
                       </div>
-
                     )}
-
                   </article>
                 );
               })}
 
-
-              {/* SIN RESULTADOS */}
-
-              {busqueda.trim() !== "" &&
-                recursosFiltrados.length === 0 && (
-
-                  <div className="vehiculo-detalle-no-results">
-
-                    <strong>
-                      No se encontraron recursos
-                    </strong>
-
-                    <span>
-                      Intenta buscar por nombre o código.
-                    </span>
-
-                  </div>
-
-                )}
-
+              {terminoBusqueda !== "" && recursosFiltrados.length === 0 && (
+                <div className="vehiculo-detalle-no-results">
+                  <strong>No se encontraron recursos</strong>
+                  <span>Intenta buscar por nombre o código.</span>
+                </div>
+              )}
             </div>
-
           </div>
-
         </div>
-
       </section>
 
-
-      {/* =====================================================
-          MODAL ASIGNAR RECURSO
-          ===================================================== */}
-
-      {mostrarAsignar && (
-
-        <div
-          className="vehiculo-detalle-modal-overlay"
-          onClick={() =>
-            setMostrarAsignar(false)
-          }
-        >
-
+      {/* MODAL MOVER RECURSO */}
+      {mostrarMover && recursoAMover && (
+        <div className="vehiculo-detalle-modal-overlay" onClick={cerrarModalMover}>
           <div
             className="vehiculo-detalle-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
-
             <div className="vehiculo-detalle-modal-header">
-
               <div>
-
-                <span>
-                  GESTIÓN DE EQUIPAMIENTO
-                </span>
-
-                <h2>
-                  Asignar recurso
-                </h2>
-
+                <span>GESTIÓN DE EQUIPAMIENTO</span>
+                <h2>Mover recurso</h2>
               </div>
-
               <button
                 type="button"
-                onClick={() =>
-                  setMostrarAsignar(false)
-                }
+                onClick={cerrarModalMover}
                 aria-label="Cerrar"
               >
                 ×
               </button>
-
             </div>
 
-
             <div className="vehiculo-detalle-modal-body">
-
               <p>
-                La asignación de recursos se realizará
-                seleccionando el recurso y la ubicación
-                correspondiente.
+                Selecciona la nueva ubicación de este recurso dentro de la misma
+                unidad.
               </p>
 
-              <label>
-                RECURSO
-              </label>
+              <div className="vehiculo-detalle-modal-resource">
+                <strong>{recursoAMover.nombre}</strong>
+                <span>{recursoAMover.codigo}</span>
+              </div>
 
-              <select defaultValue="">
+              <label>UBICACIÓN ACTUAL</label>
+              <p>
+                <strong>
+                  {ubicaciones.find(
+                    (ubicacion) => ubicacion.id === recursoAMover.idUbicacion,
+                  )?.nombre ?? "Ubicación actual"}
+                </strong>
+              </p>
+
+              <label htmlFor="ubicacion-mover-recurso">NUEVA UBICACIÓN</label>
+              <select
+                id="ubicacion-mover-recurso"
+                value={ubicacionMoverId ?? ""}
+                onChange={(event) =>
+                  setUbicacionMoverId(
+                    event.target.value ? Number(event.target.value) : null,
+                  )
+                }
+              >
+                <option value="" disabled>
+                  {ubicaciones.some(
+                    (ubicacion) => ubicacion.id !== recursoAMover.idUbicacion,
+                  )
+                    ? "Seleccionar ubicación de destino"
+                    : "No hay otras ubicaciones disponibles"}
+                </option>
+                {ubicaciones
+                  .filter((ubicacion) => ubicacion.id !== recursoAMover.idUbicacion)
+                  .map((ubicacion) => (
+                    <option key={ubicacion.id} value={ubicacion.id}>
+                      {ubicacion.nombre}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="vehiculo-detalle-modal-footer">
+              <button
+                type="button"
+                className="vehiculo-detalle-modal-cancel"
+                onClick={cerrarModalMover}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="vehiculo-detalle-modal-confirm"
+                onClick={confirmarMoverRecurso}
+                disabled={
+                  ubicacionMoverId === null ||
+                  ubicacionMoverId === recursoAMover.idUbicacion
+                }
+              >
+                Confirmar movimiento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ASIGNAR RECURSO */}
+      {mostrarAsignar && (
+        <div
+          className="vehiculo-detalle-modal-overlay"
+          onClick={cerrarModalAsignar}
+        >
+          <div
+            className="vehiculo-detalle-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="vehiculo-detalle-modal-header">
+              <div>
+                <span>GESTIÓN DE EQUIPAMIENTO</span>
+                <h2>Asignar recurso</h2>
+              </div>
+              <button
+                type="button"
+                onClick={cerrarModalAsignar}
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="vehiculo-detalle-modal-body">
+              <p>
+                Selecciona un recurso disponible en la Sala de Operaciones y la
+                ubicación de esta unidad donde se asignará.
+              </p>
+
+              <label htmlFor="recurso-a-asignar">RECURSO</label>
+              <select
+                id="recurso-a-asignar"
+                value={recursoAAsignarId ?? ""}
+                onChange={(event) =>
+                  setRecursoAAsignarId(
+                    event.target.value ? Number(event.target.value) : null,
+                  )
+                }
+              >
                 <option value="" disabled>
                   Seleccionar recurso
                 </option>
-
-                {recursos.map((recurso) => (
-                  <option
-                    key={recurso.id}
-                    value={recurso.id}
-                  >
+                {recursosDisponibles.map((recurso) => (
+                  <option key={recurso.id} value={recurso.id}>
                     {recurso.nombre} · {recurso.codigo}
                   </option>
                 ))}
               </select>
 
-
-              <label>
-                UBICACIÓN
-              </label>
-
-              <select defaultValue="">
+              <label htmlFor="ubicacion-asignacion">UBICACIÓN DE DESTINO</label>
+              <select
+                id="ubicacion-asignacion"
+                value={ubicacionDestinoId ?? ""}
+                onChange={(event) =>
+                  setUbicacionDestinoId(
+                    event.target.value ? Number(event.target.value) : null,
+                  )
+                }
+              >
                 <option value="" disabled>
                   Seleccionar ubicación
                 </option>
-
                 {ubicaciones.map((ubicacion) => (
-                  <option
-                    key={ubicacion.id}
-                    value={ubicacion.id}
-                  >
+                  <option key={ubicacion.id} value={ubicacion.id}>
                     {ubicacion.nombre}
                   </option>
                 ))}
               </select>
-
             </div>
 
-
             <div className="vehiculo-detalle-modal-footer">
-
               <button
                 type="button"
                 className="vehiculo-detalle-modal-cancel"
-                onClick={() =>
-                  setMostrarAsignar(false)
-                }
+                onClick={cerrarModalAsignar}
               >
                 Cancelar
               </button>
-
               <button
                 type="button"
                 className="vehiculo-detalle-modal-confirm"
-                onClick={() =>
-                  setMostrarAsignar(false)
+                onClick={confirmarAsignacionRecurso}
+                disabled={
+                  recursoAAsignarId === null || ubicacionDestinoId === null
                 }
               >
                 Asignar recurso
               </button>
-
             </div>
-
           </div>
-
         </div>
-        )}
+      )}
 
-              {recursoARetirar && (
+      {/* MODAL RETIRAR RECURSO */}
+      {recursoARetirar && (
         <div
           className="vehiculo-detalle-modal-overlay"
           onClick={() => setRecursoARetirar(null)}
@@ -787,10 +767,8 @@ const recursosFiltrados = !terminoBusqueda
             <div className="vehiculo-detalle-modal-header">
               <div>
                 <span>GESTIÓN DE EQUIPAMIENTO</span>
-
                 <h2>Retirar recurso</h2>
               </div>
-
               <button
                 type="button"
                 onClick={() => setRecursoARetirar(null)}
@@ -802,27 +780,27 @@ const recursosFiltrados = !terminoBusqueda
 
             <div className="vehiculo-detalle-modal-body">
               <p>
-                ¿Seguro que deseas retirar este recurso del{" "}
+                ¿Deseas retirar este recurso de{" "}
                 <strong>
-                  {
-                    ubicaciones.find(
-                      (ubicacion) =>
-                        ubicacion.id === recursoARetirar.idUbicacion,
-                    )?.nombre
-                  }
+                  {ubicaciones.find(
+                    (ubicacion) => ubicacion.id === recursoARetirar.idUbicacion,
+                  )?.nombre ?? "su ubicación actual"}
+                </strong>{" "}
+                y trasladarlo a{" "}
+                <strong>
+                  {ubicacionSalaOperaciones?.nombre ?? "Sala de Operaciones"}
                 </strong>
                 ?
               </p>
 
               <div className="vehiculo-detalle-modal-resource">
                 <strong>{recursoARetirar.nombre}</strong>
-
                 <span>{recursoARetirar.codigo}</span>
               </div>
 
               <p>
-                El recurso no será eliminado de SIGMA. Solo dejará
-                de estar asignado a este casillero.
+                El recurso seguirá registrado en SIGMA y conservará su estado
+                actual. Solo cambiará su ubicación.
               </p>
             </div>
 
@@ -834,18 +812,16 @@ const recursosFiltrados = !terminoBusqueda
               >
                 Cancelar
               </button>
-
               <button
                 type="button"
                 className="vehiculo-detalle-modal-confirm"
-                onClick={() => setRecursoARetirar(null)}
+                onClick={confirmarRetiroRecurso}
               >
                 Retirar recurso
               </button>
             </div>
           </div>
         </div>
-      
       )}
     </div>
   );
