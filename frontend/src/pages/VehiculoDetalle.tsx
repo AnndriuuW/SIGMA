@@ -1,24 +1,40 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeftRight, FileDown, Trash2 } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ChevronDown,
+  ChevronRight,
+  FileDown,
+  History,
+  Trash2,
+} from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import "../styles/vehiculo-detalle.css";
+import { useAuth } from "../context/AuthContext";
 
 import { listarUnidades } from "../services/unidadService";
 import { listarUbicaciones } from "../services/ubicacionService";
 import {
   cambiarUbicacionRecurso,
   listarRecursos,
+  obtenerHistorialRecurso,
 } from "../services/recursoService";
 
 import type { Unidad } from "../types/unidad";
 import type { Ubicacion } from "../types/ubicacion";
 import type { Recurso } from "../types/recurso";
+import type { MovimientoRecurso } from "../types/movimientoRecurso";
 import VehiculoDetallePDF from "../components/VehiculoDetallePDF";
 
 const formatearTexto = (valor: string) => valor.replaceAll("_", " ");
 
 function VehiculoDetalle() {
+  const { usuario } = useAuth();
+  const puedeVerHistorial = [
+    "ADMINISTRADOR",
+    "JEFE_MAQUINAS",
+    "PERSONAL_ADJUNTO",
+  ].includes(usuario?.rol ?? "");
   const { id } = useParams<{ id: string }>();
   const unidadId = Number(id);
 
@@ -34,6 +50,16 @@ function VehiculoDetalle() {
   const [busqueda, setBusqueda] = useState("");
   const [ubicacionSeleccionada, setUbicacionSeleccionada] =
     useState<number | null>(null);
+  const [ubicacionesPlegadas, setUbicacionesPlegadas] = useState<Set<number>>(
+    () => new Set(),
+  );
+
+  const seleccionarUbicacion = (ubicacionId: number) => {
+    setUbicacionSeleccionada(ubicacionId);
+    document
+      .getElementById(`ubicacion-inventario-${ubicacionId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const [mostrarAsignar, setMostrarAsignar] = useState(false);
   const [recursoAAsignarId, setRecursoAAsignarId] = useState<number | null>(null);
@@ -44,6 +70,11 @@ function VehiculoDetalle() {
   const [ubicacionMoverId, setUbicacionMoverId] = useState<number | null>(null);
 
   const [recursoARetirar, setRecursoARetirar] = useState<Recurso | null>(null);
+
+  const [recursoHistorial, setRecursoHistorial] = useState<Recurso | null>(null);
+  const [movimientosHistorial, setMovimientosHistorial] = useState<MovimientoRecurso[]>([]);
+  const [cargandoHistorial, setCargandoHistorial] = useState(false);
+  const [errorHistorial, setErrorHistorial] = useState("");
 
   useEffect(() => {
     let cancelado = false;
@@ -304,6 +335,42 @@ function VehiculoDetalle() {
     }
   };
 
+  const abrirHistorialRecurso = async (recurso: Recurso) => {
+    setRecursoHistorial(recurso);
+    setMovimientosHistorial([]);
+    setErrorHistorial("");
+    setCargandoHistorial(true);
+
+    try {
+      const movimientos = await obtenerHistorialRecurso(recurso.id);
+      setMovimientosHistorial(movimientos);
+    } catch (errorHistorialCarga) {
+      console.error("Error al cargar el historial:", errorHistorialCarga);
+      setErrorHistorial(
+        "No se pudo cargar el historial de movimientos. Inténtalo nuevamente.",
+      );
+    } finally {
+      setCargandoHistorial(false);
+    }
+  };
+
+  const cerrarHistorialRecurso = () => {
+    setRecursoHistorial(null);
+    setMovimientosHistorial([]);
+    setErrorHistorial("");
+    setCargandoHistorial(false);
+  };
+
+  const formatearFechaHora = (fechaHora: string) => {
+    const fecha = new Date(fechaHora);
+    if (Number.isNaN(fecha.getTime())) return fechaHora.replace("T", " ");
+
+    return new Intl.DateTimeFormat("es-PE", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(fecha);
+  };
+
   if (cargando) {
     return (
       <div className="vehiculo-detalle-page">
@@ -433,7 +500,15 @@ function VehiculoDetalle() {
                       className={`vehiculo-detalle-location-item ${
                         seleccionada ? "is-selected" : ""
                       }`}
-                      onClick={() => setUbicacionSeleccionada(ubicacion.id)}
+                      onClick={() => {
+                        seleccionarUbicacion(ubicacion.id);
+                        setUbicacionesPlegadas((actuales) => {
+                          if (!actuales.has(ubicacion.id)) return actuales;
+                          const siguientes = new Set(actuales);
+                          siguientes.delete(ubicacion.id);
+                          return siguientes;
+                        });
+                      }}
                     >
                       <span className="vehiculo-detalle-location-number">
                         {String(index + 1).padStart(2, "0")}
@@ -459,7 +534,6 @@ function VehiculoDetalle() {
             <div className="vehiculo-detalle-inventory-head">
               <div className="vehiculo-detalle-inventory-columns">
                 <span>RECURSO</span>
-                <span>CÓDIGO</span>
               </div>
             </div>
 
@@ -467,6 +541,7 @@ function VehiculoDetalle() {
               {ubicaciones.map((ubicacion, index) => {
                 const recursosUbicacion = obtenerRecursosUbicacion(ubicacion.id);
                 const estaSeleccionada = ubicacionSeleccionada === ubicacion.id;
+                const estaPlegada = ubicacionesPlegadas.has(ubicacion.id);
                 const mostrarUbicacion =
                   terminoBusqueda.length === 0 || recursosUbicacion.length > 0;
 
@@ -475,6 +550,7 @@ function VehiculoDetalle() {
                 return (
                   <article
                     key={ubicacion.id}
+                    id={`ubicacion-inventario-${ubicacion.id}`}
                     className={`vehiculo-detalle-location-block ${
                       estaSeleccionada ? "is-active" : ""
                     }`}
@@ -484,7 +560,28 @@ function VehiculoDetalle() {
                       className={`vehiculo-detalle-location-block-header ${
                         estaSeleccionada ? "is-active" : ""
                       }`}
-                      onClick={() => setUbicacionSeleccionada(ubicacion.id)}
+                      onClick={() => {
+                        seleccionarUbicacion(ubicacion.id);
+                        if (recursosUbicacion.length > 0) {
+                          setUbicacionesPlegadas((actuales) => {
+                            const siguientes = new Set(actuales);
+                            if (siguientes.has(ubicacion.id)) {
+                              siguientes.delete(ubicacion.id);
+                            } else {
+                              siguientes.add(ubicacion.id);
+                            }
+                            return siguientes;
+                          });
+                        }
+                      }}
+                      aria-expanded={
+                        recursosUbicacion.length > 0 ? !estaPlegada : undefined
+                      }
+                      aria-label={
+                        recursosUbicacion.length === 0
+                          ? `${ubicacion.nombre}, sin recursos`
+                          : `${estaPlegada ? "Mostrar" : "Ocultar"} recursos de ${ubicacion.nombre}`
+                      }
                     >
                       <div className="vehiculo-detalle-location-block-title">
                         <span className="vehiculo-detalle-block-number">
@@ -504,9 +601,24 @@ function VehiculoDetalle() {
                             }`
                           : "Sin recursos"}
                       </span>
+                      {recursosUbicacion.length > 0 && (
+                        estaPlegada ? (
+                          <ChevronRight
+                            className="vehiculo-detalle-location-toggle"
+                            size={20}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <ChevronDown
+                            className="vehiculo-detalle-location-toggle"
+                            size={20}
+                            aria-hidden="true"
+                          />
+                        )
+                      )}
                     </button>
 
-                    {recursosUbicacion.length > 0 && (
+                    {recursosUbicacion.length > 0 && !estaPlegada && (
                       <div className="vehiculo-detalle-resource-list">
                         {recursosUbicacion.map((recurso) => (
                           <div
@@ -526,6 +638,17 @@ function VehiculoDetalle() {
                             </span>
 
                             <div className="vehiculo-detalle-resource-actions">
+                              {puedeVerHistorial && (
+                                <button
+                                  type="button"
+                                  className="vehiculo-detalle-resource-history"
+                                  onClick={() => void abrirHistorialRecurso(recurso)}
+                                  aria-label={`Ver historial de ${recurso.nombre}`}
+                                  title="Historial de movimientos"
+                                >
+                                  <History size={20} strokeWidth={2} />
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 className="vehiculo-detalle-resource-move"
@@ -818,6 +941,117 @@ function VehiculoDetalle() {
                 onClick={confirmarRetiroRecurso}
               >
                 Retirar recurso
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* MODAL HISTORIAL DE MOVIMIENTOS */}
+      {recursoHistorial && (
+        <div
+          className="vehiculo-detalle-modal-overlay"
+          onClick={cerrarHistorialRecurso}
+        >
+          <div
+            className="vehiculo-detalle-modal vehiculo-detalle-modal-history"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="vehiculo-detalle-historial-title"
+          >
+            <div className="vehiculo-detalle-modal-header">
+              <div>
+                <span>TRAZABILIDAD DE EQUIPAMIENTO</span>
+                <h2 id="vehiculo-detalle-historial-title">Historial de movimientos</h2>
+              </div>
+              <button
+                type="button"
+                onClick={cerrarHistorialRecurso}
+                aria-label="Cerrar historial"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="vehiculo-detalle-modal-body vehiculo-detalle-history-body">
+              <div className="vehiculo-detalle-modal-resource">
+                <strong>{recursoHistorial.nombre}</strong>
+                <span>{recursoHistorial.codigo}</span>
+              </div>
+
+              {cargandoHistorial && (
+                <div className="vehiculo-detalle-history-message" role="status">
+                  <div className="vehiculo-detalle-loading-line" />
+                  <span>Cargando movimientos...</span>
+                </div>
+              )}
+
+              {!cargandoHistorial && errorHistorial && (
+                <div className="vehiculo-detalle-history-error" role="alert">
+                  <span>{errorHistorial}</span>
+                  <button
+                    type="button"
+                    className="vehiculo-detalle-modal-cancel"
+                    onClick={() => void abrirHistorialRecurso(recursoHistorial)}
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              )}
+
+              {!cargandoHistorial && !errorHistorial && movimientosHistorial.length === 0 && (
+                <div className="vehiculo-detalle-history-message">
+                  <History size={24} strokeWidth={1.8} />
+                  <strong>Sin movimientos registrados</strong>
+                  <span>Este recurso todavía no tiene movimientos en el historial.</span>
+                </div>
+              )}
+
+              {!cargandoHistorial && !errorHistorial && movimientosHistorial.length > 0 && (
+                <div className="vehiculo-detalle-history-list">
+                  {movimientosHistorial.map((movimiento) => (
+                    <article className="vehiculo-detalle-history-item" key={movimiento.id}>
+                      <div className="vehiculo-detalle-history-route">
+                        <div className="vehiculo-detalle-history-location">
+                          <span>ORIGEN</span>
+                          <strong>{movimiento.nombreUbicacionAnterior ?? "Sin ubicación anterior"}</strong>
+                          {movimiento.nombreUnidadAnterior && (
+                            <small>{movimiento.nombreUnidadAnterior}</small>
+                          )}
+                        </div>
+                        <ArrowLeftRight size={20} strokeWidth={2} aria-hidden="true" />
+                        <div className="vehiculo-detalle-history-location">
+                          <span>DESTINO</span>
+                          <strong>{movimiento.nombreUbicacionNueva}</strong>
+                          {movimiento.nombreUnidadNueva && (
+                            <small>{movimiento.nombreUnidadNueva}</small>
+                          )}
+                        </div>
+                      </div>
+                      <div className="vehiculo-detalle-history-metadata">
+                        <span>
+                          <strong>Responsable:</strong> {movimiento.nombreUsuario || "Usuario no disponible"}
+                          {movimiento.codigoUsuario ? ` · ${movimiento.codigoUsuario}` : ""}
+                        </span>
+                        <time dateTime={movimiento.fechaHora}>
+                          {formatearFechaHora(movimiento.fechaHora)}
+                        </time>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="vehiculo-detalle-modal-footer">
+              <button
+                type="button"
+                className="vehiculo-detalle-modal-cancel"
+                onClick={cerrarHistorialRecurso}
+              >
+                Cerrar
               </button>
             </div>
           </div>

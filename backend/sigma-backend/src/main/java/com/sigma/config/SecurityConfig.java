@@ -274,10 +274,18 @@ public class SecurityConfig {
                 )
 
 
-                // =====================================================
-                // RECURSOS
-                // =====================================================
+                // Historial de movimientos:
+                // solo Administrador, Jefe de Máquinas y Personal Adjunto.
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/recursos/*/historial"
+                ).hasAnyRole(
+                    "ADMINISTRADOR",
+                    "JEFE_MAQUINAS",
+                    "PERSONAL_ADJUNTO"
+                )
 
+                // Consulta general de recursos: incluye Bombero.
                 .requestMatchers(
                     HttpMethod.GET,
                     "/recursos",
