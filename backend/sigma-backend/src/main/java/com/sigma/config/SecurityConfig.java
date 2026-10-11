@@ -365,6 +365,16 @@ public class SecurityConfig {
                     "BOMBERO"
                 )
 
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/ocurrencias/*/leida"
+                ).hasAnyRole(
+                    "ADMINISTRADOR",
+                    "JEFE_MAQUINAS",
+                    "PERSONAL_ADJUNTO",
+                    "BOMBERO"
+                )
+
 
                 // =====================================================
                 // INVENTARIOS

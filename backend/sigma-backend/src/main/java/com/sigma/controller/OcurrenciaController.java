@@ -45,4 +45,11 @@ public class OcurrenciaController {
                 ocurrenciaService.buscarPorId(id)
         );
     }
+
+    @PutMapping("/{id}/leida")
+    public ResponseEntity<OcurrenciaResponse> marcarComoLeida(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(ocurrenciaService.marcarComoLeida(id));
+    }
 }

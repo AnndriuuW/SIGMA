@@ -1,18 +1,48 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { obtenerOcurrencia } from "../services/ocurrenciaService";
+import { useAuth } from "../context/AuthContext";
+import {
+  marcarOcurrenciaLeida,
+  obtenerOcurrencia,
+} from "../services/ocurrenciaService";
 import type { Ocurrencia } from "../types/ocurrencia";
 
 export default function OcurrenciaDetalle() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { usuario } = useAuth();
 
   const ocurrenciaId = Number(id);
 
   const [ocurrencia, setOcurrencia] = useState<Ocurrencia | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [marcandoLeida, setMarcandoLeida] = useState(false);
+  const [errorLectura, setErrorLectura] = useState("");
+
+  const esDestinatario =
+    Boolean(usuario?.codigo) &&
+    usuario?.codigo === ocurrencia?.codigoDestinatario;
+  const puedeMarcarLeida =
+    esDestinatario || usuario?.rol === "ADMINISTRADOR";
+
+  const marcarComoLeida = async () => {
+    if (!ocurrencia || marcandoLeida) return;
+
+    try {
+      setMarcandoLeida(true);
+      setErrorLectura("");
+      setOcurrencia(await marcarOcurrenciaLeida(ocurrencia.id));
+    } catch (error: any) {
+      setErrorLectura(
+        error?.response?.data?.message ||
+          "No se pudo actualizar el estado de lectura.",
+      );
+    } finally {
+      setMarcandoLeida(false);
+    }
+  };
 
   useEffect(() => {
     if (!ocurrenciaId || Number.isNaN(ocurrenciaId)) {
@@ -44,10 +74,20 @@ export default function OcurrenciaDetalle() {
   }, [ocurrenciaId]);
 
   const formatearFecha = (fecha: string) => {
-    return new Date(fecha).toLocaleString("es-PE", {
-      dateStyle: "long",
-      timeStyle: "short",
-    });
+    const valor = new Date(fecha);
+
+    return {
+      fecha: valor.toLocaleDateString("es-PE", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+      hora: valor.toLocaleTimeString("es-PE", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }),
+    };
   };
 
   const obtenerTipoTexto = (tipo: string) => {
@@ -106,57 +146,71 @@ export default function OcurrenciaDetalle() {
     );
   }
 
+  const fechaHora = formatearFecha(ocurrencia.fechaHora);
+
   return (
     <div className="ocurrencia-detalle-page">
-      <Link
-        to="/ocurrencias"
-        className="ocurrencia-detalle-back"
-      >
-        <span>←</span>
-        Volver a ocurrencias
-      </Link>
+      <div className="ocurrencia-detalle-topbar">
+        <Link to="/ocurrencias" className="ocurrencia-detalle-back">
+          <span>←</span>
+          Volver a ocurrencias
+        </Link>
+        <span className="ocurrencia-detalle-breadcrumb">
+          BITÁCORA <span>/</span> DETALLE
+        </span>
+      </div>
 
       <header className="ocurrencia-detalle-header">
         <div className="ocurrencia-detalle-heading">
           <span className="ocurrencia-detalle-kicker">
-            SIGMA · REGISTRO DE NOVEDAD
+            SIGMA · BITÁCORA OPERATIVA
           </span>
 
-          <h1>
-            Ocurrencia #{ocurrencia.id}
-          </h1>
+          <div className="ocurrencia-detalle-title-row">
+            <h1>Ocurrencia <span>#{ocurrencia.id}</span></h1>
+
+            <div
+              className={`ocurrencia-detalle-reading ocurrencia-detalle-reading-${
+                ocurrencia.leida ? "read" : "unread"
+              }`}
+              role="status"
+              aria-label={`Estado de lectura: ${ocurrencia.leida ? "Leída" : "No leída"}`}
+            >
+              <div className="ocurrencia-detalle-reading-status">
+                <span className="ocurrencia-detalle-reading-dot" />
+                <strong>{ocurrencia.leida ? "Leída" : "No leída"}</strong>
+              </div>
+
+              {puedeMarcarLeida && !ocurrencia.leida && (
+                <button
+                  type="button"
+                  className="ocurrencia-detalle-mark-read"
+                  onClick={marcarComoLeida}
+                  disabled={marcandoLeida}
+                >
+                  {marcandoLeida ? "Guardando..." : "Marcar como leída"}
+                </button>
+              )}
+
+              {errorLectura && (
+                <p className="ocurrencia-detalle-reading-error" role="alert">
+                  {errorLectura}
+                </p>
+              )}
+            </div>
+          </div>
 
           <p>
             Detalle de la novedad registrada en el sistema.
           </p>
         </div>
-
-        <div
-          className={`ocurrencia-detalle-reading ocurrencia-detalle-reading-${
-            ocurrencia.leida ? "read" : "unread"
-          }`}
-        >
-          <span className="ocurrencia-detalle-reading-dot" />
-
-          <div>
-            <small>ESTADO DE LECTURA</small>
-
-            <strong>
-              {ocurrencia.leida
-                ? "Leída"
-                : "No leída"}
-            </strong>
-          </div>
-        </div>
       </header>
 
       <section className="ocurrencia-detalle-meta">
-        <div className="ocurrencia-detalle-meta-item">
+        <div className="ocurrencia-detalle-meta-item ocurrencia-detalle-meta-date">
           <span>FECHA Y HORA</span>
-
-          <strong>
-            {formatearFecha(ocurrencia.fechaHora)}
-          </strong>
+          <strong>{fechaHora.fecha}</strong>
+          <small>{fechaHora.hora}</small>
         </div>
 
         <div className="ocurrencia-detalle-meta-item">
@@ -200,13 +254,9 @@ export default function OcurrenciaDetalle() {
       <section className="ocurrencia-detalle-content">
         <div className="ocurrencia-detalle-section-header">
           <div>
-            <span>CONTENIDO DEL REGISTRO</span>
+            <span>RELATO DE LA NOVEDAD</span>
 
             <h2>Descripción</h2>
-
-            <p>
-              Detalle de la ocurrencia registrada.
-            </p>
           </div>
         </div>
 
@@ -220,13 +270,9 @@ export default function OcurrenciaDetalle() {
         <section className="ocurrencia-detalle-content">
           <div className="ocurrencia-detalle-section-header">
             <div>
-              <span>REFERENCIA DEL REGISTRO</span>
+              <span>ELEMENTO VINCULADO</span>
 
-              <h2>Relacionado</h2>
-
-              <p>
-                Elemento asociado a esta ocurrencia.
-              </p>
+              <h2>Referencia</h2>
             </div>
           </div>
 
@@ -254,24 +300,6 @@ export default function OcurrenciaDetalle() {
         </section>
       )}
 
-      <footer className="ocurrencia-detalle-footer">
-        <div>
-          <span>REGISTRO DE LECTURA</span>
-
-          <strong>
-            {ocurrencia.leida
-              ? "Esta ocurrencia ha sido leída."
-              : "Esta ocurrencia permanece sin leer."}
-          </strong>
-        </div>
-
-        <Link
-          to="/ocurrencias"
-          className="ocurrencia-detalle-footer-button"
-        >
-          Volver al registro
-        </Link>
-      </footer>
     </div>
   );
 }

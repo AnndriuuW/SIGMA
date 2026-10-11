@@ -65,18 +65,11 @@ function Recursos() {
     (recurso) => recurso.estado === "EN_MANTENIMIENTO",
   ).length;
 
-  const porcentajeOperativo =
-    recursos.length > 0
-      ? Math.round((operativos / recursos.length) * 100)
-      : 0;
-
   return (
     <div className="recursos-page">
       <header className="recursos-header">
         <div className="recursos-heading">
-          <span className="recursos-kicker">
-            SIGMA · CONTROL DE EQUIPAMIENTO
-          </span>
+          <span className="recursos-kicker">INVENTARIO DE LA COMPAÑÍA</span>
 
           <h1>Recursos</h1>
 
@@ -86,58 +79,7 @@ function Recursos() {
           </p>
         </div>
 
-        <div className="recursos-status-box">
-          <span className="recursos-status-label">
-            REGISTRO ACTUAL
-          </span>
-
-          <strong>{recursos.length}</strong>
-
-          <span>
-            {recursos.length === 1 ? "recurso registrado" : "recursos registrados"}
-          </span>
-        </div>
       </header>
-
-      <section className="recursos-overview">
-        <div className="recursos-overview-item recursos-overview-total">
-          <div>
-            <span>Total de recursos</span>
-            <strong>{recursos.length}</strong>
-          </div>
-
-          <small>Equipamiento registrado</small>
-        </div>
-
-        <div className="recursos-overview-item">
-          <div>
-            <span>Operativos</span>
-            <strong>{operativos}</strong>
-          </div>
-
-          <small>
-            {porcentajeOperativo}% del total
-          </small>
-        </div>
-
-        <div className="recursos-overview-item">
-          <div>
-            <span>En mantenimiento</span>
-            <strong>{mantenimiento}</strong>
-          </div>
-
-          <small>Requieren seguimiento</small>
-        </div>
-
-        <div className="recursos-overview-item">
-          <div>
-            <span>Dañados</span>
-            <strong>{danados}</strong>
-          </div>
-
-          <small>Fuera de condición operativa</small>
-        </div>
-      </section>
 
       <section className="recursos-panel">
         <div className="recursos-panel-header">
@@ -171,6 +113,7 @@ function Recursos() {
               type="text"
               value={busqueda}
               onChange={(event) => setBusqueda(event.target.value)}
+              aria-label="Buscar recursos"
               placeholder="Buscar recurso, código, tipo o ubicación..."
               className="recursos-search"
             />
@@ -187,9 +130,10 @@ function Recursos() {
             )}
           </div>
 
-          <div className="recursos-filters">
+          <div className="recursos-filters" role="group" aria-label="Filtrar por estado">
             <button
               type="button"
+              aria-pressed={filtroEstado === "TODOS"}
               className={
                 filtroEstado === "TODOS"
                   ? "recursos-filter active"
@@ -198,10 +142,12 @@ function Recursos() {
               onClick={() => setFiltroEstado("TODOS")}
             >
               Todos
+              <span className="recursos-filter-count">{recursos.length}</span>
             </button>
 
             <button
               type="button"
+              aria-pressed={filtroEstado === "OPERATIVO"}
               className={
                 filtroEstado === "OPERATIVO"
                   ? "recursos-filter active"
@@ -210,10 +156,12 @@ function Recursos() {
               onClick={() => setFiltroEstado("OPERATIVO")}
             >
               Operativos
+              <span className="recursos-filter-count">{operativos}</span>
             </button>
 
             <button
               type="button"
+              aria-pressed={filtroEstado === "DANADO"}
               className={
                 filtroEstado === "DANADO"
                   ? "recursos-filter active"
@@ -222,10 +170,12 @@ function Recursos() {
               onClick={() => setFiltroEstado("DANADO")}
             >
               Dañados
+              <span className="recursos-filter-count">{danados}</span>
             </button>
 
             <button
               type="button"
+              aria-pressed={filtroEstado === "EN_MANTENIMIENTO"}
               className={
                 filtroEstado === "EN_MANTENIMIENTO"
                   ? "recursos-filter active"
@@ -235,7 +185,8 @@ function Recursos() {
                 setFiltroEstado("EN_MANTENIMIENTO")
               }
             >
-              Mantenimiento
+              En mantenimiento
+              <span className="recursos-filter-count">{mantenimiento}</span>
             </button>
           </div>
         </div>

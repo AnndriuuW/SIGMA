@@ -125,6 +125,32 @@ public class OcurrenciaService {
                 return convertirAResponse(ocurrencia);
         }
 
+        public OcurrenciaResponse marcarComoLeida(Long id) {
+
+                Ocurrencia ocurrencia = ocurrenciaRepository.findById(id)
+                                .orElseThrow(() -> new RecursoNoEncontradoException(
+                                                "Ocurrencia no encontrada"));
+                Usuario usuarioAutenticado = obtenerUsuarioAutenticado();
+                boolean esAdministrador = usuarioAutenticado.getRol() != null
+                                && "ADMINISTRADOR".equals(
+                                                usuarioAutenticado.getRol().getNombre());
+                boolean esDestinatario = ocurrencia.getDestinatario() != null
+                                && ocurrencia.getDestinatario().getCodigo()
+                                                .equals(usuarioAutenticado.getCodigo());
+
+                if (!esAdministrador && !esDestinatario) {
+                        throw new ReglaNegocioException(
+                                        "Solo el administrador o el destinatario pueden marcar esta ocurrencia como leída");
+                }
+
+                if (!Boolean.TRUE.equals(ocurrencia.getLeida())) {
+                        ocurrencia.setLeida(true);
+                        ocurrencia = ocurrenciaRepository.save(ocurrencia);
+                }
+
+                return convertirAResponse(ocurrencia);
+        }
+
         private void validarRelacionTipo(
                         TipoOcurrencia tipo,
                         Long idUnidad,

@@ -140,6 +140,11 @@ export default function Usuarios() {
     }
   };
 
+  const obtenerIniciales = (usuario: Usuario) => {
+    const iniciales = `${usuario.nombres.trim().charAt(0)}${usuario.apellidos.trim().charAt(0)}`;
+    return iniciales.toUpperCase() || "U";
+  };
+
   const obtenerRolId = (rol: string) => {
     return (
       ROLES.find(
@@ -332,9 +337,7 @@ export default function Usuarios() {
     <div className="usuarios-page">
       <div className="usuarios-header">
         <div className="usuarios-header-copy">
-          <span className="usuarios-kicker">
-            SIGMA · ADMINISTRACIÓN DEL SISTEMA
-          </span>
+          <span className="usuarios-kicker">DIRECTORIO OPERATIVO</span>
 
           <div className="usuarios-title-row">
             <div>
@@ -345,10 +348,6 @@ export default function Usuarios() {
               </p>
             </div>
 
-            <div className="usuarios-record-summary">
-              <span>REGISTROS</span>
-              <strong>{usuarios.length}</strong>
-            </div>
           </div>
         </div>
 
@@ -386,35 +385,22 @@ export default function Usuarios() {
             <strong>{usuariosInactivos}</strong>
           </div>
         </div>
-
-        <div className="usuarios-status-divider" />
-
-        <div className="usuarios-status-caption">
-          <span>CONTROL DE ACCESO</span>
-          <strong>
-            {usuariosActivos} cuentas habilitadas actualmente
-          </strong>
-        </div>
       </div>
 
       <section className="usuarios-panel">
         <div className="usuarios-panel-header">
           <div>
             <span className="usuarios-section-label">
-              DIRECTORIO DE PERSONAL
+              EQUIPO SIGMA
             </span>
 
-            <h2>Usuarios registrados</h2>
+            <h2>Personal y permisos</h2>
 
             <p>
-              Consulta, modifica o administra el estado de las cuentas.
+              Revisa las cuentas, sus roles y el acceso al sistema.
             </p>
           </div>
 
-          <div className="usuarios-result-count">
-            <strong>{usuariosFiltrados.length}</strong>
-            <span>resultado{usuariosFiltrados.length === 1 ? "" : "s"}</span>
-          </div>
         </div>
 
         <div className="usuarios-toolbar">
@@ -424,6 +410,7 @@ export default function Usuarios() {
             <input
               type="text"
               placeholder="Buscar por código, nombre o rol..."
+              aria-label="Buscar usuarios"
               value={busqueda}
               onChange={(event) => setBusqueda(event.target.value)}
             />
@@ -440,9 +427,14 @@ export default function Usuarios() {
             )}
           </div>
 
-          <div className="usuarios-filter-tabs">
+          <div
+            className="usuarios-filter-tabs"
+            role="group"
+            aria-label="Filtrar por estado"
+          >
             <button
               type="button"
+              aria-pressed={filtroEstado === "TODOS"}
               className={
                 filtroEstado === "TODOS"
                   ? "usuarios-filter-tab active"
@@ -455,6 +447,7 @@ export default function Usuarios() {
 
             <button
               type="button"
+              aria-pressed={filtroEstado === "ACTIVOS"}
               className={
                 filtroEstado === "ACTIVOS"
                   ? "usuarios-filter-tab active"
@@ -467,6 +460,7 @@ export default function Usuarios() {
 
             <button
               type="button"
+              aria-pressed={filtroEstado === "INACTIVOS"}
               className={
                 filtroEstado === "INACTIVOS"
                   ? "usuarios-filter-tab active"
@@ -516,111 +510,80 @@ export default function Usuarios() {
         {!cargando &&
           !error &&
           usuariosFiltrados.length > 0 && (
-            <div className="usuarios-table-wrapper">
-              <table className="usuarios-table">
-                <thead>
-                  <tr>
-                    <th>IDENTIFICACIÓN</th>
-                    <th>PERSONAL</th>
-                    <th>ROL OPERATIVO</th>
-                    <th>ESTADO</th>
-                    <th className="usuarios-table-action-head">
-                      ACCIONES
-                    </th>
-                  </tr>
-                </thead>
+            <div className="usuarios-directory">
+              {usuariosFiltrados.map((usuario) => (
+                <article
+                  className={`usuarios-member-card ${obtenerClaseRol(usuario.rol)} ${
+                    usuario.activo ? "is-active" : "is-inactive"
+                  }`}
+                  key={usuario.codigo}
+                >
+                  <div className="usuarios-member-mark" aria-hidden="true">
+                    {obtenerIniciales(usuario)}
+                  </div>
 
-                <tbody>
-                  {usuariosFiltrados.map((usuario) => (
-                    <tr key={usuario.codigo}>
-                      <td>
-                        <div className="usuarios-code-cell">
-                          <div>
-                            <strong>{usuario.codigo}</strong>
-                            <span>ID de acceso</span>
-                          </div>
-                        </div>
-                      </td>
+                  <div className="usuarios-member-info">
+                    <strong className="usuarios-member-name">
+                      {usuario.nombres} {usuario.apellidos}
+                    </strong>
+                    <span className="usuarios-member-code">
+                      CÓDIGO <b>{usuario.codigo}</b>
+                    </span>
+                  </div>
 
-                      <td>
-                        <div className="usuarios-person-cell">
-                          <strong>
-                            {usuario.nombres} {usuario.apellidos}
-                          </strong>
+                  <div className="usuarios-member-access">
+                    <span
+                      className={`usuarios-role-badge ${obtenerClaseRol(usuario.rol)}`}
+                    >
+                      {obtenerNombreRol(usuario.rol)}
+                    </span>
+                    <span
+                      className={
+                        usuario.activo
+                          ? "usuarios-state-badge active"
+                          : "usuarios-state-badge inactive"
+                      }
+                    >
+                      <span className="usuarios-state-badge-dot" />
+                      {usuario.activo ? "Activo" : "Inactivo"}
+                    </span>
+                  </div>
 
-                          <span>Cuenta de usuario SIGMA</span>
-                        </div>
-                      </td>
+                  <div className="usuarios-actions">
+                    <button
+                      type="button"
+                      className="usuarios-action edit"
+                      onClick={() => abrirEditarUsuario(usuario)}
+                    >
+                      Editar
+                    </button>
 
-                      <td>
-                        <span
-                          className={`usuarios-role-badge ${obtenerClaseRol(
-                            usuario.rol,
-                          )}`}
-                        >
-                          {obtenerNombreRol(usuario.rol)}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span
-                          className={
-                            usuario.activo
-                              ? "usuarios-state-badge active"
-                              : "usuarios-state-badge inactive"
-                          }
-                        >
-                          <span className="usuarios-state-badge-dot" />
-
-                          {usuario.activo ? "Activo" : "Inactivo"}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="usuarios-actions">
-                          <button
-                            type="button"
-                            className="usuarios-action edit"
-                            onClick={() => abrirEditarUsuario(usuario)}
-                          >
-                            Editar
-                          </button>
-
-                          <span className="usuarios-action-separator" />
-
-                          {usuario.activo ? (
-                            <button
-                              type="button"
-                              className="usuarios-action danger"
-                              onClick={() => handleDesactivar(usuario)}
-                              disabled={
-                                procesandoEstado === usuario.codigo
-                              }
-                            >
-                              {procesandoEstado === usuario.codigo
-                                ? "Procesando..."
-                                : "Desactivar"}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="usuarios-action activate"
-                              onClick={() => handleActivar(usuario)}
-                              disabled={
-                                procesandoEstado === usuario.codigo
-                              }
-                            >
-                              {procesandoEstado === usuario.codigo
-                                ? "Procesando..."
-                                : "Activar"}
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    {usuario.activo ? (
+                      <button
+                        type="button"
+                        className="usuarios-action danger"
+                        onClick={() => handleDesactivar(usuario)}
+                        disabled={procesandoEstado === usuario.codigo}
+                      >
+                        {procesandoEstado === usuario.codigo
+                          ? "Procesando..."
+                          : "Desactivar"}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="usuarios-action activate"
+                        onClick={() => handleActivar(usuario)}
+                        disabled={procesandoEstado === usuario.codigo}
+                      >
+                        {procesandoEstado === usuario.codigo
+                          ? "Procesando..."
+                          : "Activar"}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              ))}
             </div>
           )}
       </section>

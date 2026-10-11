@@ -47,30 +47,34 @@ export default function Ocurrencias() {
   const ocurrenciasFiltradas = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
 
-    return ocurrencias.filter((ocurrencia) => {
-      const coincideBusqueda =
-        !texto ||
-        ocurrencia.descripcion.toLowerCase().includes(texto) ||
-        ocurrencia.nombreInformante.toLowerCase().includes(texto) ||
-        ocurrencia.nombreDestinatario.toLowerCase().includes(texto) ||
-        (ocurrencia.nombreUnidad ?? "")
-          .toLowerCase()
-          .includes(texto) ||
-        (ocurrencia.codigoRecurso ?? "")
-          .toLowerCase()
-          .includes(texto);
+    return ocurrencias
+      .filter((ocurrencia) => {
+        const coincideBusqueda =
+          !texto ||
+          ocurrencia.descripcion.toLowerCase().includes(texto) ||
+          ocurrencia.nombreInformante.toLowerCase().includes(texto) ||
+          ocurrencia.nombreDestinatario.toLowerCase().includes(texto) ||
+          (ocurrencia.nombreUnidad ?? "")
+            .toLowerCase()
+            .includes(texto) ||
+          (ocurrencia.codigoRecurso ?? "")
+            .toLowerCase()
+            .includes(texto);
 
-      const coincideTipo =
-        filtroTipo === "TODOS" ||
-        ocurrencia.tipo === filtroTipo;
+        const coincideTipo =
+          filtroTipo === "TODOS" || ocurrencia.tipo === filtroTipo;
 
-      const coincideLectura =
-        filtroLectura === "TODAS" ||
-        (filtroLectura === "NO_LEIDAS" && !ocurrencia.leida) ||
-        (filtroLectura === "LEIDAS" && ocurrencia.leida);
+        const coincideLectura =
+          filtroLectura === "TODAS" ||
+          (filtroLectura === "NO_LEIDAS" && !ocurrencia.leida) ||
+          (filtroLectura === "LEIDAS" && ocurrencia.leida);
 
-      return coincideBusqueda && coincideTipo && coincideLectura;
-    });
+        return coincideBusqueda && coincideTipo && coincideLectura;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime(),
+      );
   }, [ocurrencias, busqueda, filtroTipo, filtroLectura]);
 
   const obtenerTipoTexto = (tipo: string) => {
@@ -113,9 +117,7 @@ export default function Ocurrencias() {
     <div className="ocurrencias-page">
       <header className="ocurrencias-header">
         <div className="ocurrencias-heading">
-          <span className="ocurrencias-kicker">
-            SIGMA · BITÁCORA OPERATIVA
-          </span>
+          <span className="ocurrencias-kicker">BITÁCORA OPERATIVA</span>
 
           <h1>Ocurrencias</h1>
 
@@ -124,40 +126,31 @@ export default function Ocurrencias() {
             sistema.
           </p>
         </div>
-
-        <div className="ocurrencias-header-meta">
-          <span>REGISTROS DISPONIBLES</span>
-          <strong>{ocurrencias.length}</strong>
-          <small>
-            {noLeidas}{" "}
-            {noLeidas === 1 ? "sin leer" : "sin leer"}
-          </small>
-        </div>
       </header>
 
       <section className="ocurrencias-overview">
-        <div className="ocurrencias-overview-item ocurrencias-overview-total">
-          <span>Total de ocurrencias</span>
+        <div className="ocurrencias-overview-item">
+          <span>Total</span>
           <strong>{ocurrencias.length}</strong>
-          <small>Registros disponibles</small>
+          <small>Registros</small>
         </div>
 
         <div className="ocurrencias-overview-item ocurrencias-overview-unread">
           <span>No leídas</span>
           <strong>{noLeidas}</strong>
-          <small>Requieren revisión</small>
+          <small>Por revisar</small>
         </div>
 
         <div className="ocurrencias-overview-item">
           <span>De unidad</span>
           <strong>{deUnidad}</strong>
-          <small>Novedades asociadas a unidades</small>
+          <small>Asociadas a unidades</small>
         </div>
 
         <div className="ocurrencias-overview-item">
           <span>De recurso</span>
           <strong>{deRecurso}</strong>
-          <small>Novedades asociadas a recursos</small>
+          <small>Asociadas a recursos</small>
         </div>
       </section>
 
@@ -165,23 +158,14 @@ export default function Ocurrencias() {
         <div className="ocurrencias-panel-header">
           <div>
             <span className="ocurrencias-section-label">
-              REGISTRO DE NOVEDADES
+              REGISTRO CRONOLÓGICO
             </span>
 
-            <h2>Bitácora de ocurrencias</h2>
+            <h2>Novedades comunicadas</h2>
 
             <p>
               Consulta las novedades registradas y su estado de lectura.
             </p>
-          </div>
-
-          <div className="ocurrencias-result-count">
-            <strong>{ocurrenciasFiltradas.length}</strong>
-            <span>
-              {ocurrenciasFiltradas.length === 1
-                ? "resultado"
-                : "resultados"}
-            </span>
           </div>
         </div>
 
@@ -192,6 +176,7 @@ export default function Ocurrencias() {
             <input
               type="text"
               placeholder="Buscar por descripción, informante, destinatario o recurso..."
+              aria-label="Buscar ocurrencias"
               value={busqueda}
               onChange={(event) =>
                 setBusqueda(event.target.value)
@@ -301,115 +286,90 @@ export default function Ocurrencias() {
         {!cargando &&
           !error &&
           ocurrenciasFiltradas.length > 0 && (
-            <div className="ocurrencias-table-wrapper">
-              <table className="ocurrencias-table">
-                <thead>
-                  <tr>
-                    <th>FECHA</th>
-                    <th>TIPO</th>
-                    <th>RELACIONADO</th>
-                    <th>DESCRIPCIÓN</th>
-                    <th>INFORMANTE</th>
-                    <th>DESTINATARIO</th>
-                    <th>LECTURA</th>
-                    <th />
-                  </tr>
-                </thead>
+            <div className="ocurrencias-list">
+              {ocurrenciasFiltradas.map((ocurrencia) => {
+                const fecha = new Date(ocurrencia.fechaHora);
 
-                <tbody>
-                  {ocurrenciasFiltradas.map((ocurrencia) => (
-                    <tr
-                      key={ocurrencia.id}
-                      className={
-                        ocurrencia.leida
-                          ? ""
-                          : "ocurrencia-row-unread"
-                      }
-                    >
-                      <td>
-                        <div className="ocurrencia-date-cell">
-                          <strong>
-                            {new Date(
-                              ocurrencia.fechaHora,
-                            ).toLocaleDateString("es-PE")}
-                          </strong>
+                return (
+                  <article
+                    key={ocurrencia.id}
+                    className={`ocurrencia-entry ${
+                      ocurrencia.leida ? "is-read" : "is-unread"
+                    }`}
+                  >
+                    <div className="ocurrencia-entry-date">
+                      <strong>
+                        {fecha.toLocaleDateString("es-PE", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </strong>
+                      <span>
+                        {fecha.toLocaleTimeString("es-PE", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hourCycle: "h23",
+                        })}
+                      </span>
+                    </div>
 
-                          <span>
-                            {new Date(
-                              ocurrencia.fechaHora,
-                            ).toLocaleTimeString("es-PE", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                    <div className="ocurrencia-entry-content">
+                      <div className="ocurrencia-entry-heading">
+                        <div className="ocurrencia-entry-tags">
+                          <span
+                            className={`ocurrencia-type ocurrencia-type-${ocurrencia.tipo.toLowerCase()}`}
+                          >
+                            <span className="ocurrencia-type-dot" />
+                            {obtenerTipoTexto(ocurrencia.tipo)}
+                          </span>
+                          <span
+                            className={`ocurrencia-reading ${
+                              ocurrencia.leida
+                                ? "ocurrencia-reading-read"
+                                : "ocurrencia-reading-unread"
+                            }`}
+                          >
+                            <span />
+                            {ocurrencia.leida ? "Leída" : "No leída"}
                           </span>
                         </div>
-                      </td>
 
-                      <td>
-                        <span
-                          className={`ocurrencia-type ocurrencia-type-${ocurrencia.tipo.toLowerCase()}`}
-                        >
-                          <span className="ocurrencia-type-dot" />
-                          {obtenerTipoTexto(ocurrencia.tipo)}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="ocurrencia-related-cell">
-                          <strong>
-                            {obtenerRelacionado(ocurrencia)}
-                          </strong>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="ocurrencia-description-cell">
-                          <span>
-                            {ocurrencia.descripcion}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <span className="ocurrencia-person">
-                          {ocurrencia.nombreInformante}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span className="ocurrencia-person">
-                          {ocurrencia.nombreDestinatario}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span
-                          className={`ocurrencia-reading ${
-                            ocurrencia.leida
-                              ? "ocurrencia-reading-read"
-                              : "ocurrencia-reading-unread"
-                          }`}
-                        >
-                          <span />
-                          {ocurrencia.leida
-                            ? "Leída"
-                            : "No leída"}
-                        </span>
-                      </td>
-
-                      <td>
                         <Link
                           to={`/ocurrencias/${ocurrencia.id}`}
                           className="ocurrencia-view-link"
                         >
-                          Ver
-                          <span>→</span>
+                          <span className="ocurrencia-view-link-label">
+                            Ver detalle
+                          </span>
+                          <span className="ocurrencia-view-link-arrow" aria-hidden="true">
+                            →
+                          </span>
                         </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+
+                      <p className="ocurrencia-entry-description">
+                        {ocurrencia.descripcion}
+                      </p>
+
+                      <div className="ocurrencia-entry-details">
+                        <div>
+                          <span>RELACIONADO</span>
+                          <strong>{obtenerRelacionado(ocurrencia)}</strong>
+                        </div>
+                        <div>
+                          <span>INFORMANTE</span>
+                          <strong>{ocurrencia.nombreInformante}</strong>
+                        </div>
+                        <div>
+                          <span>DESTINATARIO</span>
+                          <strong>{ocurrencia.nombreDestinatario}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
       </section>

@@ -16,6 +16,13 @@ export const obtenerOcurrencia = async (
   return response.data;
 };
 
+export const marcarOcurrenciaLeida = async (
+  id: number,
+): Promise<Ocurrencia> => {
+  const response = await api.put<Ocurrencia>(`/ocurrencias/${id}/leida`);
+  return response.data;
+};
+
 export interface CrearOcurrenciaRequest {
   tipo: "GENERAL" | "UNIDAD" | "RECURSO";
   descripcion: string;
