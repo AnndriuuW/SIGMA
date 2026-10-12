@@ -1,0 +1,233 @@
+/* Shared layout safeguards and small-screen refinements. */
+
+.app-content,
+.page-content,
+.page-content > *,
+.dashboard,
+.vehiculos-page,
+.recursos-page,
+.inventario-page,
+.inventario-detalle-page,
+.ocurrencias-page,
+.ocurrencia-detalle-page,
+.usuarios-page,
+.perfil-page,
+.vehiculo-detalle-page {
+  min-width: 0;
+}
+
+.recursos-table-container,
+.resources-table-wrapper,
+.inventario-table-wrapper,
+.dashboard-table-wrapper {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 1100px) {
+  .recursos-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventario-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-header,
+  .vehiculos-header,
+  .recursos-header,
+  .inventario-header,
+  .ocurrencias-header,
+  .usuarios-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .vehiculos-header-meta {
+    flex: 1 1 auto;
+    width: 100%;
+    transform: none;
+  }
+
+  .dashboard-system-status {
+    transform: none;
+  }
+
+  .dashboard-description,
+  .vehiculos-heading p,
+  .recursos-heading p,
+  .inventario-heading p,
+  .ocurrencias-heading p,
+  .usuarios-header-copy p,
+  .perfil-header p {
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .dashboard-section-heading,
+  .recursos-panel-header,
+  .inventario-panel-header,
+  .usuarios-panel-header {
+    gap: 12px;
+  }
+
+  .recursos-panel,
+  .inventario-panel,
+  .usuarios-panel {
+    max-width: 100%;
+  }
+
+  .recursos-modal-overlay,
+  .inventario-modal-overlay,
+  .inventario-finalizar-overlay,
+  .ocurrencia-modal-overlay,
+  .vehiculo-detalle-modal-overlay,
+  .usuarios-drawer-overlay {
+    padding: 12px;
+  }
+
+  .recursos-modal,
+  .inventario-modal,
+  .inventario-finalizar-modal,
+  .ocurrencia-modal,
+  .vehiculo-detalle-modal {
+    width: min(100%, 720px);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  .usuarios-drawer {
+    width: min(100%, 560px);
+  }
+
+  .vehiculo-detalle-header-actions,
+  .inventario-detalle-actions,
+  .inventario-detalle-action-group {
+    flex-wrap: wrap;
+  }
+
+  .vehiculo-detalle-content,
+  .inventario-detalle-workspace,
+  .perfil-content {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-header h1,
+  .vehiculos-heading h1,
+  .recursos-heading h1,
+  .inventario-heading h1,
+  .ocurrencias-heading h1,
+  .usuarios-title-row h1,
+  .perfil-header h1 {
+    font-size: clamp(27px, 8vw, 32px);
+    line-height: 1.12;
+  }
+
+  .dashboard-kicker,
+  .vehiculos-kicker,
+  .recursos-kicker,
+  .inventario-kicker,
+  .ocurrencias-kicker,
+  .usuarios-kicker,
+  .perfil-kicker {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .recursos-overview,
+  .inventario-overview,
+  .ocurrencias-overview,
+  .usuarios-status-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recursos-overview-total,
+  .inventario-overview-total,
+  .ocurrencias-overview-item:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .dashboard-actions {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .dashboard-action {
+    min-height: 84px;
+  }
+
+  .recursos-form-grid,
+  .usuarios-form-grid,
+  .perfil-form-grid,
+  .perfil-readonly-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recursos-row-actions,
+  .vehiculo-detalle-resource-actions {
+    flex-wrap: wrap;
+  }
+
+  .recursos-modal-overlay,
+  .inventario-modal-overlay,
+  .inventario-finalizar-overlay,
+  .ocurrencia-modal-overlay,
+  .vehiculo-detalle-modal-overlay {
+    align-items: flex-end;
+    padding: 8px;
+  }
+
+  .recursos-modal,
+  .inventario-modal,
+  .inventario-finalizar-modal,
+  .ocurrencia-modal,
+  .vehiculo-detalle-modal {
+    width: 100%;
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
+    border-radius: 12px 12px 8px 8px;
+  }
+
+  .recursos-modal-footer,
+  .inventario-modal-footer,
+  .inventario-finalizar-footer,
+  .ocurrencia-modal-footer,
+  .vehiculo-detalle-modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .recursos-modal-footer > button,
+  .inventario-modal-footer > button,
+  .inventario-finalizar-footer > button,
+  .ocurrencia-modal-footer > button,
+  .vehiculo-detalle-modal-footer > button {
+    min-height: 44px;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .recursos-overview,
+  .inventario-overview,
+  .ocurrencias-overview,
+  .usuarios-status-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .recursos-overview-total,
+  .inventario-overview-total,
+  .ocurrencias-overview-item:first-child {
+    grid-column: auto;
+  }
+}

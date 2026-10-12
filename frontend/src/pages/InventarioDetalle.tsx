@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { CircleCheck, Clock3, Package, SearchX } from "lucide-react";
 
 import {
   obtenerInventario,
@@ -496,28 +497,40 @@ export default function InventarioDetalle() {
       </div>
 
       <section className="inventario-detalle-summary">
-        <div className="inventario-detalle-summary-item">
-          <span>RECURSOS</span>
-          <strong>{totalRecursos}</strong>
-          <small>Registrados en la unidad</small>
+        <div className="inventario-detalle-summary-item inventario-summary-resources">
+          <span className="inventario-summary-icon"><Package size={20} /></span>
+          <div className="inventario-summary-copy">
+            <span>RECURSOS</span>
+            <strong>{totalRecursos}</strong>
+            <small>Registrados en la unidad</small>
+          </div>
         </div>
 
-        <div className="inventario-detalle-summary-item">
-          <span>VERIFICADOS</span>
-          <strong>{recursosVerificados}</strong>
-          <small>Revisados durante el inventario</small>
+        <div className="inventario-detalle-summary-item inventario-summary-verified">
+          <span className="inventario-summary-icon"><CircleCheck size={20} /></span>
+          <div className="inventario-summary-copy">
+            <span>VERIFICADOS</span>
+            <strong>{recursosVerificados}</strong>
+            <small>Revisados durante el inventario</small>
+          </div>
         </div>
 
-        <div className="inventario-detalle-summary-item">
-          <span>PENDIENTES</span>
-          <strong>{pendientes}</strong>
-          <small>Recursos aún sin registrar</small>
+        <div className="inventario-detalle-summary-item inventario-summary-pending">
+          <span className="inventario-summary-icon"><Clock3 size={20} /></span>
+          <div className="inventario-summary-copy">
+            <span>PENDIENTES</span>
+            <strong>{pendientes}</strong>
+            <small>Recursos aún sin registrar</small>
+          </div>
         </div>
 
-        <div className="inventario-detalle-summary-item">
-          <span>NO ENCONTRADOS</span>
-          <strong>{recursosNoEncontrados}</strong>
-          <small>Marcados durante la revisión</small>
+        <div className="inventario-detalle-summary-item inventario-summary-missing">
+          <span className="inventario-summary-icon"><SearchX size={20} /></span>
+          <div className="inventario-summary-copy">
+            <span>NO ENCONTRADOS</span>
+            <strong>{recursosNoEncontrados}</strong>
+            <small>Marcados durante la revisión</small>
+          </div>
         </div>
       </section>
 

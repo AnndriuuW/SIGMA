@@ -14,6 +14,8 @@ import OcurrenciaDetalle from "../pages/OcurrenciaDetalle";
 import Usuarios from "../pages/Usuarios";
 import Perfil from "../pages/Perfil";
 
+import "../styles/responsive.css";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -27,11 +29,34 @@ export default function AppRoutes() {
 
           <Route path="/vehiculos/:id" element={<VehiculoDetalle />} />
 
-          <Route path="/recursos" element={<Recursos />} />
+          <Route
+            element={(
+              <ProtectedRoute
+                roles={[
+                  "ADMINISTRADOR",
+                  "JEFE_MAQUINAS",
+                  "PERSONAL_ADJUNTO",
+                ]}
+              />
+            )}
+          >
+            <Route path="/recursos" element={<Recursos />} />
+          </Route>
 
-          <Route path="/inventario" element={<Inventario />} />
-
-          <Route path="/inventario/:id" element={<InventarioDetalle />} />
+          <Route
+            element={(
+              <ProtectedRoute
+                roles={[
+                  "ADMINISTRADOR",
+                  "JEFE_MAQUINAS",
+                  "PERSONAL_ADJUNTO",
+                ]}
+              />
+            )}
+          >
+            <Route path="/inventario" element={<Inventario />} />
+            <Route path="/inventario/:id" element={<InventarioDetalle />} />
+          </Route>
 
           <Route path="/ocurrencias" element={<Ocurrencias />} />
 

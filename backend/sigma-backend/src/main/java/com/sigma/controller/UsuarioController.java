@@ -54,6 +54,11 @@ public class UsuarioController {
         return usuarioService.listarUsuarios();
     }
 
+    @GetMapping("/destinatarios-ocurrencia")
+    public List<UsuarioResponse> listarDestinatariosOcurrencia() {
+        return usuarioService.listarDestinatariosOcurrencia();
+    }
+
     @PutMapping("/{codigo}")
     public UsuarioResponse actualizar(
             @PathVariable String codigo,

@@ -111,8 +111,19 @@ public class SecurityConfig {
 
                 // =====================================================
                 // USUARIOS
-                // ADMINISTRADOR + JEFE DE MÁQUINAS
+                // Gestión: Administrador + Jefe de Máquinas
+                // Destinatarios de ocurrencia: todos los roles operativos
                 // =====================================================
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/usuarios/destinatarios-ocurrencia"
+                ).hasAnyRole(
+                    "ADMINISTRADOR",
+                    "JEFE_MAQUINAS",
+                    "PERSONAL_ADJUNTO",
+                    "BOMBERO"
+                )
 
                 .requestMatchers(
                     HttpMethod.GET,
@@ -378,9 +389,7 @@ public class SecurityConfig {
 
                 // =====================================================
                 // INVENTARIOS
-                // Consulta:
-                // - Admin/Jefe/Adjunto: todos
-                // - Bombero: solo activos, controlado en Controller
+                // Acceso: Administrador, Jefe de Máquinas y Personal Adjunto
                 // =====================================================
 
                 .requestMatchers(
@@ -390,8 +399,7 @@ public class SecurityConfig {
                 ).hasAnyRole(
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
-                    "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "PERSONAL_ADJUNTO"
                 )
 
                 .requestMatchers(
@@ -415,9 +423,7 @@ public class SecurityConfig {
 
                 // =====================================================
                 // DETALLES DE INVENTARIO
-                // Consulta:
-                // - Admin/Jefe/Adjunto: todos
-                // - Bombero: solo activos, controlado en Controller
+                // Acceso: Administrador, Jefe de Máquinas y Personal Adjunto
                 // =====================================================
 
                 .requestMatchers(
@@ -427,8 +433,7 @@ public class SecurityConfig {
                 ).hasAnyRole(
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
-                    "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "PERSONAL_ADJUNTO"
                 )
 
                 .requestMatchers(

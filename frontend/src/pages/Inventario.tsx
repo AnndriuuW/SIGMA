@@ -164,14 +164,16 @@ export default function Inventario() {
 
       <section className="inventario-overview">
         <div className="inventario-overview-item inventario-overview-total">
-          <div className="inventario-overview-topline">
-            <span className="inventario-overview-icon">
-              <ClipboardList size={21} strokeWidth={2} />
-            </span>
-            <span>REGISTRO GENERAL</span>
+          <span className="inventario-overview-icon">
+            <ClipboardList size={21} strokeWidth={2} />
+          </span>
+          <div className="inventario-overview-total-copy">
+            <div className="inventario-overview-topline">
+              <span>REGISTRO GENERAL</span>
+            </div>
+            <strong>{inventarios.length}</strong>
+            <small>Inventarios registrados</small>
           </div>
-          <strong>{inventarios.length}</strong>
-          <small>Inventarios registrados</small>
         </div>
 
         <div className="inventario-overview-item inventario-overview-progress">

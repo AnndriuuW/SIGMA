@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -10,6 +11,8 @@ import {
   Users,
   UserCircle,
   LogOut,
+  Menu,
+  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -54,7 +57,6 @@ const menuItems: MenuItem[] = [
       "ADMINISTRADOR",
       "JEFE_MAQUINAS",
       "PERSONAL_ADJUNTO",
-      "BOMBERO",
     ],
     icon: Package,
   },
@@ -65,7 +67,6 @@ const menuItems: MenuItem[] = [
       "ADMINISTRADOR",
       "JEFE_MAQUINAS",
       "PERSONAL_ADJUNTO",
-      "BOMBERO",
     ],
     icon: ClipboardList,
   },
@@ -91,6 +92,7 @@ const menuItems: MenuItem[] = [
 export default function AppLayout() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
   const rol = usuario?.rol ?? "";
 
@@ -99,13 +101,49 @@ export default function AppLayout() {
   );
 
   const handleLogout = () => {
+    setMenuAbierto(false);
     logout();
     navigate("/login", { replace: true });
   };
 
+  useEffect(() => {
+    const cerrarEnEscritorio = () => {
+      if (window.innerWidth > 760) setMenuAbierto(false);
+    };
+
+    window.addEventListener("resize", cerrarEnEscritorio);
+    return () => window.removeEventListener("resize", cerrarEnEscritorio);
+  }, []);
+
+  useEffect(() => {
+    if (!menuAbierto) return;
+    const overflowAnterior = document.body.style.overflow;
+
+    const cerrarConEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuAbierto(false);
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", cerrarConEscape);
+
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      window.removeEventListener("keydown", cerrarConEscape);
+    };
+  }, [menuAbierto]);
+
   return (
     <div className="app-layout">
-      <aside className="sidebar">
+      {menuAbierto && (
+        <button
+          type="button"
+          className="mobile-menu-backdrop"
+          aria-label="Cerrar menú"
+          onClick={() => setMenuAbierto(false)}
+        />
+      )}
+
+      <aside className={`sidebar ${menuAbierto ? "sidebar-open" : ""}`}>
         {/* CABECERA DEL SIDEBAR */}
         <div className="sidebar-header">
           <img
@@ -121,7 +159,7 @@ export default function AppLayout() {
         </div>
 
         {/* MENÚ PRINCIPAL */}
-        <nav className="sidebar-nav">
+        <nav id="main-navigation" className="sidebar-nav">
           <p className="sidebar-section-title">MENÚ PRINCIPAL</p>
 
           {menuVisible.map((item) => {
@@ -131,6 +169,7 @@ export default function AppLayout() {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={() => setMenuAbierto(false)}
                 className={({ isActive }) =>
                   `sidebar-link ${isActive ? "active" : ""}`
                 }
@@ -146,6 +185,7 @@ export default function AppLayout() {
         <div className="sidebar-bottom">
           <NavLink
             to="/perfil"
+            onClick={() => setMenuAbierto(false)}
             className={({ isActive }) =>
               `sidebar-link ${isActive ? "active" : ""}`
             }
@@ -169,11 +209,24 @@ export default function AppLayout() {
       <main className="app-content">
         {/* TOPBAR */}
         <header className="topbar">
-          <div>
+          <div className="topbar-leading">
+            <button
+              type="button"
+              className="mobile-menu-button"
+              aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
+              aria-controls="main-navigation"
+              aria-expanded={menuAbierto}
+              onClick={() => setMenuAbierto((abierto) => !abierto)}
+            >
+              {menuAbierto ? <X size={21} /> : <Menu size={21} />}
+            </button>
+
+            <div>
             <p className="topbar-system">SISTEMA INTERNO</p>
             <p className="topbar-company">
               Compañía de Bomberos 120
             </p>
+            </div>
           </div>
 
           {/* USUARIO ACTUAL */}

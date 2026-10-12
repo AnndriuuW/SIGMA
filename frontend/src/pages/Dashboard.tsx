@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import {
+  AlertCircle,
+  ArrowRight,
+  CircleCheck,
+  Gauge,
+  Package,
+  TriangleAlert,
+  Truck,
+  Wrench,
+} from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
 import { listarUnidades } from "../services/unidadService";
 import type { Unidad } from "../types/unidad";
 
 function Dashboard() {
+  const { usuario } = useAuth();
   const [unidades, setUnidades] = useState<Unidad[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -43,6 +55,12 @@ function Dashboard() {
     unidades.length > 0
       ? Math.round((unidadesOperativas / unidades.length) * 100)
       : 0;
+
+  const puedeConsultarRecursos = [
+    "ADMINISTRADOR",
+    "JEFE_MAQUINAS",
+    "PERSONAL_ADJUNTO",
+  ].includes(usuario?.rol ?? "");
 
   return (
     <div className="dashboard">
@@ -85,37 +103,52 @@ function Dashboard() {
       {!cargando && !error && (
         <>
           <section className="dashboard-overview">
-            <div className="dashboard-overview-item">
-              <span>Total de unidades</span>
-              <strong>{unidades.length}</strong>
-              <small>registradas</small>
-            </div>
-
-            <div className="dashboard-overview-item">
-              <span>Operativas</span>
-              <strong>{unidadesOperativas}</strong>
-              <small>disponibles actualmente</small>
-            </div>
-
-            <div className="dashboard-overview-item">
-              <span>Fuera de servicio</span>
-              <strong>{unidadesFueraServicio}</strong>
-              <small>requieren atención</small>
-            </div>
-
-            <div className="dashboard-overview-item">
-              <span>Mantenimiento</span>
-              <strong>{unidadesMantenimiento}</strong>
-              <small>en proceso</small>
-            </div>
-
-            <div className="dashboard-overview-availability">
-              <span>Disponibilidad</span>
-              <strong>{porcentajeOperativas}%</strong>
-              <div className="availability-line">
-                <span style={{ width: `${porcentajeOperativas}%` }} />
+            <article className="dashboard-metric-card">
+              <span className="dashboard-metric-icon"><Truck size={20} /></span>
+              <div className="dashboard-metric-copy">
+                <span>Total de unidades</span>
+                <strong>{unidades.length}</strong>
+                <small>registradas</small>
               </div>
-            </div>
+            </article>
+
+            <article className="dashboard-metric-card dashboard-metric-operational">
+              <span className="dashboard-metric-icon"><CircleCheck size={20} /></span>
+              <div className="dashboard-metric-copy">
+                <span>Operativas</span>
+                <strong>{unidadesOperativas}</strong>
+                <small>disponibles actualmente</small>
+              </div>
+            </article>
+
+            <article className="dashboard-metric-card dashboard-metric-service">
+              <span className="dashboard-metric-icon"><TriangleAlert size={20} /></span>
+              <div className="dashboard-metric-copy">
+                <span>Fuera de servicio</span>
+                <strong>{unidadesFueraServicio}</strong>
+                <small>requieren atención</small>
+              </div>
+            </article>
+
+            <article className="dashboard-metric-card dashboard-metric-maintenance">
+              <span className="dashboard-metric-icon"><Wrench size={20} /></span>
+              <div className="dashboard-metric-copy">
+                <span>Mantenimiento</span>
+                <strong>{unidadesMantenimiento}</strong>
+                <small>en proceso</small>
+              </div>
+            </article>
+
+            <article className="dashboard-metric-card dashboard-metric-availability">
+              <span className="dashboard-metric-icon"><Gauge size={20} /></span>
+              <div className="dashboard-metric-copy">
+                <span>Disponibilidad</span>
+                <strong>{porcentajeOperativas}%</strong>
+                <div className="availability-line">
+                  <span style={{ width: `${porcentajeOperativas}%` }} />
+                </div>
+              </div>
+            </article>
           </section>
 
           <section className="dashboard-main-section">
@@ -180,71 +213,44 @@ function Dashboard() {
           </section>
 
           <section className="dashboard-bottom">
-            <div className="dashboard-bottom-panel">
+            <div className="dashboard-bottom-panel dashboard-quick-panel">
               <div className="dashboard-panel-heading">
                 <div>
                   <h2>Acciones rápidas</h2>
+                  <p>Accede directamente a la información que necesitas.</p>
                 </div>
               </div>
 
               <div className="dashboard-actions">
                 <NavLink to="/vehiculos" className="dashboard-action">
-                  <div>
+                  <span className="dashboard-action-icon"><Truck size={21} /></span>
+                  <span className="dashboard-action-copy">
                     <strong>Consultar vehículos</strong>
                     <span>Estado y detalle de las unidades</span>
-                  </div>
-
-                  <span className="dashboard-action-arrow">→</span>
+                  </span>
+                  <ArrowRight className="dashboard-action-arrow" size={20} />
                 </NavLink>
 
-                <NavLink to="/recursos" className="dashboard-action">
-                  <div>
-                    <strong>Consultar recursos</strong>
-                    <span>Recursos registrados y su ubicación</span>
-                  </div>
-
-                  <span className="dashboard-action-arrow">→</span>
-                </NavLink>
+                {puedeConsultarRecursos && (
+                  <NavLink to="/recursos" className="dashboard-action">
+                    <span className="dashboard-action-icon"><Package size={21} /></span>
+                    <span className="dashboard-action-copy">
+                      <strong>Consultar recursos</strong>
+                      <span>Recursos registrados y su ubicación</span>
+                    </span>
+                    <ArrowRight className="dashboard-action-arrow" size={20} />
+                  </NavLink>
+                )}
 
                 <NavLink to="/ocurrencias" className="dashboard-action">
-                  <div>
+                  <span className="dashboard-action-icon"><AlertCircle size={21} /></span>
+                  <span className="dashboard-action-copy">
                     <strong>Consultar ocurrencias</strong>
                     <span>Registro histórico de novedades</span>
-                  </div>
-
-                  <span className="dashboard-action-arrow">→</span>
+                  </span>
+                  <ArrowRight className="dashboard-action-arrow" size={20} />
                 </NavLink>
               </div>
-            </div>
-
-            <div className="dashboard-bottom-panel dashboard-info-panel">
-              <div className="dashboard-panel-heading">
-                <div>
-                  <h2>Resumen operativo</h2>
-                </div>
-              </div>
-
-              <div className="dashboard-info-list">
-                <div>
-                  <span>Unidades registradas</span>
-                  <strong>{unidades.length}</strong>
-                </div>
-
-                <div>
-                  <span>Unidades operativas</span>
-                  <strong>{unidadesOperativas}</strong>
-                </div>
-
-                <div>
-                  <span>Disponibilidad actual</span>
-                  <strong>{porcentajeOperativas}%</strong>
-                </div>
-              </div>
-
-              <p className="dashboard-info-note">
-                La información mostrada corresponde al estado actual registrado
-                en SIGMA.
-              </p>
             </div>
           </section>
         </>

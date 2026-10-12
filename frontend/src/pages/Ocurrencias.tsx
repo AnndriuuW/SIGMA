@@ -1,8 +1,38 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { listarOcurrencias } from "../services/ocurrenciaService";
-import type { Ocurrencia } from "../types/ocurrencia";
+import {
+  crearOcurrencia,
+  listarOcurrencias,
+  type CrearOcurrenciaRequest,
+} from "../services/ocurrenciaService";
+import {
+  listarDestinatariosOcurrencia,
+  listarUsuarios,
+} from "../services/usuarioService";
+import { listarUnidades } from "../services/unidadService";
+import { listarRecursos } from "../services/recursoService";
+import type { Ocurrencia, TipoOcurrencia } from "../types/ocurrencia";
+import type { Usuario } from "../types/usuario";
+import type { Unidad } from "../types/unidad";
+import type { Recurso } from "../types/recurso";
+
+interface FormularioOcurrencia {
+  tipo: TipoOcurrencia;
+  descripcion: string;
+  codigoDestinatario: string;
+  idUnidad: string;
+  idRecurso: string;
+}
+
+const formularioInicial: FormularioOcurrencia = {
+  tipo: "GENERAL",
+  descripcion: "",
+  codigoDestinatario: "",
+  idUnidad: "",
+  idRecurso: "",
+};
 
 export default function Ocurrencias() {
   const [ocurrencias, setOcurrencias] = useState<Ocurrencia[]>([]);
@@ -12,6 +42,15 @@ export default function Ocurrencias() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
   const [filtroLectura, setFiltroLectura] = useState("TODAS");
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [formulario, setFormulario] = useState(formularioInicial);
+  const [destinatarios, setDestinatarios] = useState<Usuario[]>([]);
+  const [unidades, setUnidades] = useState<Unidad[]>([]);
+  const [recursos, setRecursos] = useState<Recurso[]>([]);
+  const [cargandoOpciones, setCargandoOpciones] = useState(false);
+  const [creando, setCreando] = useState(false);
+  const [errorCrear, setErrorCrear] = useState("");
+  const [mensajeExito, setMensajeExito] = useState("");
 
   useEffect(() => {
     const cargarOcurrencias = async () => {
@@ -31,6 +70,145 @@ export default function Ocurrencias() {
 
     cargarOcurrencias();
   }, []);
+
+  useEffect(() => {
+    if (!modalAbierto) return;
+
+    let vigente = true;
+
+    const cargarOpciones = async () => {
+      try {
+        setCargandoOpciones(true);
+        const cargarDestinatarios = async () => {
+          try {
+            const destinatariosData = await listarDestinatariosOcurrencia();
+            if (destinatariosData.some((usuario) => usuario.activo)) {
+              return destinatariosData;
+            }
+          } catch {
+            // Compatibilidad con sesiones autorizadas para consultar usuarios.
+          }
+
+          return listarUsuarios();
+        };
+
+        const [usuariosData, unidadesData, recursosData] = await Promise.all([
+          cargarDestinatarios(),
+          listarUnidades(),
+          listarRecursos(),
+        ]);
+
+        if (!vigente) return;
+
+        const usuariosActivos = usuariosData
+          .filter(
+            (usuario) =>
+              usuario.activo &&
+              ["ADMINISTRADOR", "JEFE_MAQUINAS"].includes(usuario.rol),
+          )
+          .sort((a, b) => {
+            if (a.rol === "JEFE_MAQUINAS") return -1;
+            if (b.rol === "JEFE_MAQUINAS") return 1;
+            return `${a.nombres} ${a.apellidos}`.localeCompare(
+              `${b.nombres} ${b.apellidos}`,
+              "es",
+            );
+          });
+        setDestinatarios(usuariosActivos);
+        setUnidades(unidadesData.filter((unidad) => unidad.activo));
+        setRecursos(recursosData.filter((recurso) => recurso.activo));
+
+        const jefeMaquinas = usuariosActivos.find(
+          (usuario) => usuario.rol === "JEFE_MAQUINAS",
+        );
+        setFormulario((actual) => ({
+          ...actual,
+          codigoDestinatario:
+            actual.codigoDestinatario ||
+            jefeMaquinas?.codigo ||
+            usuariosActivos[0]?.codigo ||
+            "",
+        }));
+      } catch {
+        if (vigente) {
+          setErrorCrear("No se pudieron cargar las opciones del formulario.");
+        }
+      } finally {
+        if (vigente) setCargandoOpciones(false);
+      }
+    };
+
+    void cargarOpciones();
+    return () => {
+      vigente = false;
+    };
+  }, [modalAbierto]);
+
+  const abrirFormulario = () => {
+    setFormulario(formularioInicial);
+    setErrorCrear("");
+    setMensajeExito("");
+    setModalAbierto(true);
+  };
+
+  const cerrarFormulario = () => {
+    if (creando) return;
+    setModalAbierto(false);
+    setErrorCrear("");
+  };
+
+  const handleCrearOcurrencia = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrorCrear("");
+
+    const request: CrearOcurrenciaRequest = {
+      tipo: formulario.tipo,
+      descripcion: formulario.descripcion.trim(),
+      codigoDestinatario: formulario.codigoDestinatario,
+    };
+
+    if (formulario.tipo === "UNIDAD") {
+      if (!formulario.idUnidad) {
+        setErrorCrear("Selecciona la unidad relacionada.");
+        return;
+      }
+      request.idUnidad = Number(formulario.idUnidad);
+    }
+
+    if (formulario.tipo === "RECURSO") {
+      if (!formulario.idRecurso) {
+        setErrorCrear("Selecciona el recurso relacionado.");
+        return;
+      }
+      request.idRecurso = Number(formulario.idRecurso);
+    }
+
+    if (!request.descripcion || !request.codigoDestinatario) {
+      setErrorCrear("Completa la descripción y el destinatario.");
+      return;
+    }
+
+    try {
+      setCreando(true);
+      const creada = await crearOcurrencia(request);
+      setOcurrencias((actuales) => [creada, ...actuales]);
+      setMensajeExito("La ocurrencia se registró correctamente.");
+      limpiarFiltros();
+      setModalAbierto(false);
+      setFormulario(formularioInicial);
+    } catch (error) {
+      const respuesta = error as {
+        response?: { data?: { message?: string; error?: string } };
+      };
+      setErrorCrear(
+        respuesta.response?.data?.message ??
+          respuesta.response?.data?.error ??
+          "No se pudo registrar la ocurrencia. Intenta nuevamente.",
+      );
+    } finally {
+      setCreando(false);
+    }
+  };
 
   const noLeidas = ocurrencias.filter(
     (ocurrencia) => !ocurrencia.leida,
@@ -88,6 +266,14 @@ export default function Ocurrencias() {
       default:
         return tipo;
     }
+  };
+
+  const obtenerRolTexto = (rol: string) => {
+    if (rol === "JEFE_MAQUINAS") return "Jefe de Máquinas";
+    if (rol === "PERSONAL_ADJUNTO") return "Personal Adjunto";
+    if (rol === "ADMINISTRADOR") return "Administrador";
+    if (rol === "BOMBERO") return "Bombero";
+    return rol.replace(/_/g, " ");
   };
 
   const obtenerRelacionado = (ocurrencia: Ocurrencia) => {
@@ -167,6 +353,15 @@ export default function Ocurrencias() {
               Consulta las novedades registradas y su estado de lectura.
             </p>
           </div>
+
+          <button
+            type="button"
+            className="ocurrencias-new-button"
+            onClick={abrirFormulario}
+          >
+            <Plus size={18} aria-hidden="true" />
+            Nueva ocurrencia
+          </button>
         </div>
 
         <div className="ocurrencias-toolbar">
@@ -235,6 +430,12 @@ export default function Ocurrencias() {
             )}
           </div>
         </div>
+
+        {mensajeExito && (
+          <div className="ocurrencias-success" role="status">
+            {mensajeExito}
+          </div>
+        )}
 
         {cargando && (
           <div className="ocurrencias-state">
@@ -373,6 +574,186 @@ export default function Ocurrencias() {
             </div>
           )}
       </section>
+
+      {modalAbierto && (
+        <div
+          className="ocurrencia-modal-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) cerrarFormulario();
+          }}
+        >
+          <form
+            className="ocurrencia-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ocurrencia-modal-title"
+            onSubmit={handleCrearOcurrencia}
+          >
+            <header className="ocurrencia-modal-header">
+              <div>
+                <span>REGISTRO MANUAL</span>
+                <h2 id="ocurrencia-modal-title">Nueva ocurrencia</h2>
+                <p>Comunica una novedad para que el destinatario pueda revisarla.</p>
+              </div>
+              <button
+                type="button"
+                className="ocurrencia-modal-close"
+                onClick={cerrarFormulario}
+                disabled={creando}
+                aria-label="Cerrar formulario"
+              >
+                ×
+              </button>
+            </header>
+
+            <div className="ocurrencia-modal-body">
+              {cargandoOpciones ? (
+                <div className="ocurrencia-form-loading" role="status">
+                  Cargando destinatarios y elementos disponibles…
+                </div>
+              ) : (
+                <>
+                  <label htmlFor="ocurrencia-tipo">Tipo de ocurrencia</label>
+                  <select
+                    id="ocurrencia-tipo"
+                    value={formulario.tipo}
+                    onChange={(event) =>
+                      setFormulario((actual) => ({
+                        ...actual,
+                        tipo: event.target.value as TipoOcurrencia,
+                        idUnidad: "",
+                        idRecurso: "",
+                      }))
+                    }
+                    disabled={creando}
+                  >
+                    <option value="GENERAL">General</option>
+                    <option value="UNIDAD">Relacionada con una unidad</option>
+                    <option value="RECURSO">Relacionada con un recurso</option>
+                  </select>
+
+                  {formulario.tipo === "UNIDAD" && (
+                    <>
+                      <label htmlFor="ocurrencia-unidad">Unidad relacionada</label>
+                      <select
+                        id="ocurrencia-unidad"
+                        value={formulario.idUnidad}
+                        onChange={(event) =>
+                          setFormulario((actual) => ({
+                            ...actual,
+                            idUnidad: event.target.value,
+                          }))
+                        }
+                        disabled={creando}
+                      >
+                        <option value="">Selecciona una unidad</option>
+                        {unidades.map((unidad) => (
+                          <option key={unidad.id} value={unidad.id}>
+                            {unidad.nombre} · {unidad.indicativo}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+
+                  {formulario.tipo === "RECURSO" && (
+                    <>
+                      <label htmlFor="ocurrencia-recurso">Recurso relacionado</label>
+                      <select
+                        id="ocurrencia-recurso"
+                        value={formulario.idRecurso}
+                        onChange={(event) =>
+                          setFormulario((actual) => ({
+                            ...actual,
+                            idRecurso: event.target.value,
+                          }))
+                        }
+                        disabled={creando}
+                      >
+                        <option value="">Selecciona un recurso</option>
+                        {recursos.map((recurso) => (
+                          <option key={recurso.id} value={recurso.id}>
+                            {recurso.codigo} · {recurso.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+
+                  <label htmlFor="ocurrencia-destinatario">Destinatario</label>
+                  <select
+                    id="ocurrencia-destinatario"
+                    value={formulario.codigoDestinatario}
+                    onChange={(event) =>
+                      setFormulario((actual) => ({
+                        ...actual,
+                        codigoDestinatario: event.target.value,
+                      }))
+                    }
+                    disabled={creando || destinatarios.length === 0}
+                  >
+                    <option value="">Selecciona quién recibirá la ocurrencia</option>
+                    {destinatarios.map((destinatario) => (
+                      <option key={destinatario.codigo} value={destinatario.codigo}>
+                        {destinatario.nombres} {destinatario.apellidos} ·{" "}
+                        {obtenerRolTexto(destinatario.rol)}
+                      </option>
+                    ))}
+                  </select>
+                  {destinatarios.length === 0 && (
+                    <p className="ocurrencia-form-hint">
+                      No hay destinatarios activos disponibles.
+                    </p>
+                  )}
+
+                  <label htmlFor="ocurrencia-descripcion">Descripción</label>
+                  <textarea
+                    id="ocurrencia-descripcion"
+                    value={formulario.descripcion}
+                    onChange={(event) =>
+                      setFormulario((actual) => ({
+                        ...actual,
+                        descripcion: event.target.value,
+                      }))
+                    }
+                    placeholder="Describe brevemente la novedad…"
+                    maxLength={2000}
+                    rows={5}
+                    disabled={creando}
+                  />
+                  <span className="ocurrencia-description-count">
+                    {formulario.descripcion.length}/2000 caracteres
+                  </span>
+                </>
+              )}
+
+              {errorCrear && (
+                <p className="ocurrencia-form-error" role="alert">
+                  {errorCrear}
+                </p>
+              )}
+            </div>
+
+            <footer className="ocurrencia-modal-footer">
+              <button
+                type="button"
+                className="ocurrencia-modal-cancel"
+                onClick={cerrarFormulario}
+                disabled={creando}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="ocurrencia-modal-submit"
+                disabled={creando || cargandoOpciones}
+              >
+                {creando ? "Registrando…" : "Registrar ocurrencia"}
+              </button>
+            </footer>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

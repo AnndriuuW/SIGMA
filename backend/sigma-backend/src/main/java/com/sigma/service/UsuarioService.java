@@ -86,6 +86,25 @@ public class UsuarioService {
             .toList();
     }
 
+    public List<UsuarioResponse> listarDestinatariosOcurrencia() {
+        return usuarioRepository.findAll()
+                .stream()
+                .filter(usuario -> Boolean.TRUE.equals(usuario.getActivo()))
+                .filter(usuario -> usuario.getRol() != null
+                        && ("ADMINISTRADOR".equals(usuario.getRol().getNombre())
+                                || "JEFE_MAQUINAS".equals(usuario.getRol().getNombre())))
+                .map(usuario -> {
+                    UsuarioResponse response = new UsuarioResponse();
+                    response.setCodigo(usuario.getCodigo());
+                    response.setNombres(usuario.getNombres());
+                    response.setApellidos(usuario.getApellidos());
+                    response.setRol(usuario.getRol().getNombre());
+                    response.setActivo(true);
+                    return response;
+                })
+                .toList();
+    }
+
     public UsuarioResponse actualizar(
             String codigo,
             UsuarioUpdateRequest request) {

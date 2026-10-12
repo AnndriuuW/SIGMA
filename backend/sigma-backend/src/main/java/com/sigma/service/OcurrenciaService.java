@@ -58,6 +58,15 @@ public class OcurrenciaService {
                                 new RecursoNoEncontradoException(
                                         "Destinatario no encontrado"));
 
+                String rolDestinatario = destinatario.getRol() != null
+                                ? destinatario.getRol().getNombre()
+                                : null;
+                if (!"ADMINISTRADOR".equals(rolDestinatario)
+                                && !"JEFE_MAQUINAS".equals(rolDestinatario)) {
+                        throw new ReglaNegocioException(
+                                        "Las ocurrencias solo pueden dirigirse a un Administrador o Jefe de Máquinas");
+                }
+
                 Unidad unidad = null;
                 Recurso recurso = null;
 

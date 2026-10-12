@@ -6,6 +6,13 @@ export const listarUsuarios = async (): Promise<Usuario[]> => {
   return response.data;
 };
 
+export const listarDestinatariosOcurrencia = async (): Promise<Usuario[]> => {
+  const response = await api.get<Usuario[]>(
+    "/usuarios/destinatarios-ocurrencia",
+  );
+  return response.data;
+};
+
 export const obtenerUsuario = async (
   codigo: string,
 ): Promise<Usuario> => {
