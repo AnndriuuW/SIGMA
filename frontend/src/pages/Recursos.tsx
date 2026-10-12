@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle, Boxes, CheckCircle2, Wrench } from "lucide-react";
 
 import { listarRecursos } from "../services/recursoService";
 import type { EstadoRecurso, Recurso } from "../types/recurso";
@@ -81,6 +82,49 @@ function Recursos() {
 
       </header>
 
+      <section className="recursos-overview" aria-label="Resumen de recursos">
+        <article className="recursos-overview-total">
+          <div className="recursos-overview-topline">
+            <span className="recursos-overview-icon">
+              <Boxes size={21} strokeWidth={2} />
+            </span>
+            <span>REGISTRO GENERAL</span>
+          </div>
+          <strong>{recursos.length}</strong>
+          <span className="recursos-overview-caption">Recursos registrados</span>
+        </article>
+
+        <article className="recursos-overview-card recursos-overview-operativo">
+          <span className="recursos-overview-icon">
+            <CheckCircle2 size={20} strokeWidth={2} />
+          </span>
+          <div>
+            <span>Operativos</span>
+            <strong>{operativos}</strong>
+          </div>
+        </article>
+
+        <article className="recursos-overview-card recursos-overview-mantenimiento">
+          <span className="recursos-overview-icon">
+            <Wrench size={20} strokeWidth={2} />
+          </span>
+          <div>
+            <span>En mantenimiento</span>
+            <strong>{mantenimiento}</strong>
+          </div>
+        </article>
+
+        <article className="recursos-overview-card recursos-overview-danado">
+          <span className="recursos-overview-icon">
+            <AlertTriangle size={20} strokeWidth={2} />
+          </span>
+          <div>
+            <span>Dañados</span>
+            <strong>{danados}</strong>
+          </div>
+        </article>
+      </section>
+
       <section className="recursos-panel">
         <div className="recursos-panel-header">
           <div>
@@ -95,14 +139,6 @@ function Recursos() {
             </p>
           </div>
 
-          <div className="recursos-result-count">
-            <strong>{recursosFiltrados.length}</strong>
-            <span>
-              {recursosFiltrados.length === 1
-                ? "resultado"
-                : "resultados"}
-            </span>
-          </div>
         </div>
 
         <div className="recursos-toolbar">
@@ -142,7 +178,6 @@ function Recursos() {
               onClick={() => setFiltroEstado("TODOS")}
             >
               Todos
-              <span className="recursos-filter-count">{recursos.length}</span>
             </button>
 
             <button
@@ -156,7 +191,6 @@ function Recursos() {
               onClick={() => setFiltroEstado("OPERATIVO")}
             >
               Operativos
-              <span className="recursos-filter-count">{operativos}</span>
             </button>
 
             <button
@@ -170,7 +204,6 @@ function Recursos() {
               onClick={() => setFiltroEstado("DANADO")}
             >
               Dañados
-              <span className="recursos-filter-count">{danados}</span>
             </button>
 
             <button
@@ -186,7 +219,6 @@ function Recursos() {
               }
             >
               En mantenimiento
-              <span className="recursos-filter-count">{mantenimiento}</span>
             </button>
           </div>
         </div>

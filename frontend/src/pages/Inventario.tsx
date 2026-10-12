@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ClipboardList, CircleCheck, CirclePause, Timer } from "lucide-react";
 
 import {
   listarInventarios,
@@ -60,12 +61,19 @@ export default function Inventario() {
     (inventario) => inventario.estado === "FINALIZADO",
   ).length;
 
-  const formatearFecha = (fecha: string | null) => {
-    if (!fecha) return "—";
+  const formatearFecha = (fecha: string) => {
+    return new Date(fecha).toLocaleDateString("es-PE", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
-    return new Date(fecha).toLocaleString("es-PE", {
-      dateStyle: "short",
-      timeStyle: "short",
+  const formatearHora = (fecha: string) => {
+    return new Date(fecha).toLocaleTimeString("es-PE", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
     });
   };
 
@@ -156,27 +164,44 @@ export default function Inventario() {
 
       <section className="inventario-overview">
         <div className="inventario-overview-item inventario-overview-total">
-          <span>Total de registros</span>
+          <div className="inventario-overview-topline">
+            <span className="inventario-overview-icon">
+              <ClipboardList size={21} strokeWidth={2} />
+            </span>
+            <span>REGISTRO GENERAL</span>
+          </div>
           <strong>{inventarios.length}</strong>
           <small>Inventarios registrados</small>
         </div>
 
-        <div className="inventario-overview-item">
-          <span>En proceso</span>
-          <strong>{enProceso}</strong>
-          <small>Inventarios activos</small>
+        <div className="inventario-overview-item inventario-overview-progress">
+          <span className="inventario-overview-icon">
+            <Timer size={20} strokeWidth={2} />
+          </span>
+          <div className="inventario-overview-copy">
+            <span>En proceso</span>
+            <strong>{enProceso}</strong>
+          </div>
         </div>
 
-        <div className="inventario-overview-item">
-          <span>Pausados</span>
-          <strong>{pausados}</strong>
-          <small>Pendientes de reanudación</small>
+        <div className="inventario-overview-item inventario-overview-paused">
+          <span className="inventario-overview-icon">
+            <CirclePause size={20} strokeWidth={2} />
+          </span>
+          <div className="inventario-overview-copy">
+            <span>Pausados</span>
+            <strong>{pausados}</strong>
+          </div>
         </div>
 
-        <div className="inventario-overview-item">
-          <span>Finalizados</span>
-          <strong>{finalizados}</strong>
-          <small>Registros cerrados</small>
+        <div className="inventario-overview-item inventario-overview-completed">
+          <span className="inventario-overview-icon">
+            <CircleCheck size={20} strokeWidth={2} />
+          </span>
+          <div className="inventario-overview-copy">
+            <span>Finalizados</span>
+            <strong>{finalizados}</strong>
+          </div>
         </div>
       </section>
 
@@ -194,12 +219,6 @@ export default function Inventario() {
             </p>
           </div>
 
-          <div className="inventario-result-count">
-            <strong>{inventarios.length}</strong>
-            <span>
-              {inventarios.length === 1 ? "registro" : "registros"}
-            </span>
-          </div>
         </div>
 
         {cargando && (
@@ -270,13 +289,27 @@ export default function Inventario() {
 
                     <td>
                       <span className="inventario-date">
-                        {formatearFecha(inventario.fechaInicio)}
+                        {inventario.fechaInicio ? (
+                          <>
+                            <strong>{formatearFecha(inventario.fechaInicio)}</strong>
+                            <small>{formatearHora(inventario.fechaInicio)}</small>
+                          </>
+                        ) : (
+                          "—"
+                        )}
                       </span>
                     </td>
 
                     <td>
                       <span className="inventario-date">
-                        {formatearFecha(inventario.fechaFin)}
+                        {inventario.fechaFin ? (
+                          <>
+                            <strong>{formatearFecha(inventario.fechaFin)}</strong>
+                            <small>{formatearHora(inventario.fechaFin)}</small>
+                          </>
+                        ) : (
+                          "—"
+                        )}
                       </span>
                     </td>
 
