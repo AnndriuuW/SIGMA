@@ -1,9 +1,10 @@
 /* DETALLE DE VEHÍCULO */
 .vehiculo-detalle-page {
   width: 100%;
-  max-width: 1440px;
+  max-width: 1480px;
   margin: 0 auto;
   padding-bottom: 40px;
+  font-family: var(--sigma-font);
   --vd-resource-code-width: 180px;
   --vd-resource-actions-width: 122px;
   --vd-resource-column-gap: 22px;
@@ -54,8 +55,8 @@
 .vehiculo-detalle-eyebrow {
   margin: 0 0 10px;
   color: var(--sigma-red);
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 900;
 }
 .vehiculo-detalle-title-row {
   display: flex;
@@ -65,14 +66,16 @@
 .vehiculo-detalle-title-row h1 {
   margin: 0;
   color: var(--sigma-text);
-  font-size: 35px;
+  font-size: 38px;
+  line-height: 1.08;
   font-weight: 700;
 }
 .vehiculo-detalle-title-row p {
-  margin: 6px 0 0;
+  margin: 9px 0 0;
   color: var(--sigma-text-secondary);
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.8;
+  font-weight: 550;
 }
 /* DATOS RÁPIDOS + ACCIONES */
 .vehiculo-detalle-header-actions {
