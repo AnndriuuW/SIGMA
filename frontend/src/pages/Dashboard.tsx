@@ -157,9 +157,15 @@ function Dashboard() {
                 <h2>Estado de las unidades</h2>
               </div>
 
-              <NavLink to="/vehiculos" className="dashboard-link">
-                Ver vehículos
-                <span className="dashboard-link-arrow">→</span>
+              <NavLink
+                to="/vehiculos"
+                className="dashboard-link"
+                aria-label="Ver vehículos"
+              >
+                <span className="dashboard-link-label">Ver vehículos</span>
+                <span className="dashboard-link-arrow" aria-hidden="true">
+                  →
+                </span>
               </NavLink>
             </div>
 

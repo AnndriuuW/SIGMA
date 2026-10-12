@@ -54,12 +54,19 @@ function App() {
         <div className="login-brand">
           <img
             src={logoB120}
-            alt="Bomberos 120"
+            alt="Compañía de Bomberos Voluntarios San Juan de Miraflores N° 120"
             className="login-logo-mobile"
           />
 
           <div className="brand-content">
-            <p className="brand-company">BOMBEROS 120</p>
+            <p className="brand-company">
+              <span className="brand-company-title">
+                Compañía de Bomberos Voluntarios
+              </span>
+              <span className="brand-company-location">
+                San Juan de Miraflores N° 120
+              </span>
+            </p>
             <h1>SIGMA</h1>
             <p className="brand-description">
               Sistema de Gestión de Máquinas
@@ -144,7 +151,8 @@ function App() {
           </form>
 
           <p className="login-footer">
-            Sistema interno · Compañía de Bomberos 120
+            Sistema interno · Compañía de Bomberos Voluntarios San Juan de
+            Miraflores N° 120
           </p>
         </div>
       </section>

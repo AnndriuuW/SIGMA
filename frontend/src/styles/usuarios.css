@@ -353,6 +353,10 @@
   --member-accent: #c8102e;
 }
 
+.usuarios-member-card.aspirante {
+  --member-accent: #55708f;
+}
+
 .usuarios-member-mark {
   display: grid;
   grid-row: span 2;
@@ -444,6 +448,12 @@
   border-color: #efc7ce;
   background: #fff2f4;
   color: #ad1730;
+}
+
+.usuarios-role-badge.aspirante {
+  border-color: #cbd7e5;
+  background: #eef3f8;
+  color: #3b5878;
 }
 
 .usuarios-state-badge {

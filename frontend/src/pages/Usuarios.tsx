@@ -116,6 +116,9 @@ export default function Usuarios() {
       case "BOMBERO":
         return "Bombero";
 
+      case "ASPIRANTE":
+        return "Aspirante";
+
       default:
         return rol;
     }
@@ -134,6 +137,9 @@ export default function Usuarios() {
 
       case "BOMBERO":
         return "bombero";
+
+      case "ASPIRANTE":
+        return "aspirante";
 
       default:
         return "general";

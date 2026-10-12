@@ -36,6 +36,7 @@ const menuItems: MenuItem[] = [
       "JEFE_MAQUINAS",
       "PERSONAL_ADJUNTO",
       "BOMBERO",
+      "ASPIRANTE",
     ],
     icon: LayoutDashboard,
   },
@@ -47,6 +48,7 @@ const menuItems: MenuItem[] = [
       "JEFE_MAQUINAS",
       "PERSONAL_ADJUNTO",
       "BOMBERO",
+      "ASPIRANTE",
     ],
     icon: Truck,
   },
@@ -78,6 +80,7 @@ const menuItems: MenuItem[] = [
       "JEFE_MAQUINAS",
       "PERSONAL_ADJUNTO",
       "BOMBERO",
+      "ASPIRANTE",
     ],
     icon: CircleAlert,
   },
@@ -224,7 +227,7 @@ export default function AppLayout() {
             <div>
             <p className="topbar-system">SISTEMA INTERNO</p>
             <p className="topbar-company">
-              Compañía de Bomberos 120
+              Compañía de Bomberos Voluntarios San Juan de Miraflores N° 120
             </p>
             </div>
           </div>

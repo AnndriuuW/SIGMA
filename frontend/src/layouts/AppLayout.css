@@ -484,7 +484,7 @@
 
   .topbar-company {
     max-width: 230px;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1.25;
   }
 
@@ -533,7 +533,8 @@
 
   .topbar-company {
     max-width: 170px;
-    font-size: 12px;
+    font-size: 10px;
+    line-height: 1.15;
   }
 
   .user-info {
@@ -542,6 +543,35 @@
 
   .page-content {
     padding: 20px 14px 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar-bottom {
+    padding: 10px 14px;
+  }
+
+  .sidebar-bottom .sidebar-link,
+  .sidebar-bottom .logout-button {
+    min-height: 40px;
+    height: 40px;
+    margin-top: 2px;
+    padding: 0 12px;
+    gap: 9px;
+    font-size: 13px;
+  }
+
+  .sidebar-bottom .sidebar-link {
+    margin-bottom: 2px;
+  }
+
+  .sidebar-bottom .sidebar-link.active {
+    font-weight: 650;
+  }
+
+  .sidebar-bottom .sidebar-link-icon {
+    width: 18px;
+    height: 18px;
   }
 }
 

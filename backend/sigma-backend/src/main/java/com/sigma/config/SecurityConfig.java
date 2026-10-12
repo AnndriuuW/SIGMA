@@ -122,7 +122,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 .requestMatchers(
@@ -173,7 +174,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 .requestMatchers(
@@ -208,7 +210,7 @@ public class SecurityConfig {
                 // UBICACIONES
                 // Consulta: todos
                 // Actualización directa: Administrador, Jefe, Adjunto
-                // Bombero actualizará ubicación de recursos mediante
+                // Bombero y Aspirante actualizarán ubicación de recursos mediante
                 // un endpoint específico.
                 // =====================================================
 
@@ -220,7 +222,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 .requestMatchers(
@@ -263,7 +266,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 .requestMatchers(
@@ -296,7 +300,7 @@ public class SecurityConfig {
                     "PERSONAL_ADJUNTO"
                 )
 
-                // Consulta general de recursos: incluye Bombero.
+                // Consulta general de recursos: incluye Bombero y Aspirante.
                 .requestMatchers(
                     HttpMethod.GET,
                     "/recursos",
@@ -305,11 +309,12 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 // Cambiar únicamente la ubicación de un recurso
-                // Permitido también para Bombero.
+                // Permitido también para Bombero y Aspirante.
                 .requestMatchers(
                     HttpMethod.PUT,
                     "/recursos/*/ubicacion"
@@ -317,7 +322,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 .requestMatchers(
@@ -363,7 +369,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 .requestMatchers(
@@ -373,7 +380,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
                 .requestMatchers(
@@ -383,7 +391,8 @@ public class SecurityConfig {
                     "ADMINISTRADOR",
                     "JEFE_MAQUINAS",
                     "PERSONAL_ADJUNTO",
-                    "BOMBERO"
+                    "BOMBERO",
+                    "ASPIRANTE"
                 )
 
 

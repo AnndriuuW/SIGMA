@@ -273,6 +273,7 @@ export default function Ocurrencias() {
     if (rol === "PERSONAL_ADJUNTO") return "Personal Adjunto";
     if (rol === "ADMINISTRADOR") return "Administrador";
     if (rol === "BOMBERO") return "Bombero";
+    if (rol === "ASPIRANTE") return "Aspirante";
     return rol.replace(/_/g, " ");
   };
 

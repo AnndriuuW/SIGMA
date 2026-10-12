@@ -73,4 +73,5 @@ export const ROLES = [
   { id: 2, nombre: "Jefe de Máquinas" },
   { id: 3, nombre: "Personal Adjunto" },
   { id: 4, nombre: "Bombero" },
+  { id: 5, nombre: "Aspirante" },
 ] as const;
