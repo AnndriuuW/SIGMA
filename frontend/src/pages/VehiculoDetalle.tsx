@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import axios from "axios";
 import {
   ArrowLeftRight,
   ChevronDown,
@@ -27,6 +28,11 @@ import type { MovimientoRecurso } from "../types/movimientoRecurso";
 import VehiculoDetallePDF from "../components/VehiculoDetallePDF";
 
 const formatearTexto = (valor: string) => valor.replaceAll("_", " ");
+
+const obtenerMensajeApi = (error: unknown) =>
+  axios.isAxiosError<{ message?: string }>(error)
+    ? error.response?.data?.message
+    : undefined;
 
 function VehiculoDetalle() {
   const { usuario } = useAuth();
@@ -118,7 +124,9 @@ function VehiculoDetalle() {
 
         const recursosDeSalaOperaciones = salaOperaciones
           ? recursosData.filter(
-              (recurso) => recurso.idUbicacion === salaOperaciones.id,
+              (recurso) =>
+                recurso.idUbicacion === salaOperaciones.id &&
+                recurso.estado === "OPERATIVO",
             )
           : [];
 
@@ -247,7 +255,7 @@ function VehiculoDetalle() {
 
       setRecursosDisponibles((actuales) => [
         ...actuales.filter((recurso) => recurso.id !== recursoActualizado.id),
-        recursoActualizado,
+        ...(recursoActualizado.estado === "OPERATIVO" ? [recursoActualizado] : []),
       ]);
 
       setRecursoARetirar(null);
@@ -291,7 +299,10 @@ function VehiculoDetalle() {
       cerrarModalAsignar();
     } catch (errorAsignacion) {
       console.error("Error al asignar el recurso:", errorAsignacion);
-      window.alert("No se pudo asignar el recurso. Inténtalo nuevamente.");
+      window.alert(
+        obtenerMensajeApi(errorAsignacion) ??
+          "No se pudo asignar el recurso. Inténtalo nuevamente.",
+      );
     }
   };
 
@@ -331,7 +342,10 @@ function VehiculoDetalle() {
       cerrarModalMover();
     } catch (errorMovimiento) {
       console.error("Error al mover el recurso:", errorMovimiento);
-      window.alert("No se pudo mover el recurso. Inténtalo nuevamente.");
+      window.alert(
+        obtenerMensajeApi(errorMovimiento) ??
+          "No se pudo mover el recurso. Inténtalo nuevamente.",
+      );
     }
   };
 
@@ -824,7 +838,9 @@ function VehiculoDetalle() {
                 }
               >
                 <option value="" disabled>
-                  Seleccionar recurso
+                  {recursosDisponibles.length > 0
+                    ? "Seleccionar recurso operativo"
+                    : "No hay recursos operativos disponibles"}
                 </option>
                 {recursosDisponibles.map((recurso) => (
                   <option key={recurso.id} value={recurso.id}>

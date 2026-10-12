@@ -3,6 +3,7 @@ package com.sigma.service;
 import com.sigma.dto.RecursoCreateRequest;
 import com.sigma.dto.RecursoResponse;
 import com.sigma.dto.RecursoUpdateRequest;
+import com.sigma.entity.EstadoRecurso;
 import com.sigma.entity.Recurso;
 import com.sigma.entity.TipoRecurso;
 import com.sigma.entity.Ubicacion;
@@ -69,6 +70,8 @@ public class RecursoService {
                         throw new ReglaNegocioException(
                                         "No se puede asignar un recurso a una ubicación inactiva");
                 }
+
+                validarEstadoParaUbicacion(request.getEstado(), ubicacion);
 
                 Recurso recurso = new Recurso();
 
@@ -148,6 +151,12 @@ public class RecursoService {
                                         "No se puede asignar un recurso a una ubicación inactiva");
                 }
 
+                boolean cambioUbicacion = recurso.getUbicacion() == null
+                                || !recurso.getUbicacion().getId().equals(ubicacion.getId());
+                if (cambioUbicacion) {
+                        validarEstadoParaUbicacion(request.getEstado(), ubicacion);
+                }
+
                 recurso.setCodigo(request.getCodigo());
                 recurso.setNombre(request.getNombre());
                 recurso.setMarca(request.getMarca());
@@ -197,6 +206,8 @@ public class RecursoService {
                         "El recurso ya se encuentra en esa ubicación");
         }
 
+        validarEstadoParaUbicacion(recurso.getEstado(), ubicacionNueva);
+
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -234,6 +245,16 @@ public class RecursoService {
         movimientoRecursoRepository.save(movimiento);
 
         return convertirAResponse(actualizado);
+        }
+
+        private void validarEstadoParaUbicacion(
+                        EstadoRecurso estado,
+                        Ubicacion ubicacion) {
+                if (ubicacion.getUnidad() != null
+                                && estado != EstadoRecurso.OPERATIVO) {
+                        throw new ReglaNegocioException(
+                                        "Solo se pueden asignar recursos operativos a una unidad");
+                }
         }
 
         public List<MovimientoRecursoResponse> listarHistorial(
