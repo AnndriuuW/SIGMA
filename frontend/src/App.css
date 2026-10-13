@@ -182,8 +182,8 @@
 }
 
 .login-logo {
-  width: 76px;
-  height: 76px;
+  width: 88px;
+  height: 88px;
 
   display: block;
 
@@ -207,9 +207,9 @@
 
   color: #c8102e;
 
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
 }
 
@@ -473,11 +473,11 @@
 
   .brand-company-title {
     font-size: 12px;
-    letter-spacing: 0.65px;
+    letter-spacing: 0.7px;
   }
 
   .brand-company-location {
-    font-size: 15px;
+    font-size: 16px;
     letter-spacing: 0.01em;
   }
 
@@ -503,8 +503,10 @@
   .login-logo-mobile {
     display: block;
 
-    width: 58px;
-    height: 58px;
+    width: 68px;
+    height: 68px;
+    flex: 0 0 auto;
+    margin-right: 14px;
 
     object-fit: cover;
     border-radius: 50%;
@@ -533,12 +535,12 @@
   }
 
   .brand-company-title {
-    font-size: 10px;
-    letter-spacing: 0.35px;
+    font-size: 12px;
+    letter-spacing: 0.45px;
   }
 
   .brand-company-location {
-    font-size: 13px;
+    font-size: 15px;
     letter-spacing: 0;
   }
 
