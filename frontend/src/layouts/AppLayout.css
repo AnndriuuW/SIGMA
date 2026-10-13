@@ -326,6 +326,37 @@
    USUARIO
    --------------------------------------------------------- */
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--sigma-border);
+  border-radius: 7px;
+  background: var(--sigma-surface);
+  color: var(--sigma-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--sigma-surface-soft);
+  border-color: #9aa8ba;
+}
+
 .topbar-user {
   display: flex;
   align-items: center;
@@ -492,6 +523,16 @@
     gap: 9px;
   }
 
+  .topbar-actions {
+    gap: 10px;
+  }
+
+  .theme-toggle {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+
   .user-avatar {
     width: 39px;
     height: 39px;
@@ -515,6 +556,12 @@
     min-width: 0;
     padding: 24px 20px 32px;
     overflow-x: clip;
+  }
+}
+
+@media (max-width: 900px) {
+  .theme-toggle span {
+    display: none;
   }
 }
 

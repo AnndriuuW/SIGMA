@@ -1,0 +1,566 @@
+/* Tema oscuro para el área autenticada de SIGMA. */
+.app-layout[data-theme="dark"] {
+  --sigma-bg: #111a27;
+  --sigma-surface: #192638;
+  --sigma-surface-soft: #202f42;
+  --sigma-border: #36465b;
+  --sigma-border-soft: #2b3a4e;
+  --sigma-text: #edf2f8;
+  --sigma-text-secondary: #c0ccda;
+  --sigma-text-muted: #9eacbf;
+  --sigma-navy-2: #d3deec;
+  --sigma-success: #70ca98;
+  --sigma-warning: #edc36c;
+  --sigma-danger: #f08b98;
+  --sigma-neutral: #aeb9c8;
+
+  color-scheme: dark;
+}
+
+.app-layout[data-theme="dark"] .app-content,
+.app-layout[data-theme="dark"] .page-content {
+  background: var(--sigma-bg);
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .topbar {
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+}
+
+.app-layout[data-theme="dark"] .user-avatar {
+  background: #233650;
+}
+
+.app-layout[data-theme="dark"] .theme-toggle:hover {
+  border-color: #697a91;
+}
+
+/* Superficies de tarjetas, tablas, diálogos y paneles que aún usan blanco fijo. */
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-panel"],
+  [class*="-card"],
+  [class*="-table-wrapper"],
+  [class*="-table-container"],
+  [class*="-table"],
+  [class*="-entry"],
+  [class*="-history-item"],
+  [class*="-overview-item"],
+  .inventario-overview,
+  .recursos-overview,
+  .dashboard-system-status,
+  [class*="-summary"],
+  [class*="-progress"],
+  [class*="-workspace"],
+  [class*="-meta"],
+  [class*="-content"]:not(.page-content),
+  [class*="-resource"],
+  [class*="-location-items"],
+  [class*="-modal"]:not([class*="overlay"]),
+  [class*="-drawer"]:not([class*="overlay"]),
+  [class*="-resource-list"],
+  [class*="-location-list"],
+  [class*="-list"]
+) {
+  background-color: var(--sigma-surface);
+  border-color: var(--sigma-border);
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-state-error"],
+  [class*="-state-loading"],
+  [class*="-state-empty"],
+  [class*="-form-error"],
+  [class*="-message-error"]
+) {
+  background-color: #2b202a;
+  border-color: #633541;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-toolbar"],
+  [class*="-panel-header"],
+  [class*="-section-header"],
+  [class*="-modal-header"],
+  [class*="-modal-footer"],
+  [class*="-drawer-header"],
+  [class*="-drawer-footer"],
+  [class*="-table"] thead,
+  [class*="-table"] th
+) {
+  background-color: var(--sigma-surface-soft);
+  border-color: var(--sigma-border);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  input,
+  select,
+  textarea,
+  table,
+  th,
+  td
+) {
+  border-color: var(--sigma-border);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(input, select, textarea) {
+  background-color: #152235;
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(input, textarea)::placeholder {
+  color: #91a0b5;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(h1, h2, h3, h4, label) {
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content th {
+  color: #b8c5d6;
+}
+
+.app-layout[data-theme="dark"] .page-content td {
+  color: var(--sigma-text-secondary);
+}
+
+.app-layout[data-theme="dark"] .page-content p {
+  color: var(--sigma-text-secondary);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-summary"],
+  [class*="-progress"],
+  [class*="-workspace"],
+  [class*="-meta"],
+  [class*="-content"]:not(.page-content)
+) :is(h1, h2, h3, h4, strong) {
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-summary"],
+  [class*="-progress"],
+  [class*="-workspace"],
+  [class*="-meta"],
+  [class*="-content"]:not(.page-content)
+) :is(span, small, p) {
+  color: var(--sigma-text-secondary);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-metric-icon,
+  .inventario-overview-icon,
+  .inventario-summary-icon
+) {
+  background-color: #26374b;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-search"],
+  [class*="-filter-tabs"],
+  [class*="-filter-group"],
+  [class*="-section-heading"],
+  [class*="-panel-heading"],
+  [class*="-modal-body"],
+  [class*="-drawer-body"]
+) {
+  border-color: var(--sigma-border);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-search"],
+  [class*="-filter-tabs"],
+  [class*="-filter-group"]
+) {
+  background-color: var(--sigma-surface-soft);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  [class*="-secondary-button"],
+  [class*="-cancel"],
+  [class*="-clear"],
+  [class*="-refresh-button"],
+  [class*="-view-link"],
+  [class*="-filter-tab"]
+) {
+  background-color: var(--sigma-surface);
+  border-color: var(--sigma-border);
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-table tbody tr:hover,
+  .resources-table tbody tr:hover,
+  .inventario-table tbody tr:hover,
+  .ocurrencias-table tbody tr:hover,
+  .usuarios-table tbody tr:hover,
+  .vehiculo-detalle-location-item:hover
+) {
+  background-color: #25364a;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-table td,
+  .dashboard-table th,
+  .resources-table td,
+  .resources-table th,
+  .inventario-table td,
+  .inventario-table th,
+  .ocurrencias-table td,
+  .ocurrencias-table th,
+  .usuarios-table td,
+  .usuarios-table th
+) {
+  border-color: var(--sigma-border-soft);
+}
+
+/* Cifras y etiquetas que conservaban colores demasiado oscuros del tema claro. */
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-metric-copy,
+  .recursos-overview-total-content,
+  .recursos-overview-card > div,
+  .inventario-overview-copy,
+  .inventario-overview-total-copy,
+  .ocurrencias-overview-item
+) :is(span, small, strong) {
+  color: var(--sigma-text-secondary);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-metric-copy strong,
+  .recursos-overview-total-content > strong,
+  .recursos-overview-card > div > strong,
+  .inventario-overview-copy strong,
+  .inventario-overview-total strong,
+  .ocurrencias-overview-item strong
+) {
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content .dashboard-metric-availability .dashboard-metric-copy strong {
+  color: #83d6a7;
+}
+
+.app-layout[data-theme="dark"] .page-content .availability-line {
+  background: #34465a;
+}
+
+.app-layout[data-theme="dark"] .page-content .availability-line span {
+  background: #48b77b;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-unit-code,
+  .dashboard-unit-situation,
+  .inventario-unit-cell span,
+  .inventario-date small
+) {
+  border-color: var(--sigma-border);
+  background: #26374b;
+  color: #dce6f2;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .inventario-unit-cell strong,
+  .inventario-responsable,
+  .inventario-date,
+  .inventario-date strong,
+  .inventario-result-completed,
+  .inventario-result-pending
+) {
+  color: var(--sigma-text-secondary);
+}
+
+.app-layout[data-theme="dark"] .page-content .inventario-status-en_proceso {
+  border-color: #315b78;
+  background: #1d354a;
+  color: #8cc9ed;
+}
+
+.app-layout[data-theme="dark"] .page-content .inventario-status-pausado {
+  border-color: #6b572b;
+  background: #3a321f;
+  color: #f0ca7b;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .inventario-status-finalizado,
+  .inventario-result-completed
+) {
+  border-color: #315d48;
+  background: #1c382d;
+  color: #83d6a7;
+}
+
+.app-layout[data-theme="dark"] .page-content .inventario-result-pending {
+  color: #f0ca7b;
+}
+
+.app-layout[data-theme="dark"] .page-content .dashboard-status-operativa,
+.app-layout[data-theme="dark"] .page-content .vehiculo-operativo-status-operativa,
+.app-layout[data-theme="dark"] .page-content .vehiculo-operativo-status-operativo,
+.app-layout[data-theme="dark"] .page-content .recursos-status-operativo {
+  border-color: #315d48;
+  background: #1c382d;
+  color: #83d6a7;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-status-mantenimiento,
+  .vehiculo-operativo-status-en-mantenimiento,
+  .recursos-status-en_mantenimiento
+) {
+  border-color: #6b572b;
+  background: #3a321f;
+  color: #f0ca7b;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-status-fuera_de_servicio,
+  .vehiculo-operativo-status-fuera-de-servicio,
+  .vehiculo-operativo-status-fuera-servicio,
+  .recursos-status-danado
+) {
+  border-color: #713947;
+  background: #3d2730;
+  color: #f397a2;
+}
+
+.app-layout[data-theme="dark"] .page-content .inventario-detalle-status-en_proceso {
+  border-color: #315b78;
+  background: #1d354a;
+  color: #8cc9ed;
+}
+
+.app-layout[data-theme="dark"] .page-content .inventario-detalle-status-pausado {
+  border-color: #6b572b;
+  background: #3a321f;
+  color: #f0ca7b;
+}
+
+.app-layout[data-theme="dark"] .page-content .inventario-detalle-status-finalizado {
+  border-color: #315d48;
+  background: #1c382d;
+  color: #83d6a7;
+}
+
+/* Bitácora: resumen, fechas y metadatos de cada ocurrencia. */
+.app-layout[data-theme="dark"] .page-content .ocurrencias-overview-item :is(span, small) {
+  color: var(--sigma-text-secondary);
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencias-overview-unread strong {
+  color: #f08b98;
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencias-list {
+  background: #141f2e;
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-entry-date {
+  border-color: var(--sigma-border);
+  background: #202f42;
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-entry-date :is(strong, span) {
+  border-color: var(--sigma-border);
+  background: #26374b;
+  color: #e0e8f2;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .ocurrencia-entry-description,
+  .ocurrencia-entry-details strong
+) {
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-entry-details span {
+  color: var(--sigma-text-muted);
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-entry-details {
+  border-color: var(--sigma-border);
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-type-general,
+.app-layout[data-theme="dark"] .page-content .ocurrencia-reading-read {
+  border-color: #46566a;
+  background: #29384b;
+  color: #d1dbe8;
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-type-unidad {
+  border-color: #315b78;
+  background: #1d354a;
+  color: #9bd1f0;
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-type-recurso {
+  border-color: #6b572b;
+  background: #3a321f;
+  color: #f0ca7b;
+}
+
+.app-layout[data-theme="dark"] .page-content .ocurrencia-reading-unread {
+  border-color: #713947;
+  background: #3d2730;
+  color: #f397a2;
+}
+
+/* Directorio: las fichas y su contenedor deben compartir el tema oscuro. */
+.app-layout[data-theme="dark"] .page-content .usuarios-directory {
+  background: #141f2e;
+}
+
+.app-layout[data-theme="dark"] .page-content .usuarios-member-card {
+  border-color: var(--sigma-border);
+  border-left-color: var(--member-accent);
+  background: var(--sigma-surface);
+}
+
+.app-layout[data-theme="dark"] .page-content .usuarios-member-name,
+.app-layout[data-theme="dark"] .page-content .usuarios-member-code b {
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content .usuarios-member-code {
+  color: var(--sigma-text-muted);
+}
+
+.app-layout[data-theme="dark"] .page-content .usuarios-member-mark {
+  border-color: var(--sigma-border);
+  border-bottom-color: var(--member-accent);
+  background: #26374b;
+  color: #e7edf5;
+}
+
+.app-layout[data-theme="dark"] .page-content .usuarios-state-badge.active {
+  color: #83d6a7;
+}
+
+.app-layout[data-theme="dark"] .page-content .usuarios-state-badge.inactive {
+  color: #b3bfce;
+}
+
+/* Perfil: corrige cabeceras, campos de solo lectura y pie del formulario. */
+.app-layout[data-theme="dark"] .page-content :is(
+  .perfil-identity-heading,
+  .perfil-form-footer
+) {
+  border-color: var(--sigma-border);
+  background: var(--sigma-surface-soft);
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-identity-heading .perfil-section-label,
+.app-layout[data-theme="dark"] .page-content .perfil-identity-main h2,
+.app-layout[data-theme="dark"] .page-content .perfil-identity-info strong,
+.app-layout[data-theme="dark"] .page-content .perfil-form-footer span {
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .perfil-role,
+  .perfil-identity-info span,
+  .perfil-readonly-field span,
+  .perfil-password-field small
+) {
+  color: var(--sigma-text-muted);
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-identity-code {
+  border-color: var(--sigma-border);
+  background: #26374b;
+  color: #e2eaf4;
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-account-indicator {
+  border: 1px solid #315d48;
+  background: #1c382d;
+  color: #83d6a7;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .perfil-readonly-field
+) {
+  border-color: var(--sigma-border);
+  background: #202f42;
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-readonly-field strong {
+  color: var(--sigma-text);
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-divider {
+  background-color: var(--sigma-border);
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .perfil-identity-info,
+  .perfil-identity-info > div + div
+) {
+  border-color: var(--sigma-border);
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-feedback.success {
+  border-color: #315d48;
+  background: #1c382d;
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-feedback.success :is(strong, span) {
+  color: #a3e2ba;
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-feedback.error {
+  border-color: #713947;
+  background: #3d2730;
+}
+
+.app-layout[data-theme="dark"] .page-content .perfil-feedback.error :is(strong, span) {
+  color: #f4a6b0;
+}
+
+/* Mantiene accesibles los estados semánticos en fondos oscuros. */
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-status-operativa,
+  .vehiculo-operativo-status-operativa,
+  .vehiculo-operativo-status-operativo,
+  .recursos-status-operativo,
+  .recursos-status-operativo .recursos-status-chip,
+  .inventario-status-finalizado,
+  .inventario-detalle-status-finalizado
+) {
+  color: #83d6a7;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-status-mantenimiento,
+  .vehiculo-operativo-status-en_mantenimiento,
+  .recursos-status-en_mantenimiento,
+  .inventario-status-pausado,
+  .inventario-detalle-status-pausado
+) {
+  color: #f0ca7b;
+}
+
+.app-layout[data-theme="dark"] .page-content :is(
+  .dashboard-status-fuera_de_servicio,
+  .vehiculo-operativo-status-fuera_de_servicio,
+  .vehiculo-operativo-status-fuera_servicio,
+  .recursos-status-danado,
+  .inventario-summary-missing
+) {
+  color: #f397a2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-layout,
+  .app-layout .topbar,
+  .app-layout .page-content {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+}

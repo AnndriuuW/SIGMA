@@ -24,3 +24,4 @@
 
 /* Reglas globales consolidadas */
 @import "./styles/global.css";
+@import "./styles/dark-mode.css";

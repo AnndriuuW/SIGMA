@@ -12,6 +12,8 @@ import {
   UserCircle,
   LogOut,
   Menu,
+  Moon,
+  Sun,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -96,6 +98,9 @@ export default function AppLayout() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [temaOscuro, setTemaOscuro] = useState(
+    () => localStorage.getItem("sigma-tema") === "oscuro",
+  );
 
   const rol = usuario?.rol ?? "";
 
@@ -119,6 +124,10 @@ export default function AppLayout() {
   }, []);
 
   useEffect(() => {
+    localStorage.setItem("sigma-tema", temaOscuro ? "oscuro" : "claro");
+  }, [temaOscuro]);
+
+  useEffect(() => {
     if (!menuAbierto) return;
     const overflowAnterior = document.body.style.overflow;
 
@@ -136,7 +145,7 @@ export default function AppLayout() {
   }, [menuAbierto]);
 
   return (
-    <div className="app-layout">
+    <div className="app-layout" data-theme={temaOscuro ? "dark" : "light"}>
       {menuAbierto && (
         <button
           type="button"
@@ -232,18 +241,31 @@ export default function AppLayout() {
             </div>
           </div>
 
-          {/* USUARIO ACTUAL */}
-          <div className="topbar-user">
-            <div className="user-avatar">
-              {usuario?.nombres?.charAt(0).toUpperCase()}
-            </div>
+          <div className="topbar-actions">
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={() => setTemaOscuro((oscuro) => !oscuro)}
+              aria-label={`Activar modo ${temaOscuro ? "claro" : "oscuro"}`}
+              title={`Activar modo ${temaOscuro ? "claro" : "oscuro"}`}
+            >
+              {temaOscuro ? <Sun size={18} /> : <Moon size={18} />}
+              <span>{temaOscuro ? "Modo claro" : "Modo oscuro"}</span>
+            </button>
 
-            <div className="user-info">
-              <strong>
-                {usuario?.nombres} {usuario?.apellidos}
-              </strong>
+            {/* USUARIO ACTUAL */}
+            <div className="topbar-user">
+              <div className="user-avatar">
+                {usuario?.nombres?.charAt(0).toUpperCase()}
+              </div>
 
-              <span>{usuario?.rol}</span>
+              <div className="user-info">
+                <strong>
+                  {usuario?.nombres} {usuario?.apellidos}
+                </strong>
+
+                <span>{usuario?.rol}</span>
+              </div>
             </div>
           </div>
         </header>
