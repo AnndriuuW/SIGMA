@@ -159,6 +159,70 @@
   line-height: 1.45;
 }
 
+.usuarios-password-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
+.usuarios-password-label-row label {
+  margin: 0;
+}
+
+.usuarios-password-input-wrap {
+  position: relative;
+}
+
+.usuarios-password-input-wrap input {
+  padding-right: 82px;
+}
+
+.usuarios-password-action {
+  border: 0;
+  padding: 4px 0;
+  background: transparent;
+  color: #a80c27;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.usuarios-password-action:hover:not(:disabled) {
+  color: #7f0a20;
+  text-decoration: underline;
+}
+
+.usuarios-password-action:disabled {
+  color: #9aa3af;
+  cursor: not-allowed;
+}
+
+.usuarios-password-visibility {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+}
+
+.usuarios-password-generated {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  color: #526176;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.usuarios-password-generated .usuarios-password-action {
+  flex: 0 0 auto;
+}
+
 .usuarios-code-preview {
   display: flex;
   align-items: center;

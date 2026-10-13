@@ -28,6 +28,50 @@ const formularioInicial: FormularioUsuario = {
   activo: true,
 };
 
+const gruposCaracteresContrasena = [
+  "ABCDEFGHJKLMNPQRSTUVWXYZ",
+  "abcdefghijkmnpqrstuvwxyz",
+  "23456789",
+  "!@#$%&*?",
+];
+
+const indiceAleatorio = (limite: number) => {
+  const rango = 0x1_0000_0000;
+  const maximoAceptado = rango - (rango % limite);
+  const valor = new Uint32Array(1);
+  let numero: number;
+
+  do {
+    window.crypto.getRandomValues(valor);
+    numero = valor[0];
+  } while (numero >= maximoAceptado);
+
+  return numero % limite;
+};
+
+const generarContrasenaAleatoria = () => {
+  const caracteres = gruposCaracteresContrasena.map(
+    (grupo) => grupo[indiceAleatorio(grupo.length)],
+  );
+  const todosLosCaracteres = gruposCaracteresContrasena.join("");
+
+  while (caracteres.length < 8) {
+    caracteres.push(
+      todosLosCaracteres[indiceAleatorio(todosLosCaracteres.length)],
+    );
+  }
+
+  for (let indice = caracteres.length - 1; indice > 0; indice -= 1) {
+    const otroIndice = indiceAleatorio(indice + 1);
+    [caracteres[indice], caracteres[otroIndice]] = [
+      caracteres[otroIndice],
+      caracteres[indice],
+    ];
+  }
+
+  return caracteres.join("");
+};
+
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
@@ -51,6 +95,9 @@ export default function Usuarios() {
     useState<FormularioUsuario>(formularioInicial);
 
   const [errorFormulario, setErrorFormulario] = useState("");
+  const [contrasenaVisible, setContrasenaVisible] = useState(false);
+  const [contrasenaGenerada, setContrasenaGenerada] = useState(false);
+  const [mensajeContrasena, setMensajeContrasena] = useState("");
 
   useEffect(() => {
     cargarUsuarios();
@@ -164,6 +211,9 @@ export default function Usuarios() {
     setCodigoEditando(null);
     setFormulario(formularioInicial);
     setErrorFormulario("");
+    setContrasenaVisible(false);
+    setContrasenaGenerada(false);
+    setMensajeContrasena("");
     setMostrarFormulario(true);
   };
 
@@ -181,6 +231,9 @@ export default function Usuarios() {
     });
 
     setErrorFormulario("");
+    setContrasenaVisible(false);
+    setContrasenaGenerada(false);
+    setMensajeContrasena("");
     setMostrarFormulario(true);
   };
 
@@ -192,6 +245,9 @@ export default function Usuarios() {
     setCodigoEditando(null);
     setFormulario(formularioInicial);
     setErrorFormulario("");
+    setContrasenaVisible(false);
+    setContrasenaGenerada(false);
+    setMensajeContrasena("");
   };
 
   const actualizarCampo = (
@@ -202,6 +258,33 @@ export default function Usuarios() {
       ...actual,
       [campo]: valor,
     }));
+  };
+
+  const generarContrasena = () => {
+    try {
+      actualizarCampo("contrasena", generarContrasenaAleatoria());
+      setContrasenaVisible(false);
+      setContrasenaGenerada(true);
+      setMensajeContrasena(
+        "Clave segura generada. Cópiala para entregársela al usuario.",
+      );
+    } catch {
+      setMensajeContrasena(
+        "No se pudo generar la clave en este navegador. Inténtalo nuevamente.",
+      );
+    }
+  };
+
+  const copiarContrasena = async () => {
+    try {
+      await navigator.clipboard.writeText(formulario.contrasena);
+      setMensajeContrasena("Clave copiada. Ya puedes compartirla con el usuario.");
+    } catch {
+      setMensajeContrasena(
+        "No se pudo copiar. Usa Mostrar para consultar la clave.",
+      );
+      setContrasenaVisible(true);
+    }
   };
 
   const guardarUsuario = async () => {
@@ -643,6 +726,7 @@ export default function Usuarios() {
                     <input
                       id="usuario-codigo"
                       type="text"
+                      autoComplete="off"
                       value={formulario.codigo}
                       onChange={(event) =>
                         actualizarCampo(
@@ -681,6 +765,7 @@ export default function Usuarios() {
                     <input
                       id="usuario-nombres"
                       type="text"
+                      autoComplete="off"
                       value={formulario.nombres}
                       onChange={(event) =>
                         actualizarCampo(
@@ -702,6 +787,7 @@ export default function Usuarios() {
                     <input
                       id="usuario-apellidos"
                       type="text"
+                      autoComplete="off"
                       value={formulario.apellidos}
                       onChange={(event) =>
                         actualizarCampo(
@@ -752,37 +838,78 @@ export default function Usuarios() {
                 </div>
 
                 <div className="usuarios-form-field">
-                  <label htmlFor="usuario-contrasena">
-                    {modoEdicion
-                      ? "Nueva contraseña"
-                      : "Contraseña"}
-                  </label>
+                  <div className="usuarios-password-label-row">
+                    <label htmlFor="usuario-contrasena">
+                      {modoEdicion
+                        ? "Nueva contraseña"
+                        : "Contraseña"}
+                    </label>
 
-                  <input
-                    id="usuario-contrasena"
-                    type="password"
-                    value={formulario.contrasena}
-                    onChange={(event) =>
-                      actualizarCampo(
-                        "contrasena",
-                        event.target.value,
-                      )
-                    }
-                    disabled={guardando}
-                    minLength={8}
-                    maxLength={255}
-                    placeholder={
-                      modoEdicion
-                        ? "Dejar vacío para mantener la actual"
-                        : "Mínimo 8 caracteres"
-                    }
-                  />
+                    {!modoEdicion && (
+                      <button
+                        type="button"
+                        className="usuarios-password-action"
+                        onClick={generarContrasena}
+                        disabled={guardando}
+                      >
+                        Generar clave
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="usuarios-password-input-wrap">
+                    <input
+                      id="usuario-contrasena"
+                      type={contrasenaVisible ? "text" : "password"}
+                      autoComplete="new-password"
+                      value={formulario.contrasena}
+                      onChange={(event) => {
+                        actualizarCampo(
+                          "contrasena",
+                          event.target.value,
+                        );
+                        setContrasenaGenerada(false);
+                        setMensajeContrasena("");
+                      }}
+                      disabled={guardando}
+                      minLength={8}
+                      maxLength={255}
+                      placeholder={
+                        modoEdicion
+                          ? "Dejar vacío para mantener la actual"
+                          : "Mínimo 8 caracteres"
+                      }
+                    />
+
+                    <button
+                      type="button"
+                      className="usuarios-password-action usuarios-password-visibility"
+                      onClick={() => setContrasenaVisible((visible) => !visible)}
+                      disabled={guardando || !formulario.contrasena}
+                    >
+                      {contrasenaVisible ? "Ocultar" : "Mostrar"}
+                    </button>
+                  </div>
 
                   <small>
                     {modoEdicion
                       ? "Solo completa este campo si deseas cambiarla."
-                      : "La contraseña debe contener al menos 8 caracteres."}
+                      : "Puedes escribir una clave o generar una aleatoria de 8 caracteres con mayúsculas, minúsculas, números y símbolo."}
                   </small>
+
+                  {contrasenaGenerada && !modoEdicion && (
+                    <div className="usuarios-password-generated" aria-live="polite">
+                      <span>{mensajeContrasena}</span>
+                      <button
+                        type="button"
+                        className="usuarios-password-action"
+                        onClick={copiarContrasena}
+                        disabled={guardando}
+                      >
+                        Copiar clave
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {modoEdicion && (
